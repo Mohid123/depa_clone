@@ -9,53 +9,75 @@ const ObjectId = require('mongoose').Types.ObjectId;
  * @returns {Promise<User>}
  */
 const getUserById = async (id) => {
-//   return Module.aggregate([{
-//     $match: {
-//         _id: ObjectId(id)
-//     }}
-// ]);
 
     return Module.aggregate([
         {
-          $match: {
-            _id: ObjectId("6400513365048d13d0c04cb0")
-          }
+            $match: {
+                _id: ObjectId(id)
+            }
         },
         {
-          $unwind: "$approvalStepStatus"
+            $unwind: "$approvalStepStatus"
         },
         {
-          $lookup: {
-            from: "users",
-            localField: "approvalStepStatus.pendingUserIds",
-            foreignField: "_id",
-            as: "approvalStepStatus.pendingUsers"
-          }
+            $lookup: {
+                from: "users",
+                localField: "approvalStepStatus.pendingUserIds",
+                foreignField: "_id",
+                as: "approvalStepStatus.pendingUserIds"
+            }
         },
-        // {
-        //   $group: {
-        //     _id: "$_id",
-        //     approvalStepStatus: {
-        //       $push: "$approvalStepStatus"
-        //     }
-        //   }
-        // },
-        // {
-        //     $project: {
-        //         "workFlow" : 1,
-        //         "adminUsers" : 1,
-        //         "viewOnlyUsers" : 1,
-        //         "isApproved" : 1,
-        //         "moduleCode" : 1,
-        //         "companyCode" : 1,
-        //         "approvalStepStatus.pendingUsers._id" : 1,
-        //         "approvalStepStatus.pendingUsers.name" : 1,
-        //         "approvalRequest" : 1,
-        //         "createdAt" : 1,
-        //         "updatedAt" : 1,
-        //     }
-        // }
-      ]);
+        {
+            $lookup: {
+                from: "users",
+                localField: "approvalStepStatus.activeUser",
+                foreignField: "_id",
+                as: "approvalStepStatus.activeUser"
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "approvalStepStatus.approvedUserIds",
+                foreignField: "_id",
+                as: "approvalStepStatus.approvedUserIds"
+            }
+        },
+        {
+            $group: {
+                _id: "$_id",
+                workFlow: { $first: "$workFlow" },
+                adminUsers: { $first: "$adminUsers" },
+                viewOnlyUsers: { $first: "$viewOnlyUsers" },
+                isApproved: { $first: "$isApproved" },
+                moduleCode: { $first: "$moduleCode" },
+                companyCode: { $first: "$companyCode" },
+                approvalRequest: { $first: "$approvalRequest" },
+                createdAt: { $first: "$createdAt" },
+                updatedAt: { $first: "$updatedAt" },
+                __v: { $first: "$__v" },
+                approvalStepStatus: {
+                    $push: {
+                        approvedUserIds: "$approvalStepStatus.approvedUserIds",
+                        pendingUserIds: "$approvalStepStatus.pendingUserIds",
+                        status: "$approvalStepStatus.status",
+                        isActive: "$approvalStepStatus.isActive",
+                        _id: "$approvalStepStatus._id",
+                        step: "$approvalStepStatus.step",
+                        activeUser: "$approvalStepStatus.activeUser",
+                        pendingUsers: "$approvalStepStatus.pendingUsers"
+                    }
+                }
+            }
+        },
+        {
+            $replaceRoot: {
+                newRoot: {
+                    $mergeObjects: ["$$ROOT", { approvalStepStatus: "$approvalStepStatus" }]
+                }
+            }
+        }
+    ]);
 };
 
 module.exports = {

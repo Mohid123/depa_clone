@@ -44,10 +44,10 @@ const moduleSchema = mongoose.Schema(
         ref: 'ApprovalStep', 
         required: true 
       },
-      activeUser: { 
+      activeUser: [{ 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'User' 
-      },
+      }],
       approvedUserIds: [{ 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'User' 

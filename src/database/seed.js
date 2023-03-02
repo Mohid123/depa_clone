@@ -137,7 +137,7 @@ mongoose.connect(config.mongoose.url, config.mongoose.options)
         approvalStepStatus: [
             {
                 step: workFlowSetpsIdsArray[0],
-                activeUser: stepOneusersIdsArray[0],
+                activeUser: [stepOneusersIdsArray[0]],
                 pendingUserIds:  [stepOneusersIdsArray[1],stepOneusersIdsArray[2]],
                 isActive:true
             },
