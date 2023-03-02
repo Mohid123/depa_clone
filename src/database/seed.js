@@ -78,12 +78,12 @@ mongoose.connect(config.mongoose.url, config.mongoose.options)
     const users = await User.insertMany(userData);
 
     /////////////////////////////////////////////////////////////////////////////////////////////
-    let usersIdsArray = users.map(({ _id }) => _id);[ usersIdsArray[0],usersIdsArray[1],usersIdsArray[2] ]
-    let stepOneusersIdsArray = [ usersIdsArray[0],usersIdsArray[1],usersIdsArray[2] ]
-    let stepTwousersIdsArray = [ usersIdsArray[3] ]
-    let stepThreeusersIdsArray = [ usersIdsArray[4] ]
-    let stepFourusersIdsArray = [ usersIdsArray[5] ]
-    let stepFiveusersIdsArray = [ usersIdsArray[6],usersIdsArray[7] ]
+    let usersIdsArray = users.map(({ _id }) => _id);
+    let stepOneusersIdsArray = [ usersIdsArray[1],usersIdsArray[2],usersIdsArray[3] ]
+    let stepTwousersIdsArray = [ usersIdsArray[4] ]
+    let stepThreeusersIdsArray = [ usersIdsArray[5] ]
+    let stepFourusersIdsArray = [ usersIdsArray[6] ]
+    let stepFiveusersIdsArray = [ usersIdsArray[7],usersIdsArray[8] ]
 
     let workFlowData = {
         name: "WorkFlow A",
@@ -137,8 +137,8 @@ mongoose.connect(config.mongoose.url, config.mongoose.options)
         approvalStepStatus: [
             {
                 step: workFlowSetpsIdsArray[0],
-                activeUser: [stepOneusersIdsArray[0]],
-                pendingUserIds:  [stepOneusersIdsArray[1],stepOneusersIdsArray[2]],
+                activeUser: stepOneusersIdsArray,
+                pendingUserIds:  [],
                 type: "or",
                 isActive:true
             },
