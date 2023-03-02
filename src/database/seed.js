@@ -139,6 +139,7 @@ mongoose.connect(config.mongoose.url, config.mongoose.options)
                 step: workFlowSetpsIdsArray[0],
                 activeUser: [stepOneusersIdsArray[0]],
                 pendingUserIds:  [stepOneusersIdsArray[1],stepOneusersIdsArray[2]],
+                type: "or",
                 isActive:true
             },
             {
@@ -155,6 +156,7 @@ mongoose.connect(config.mongoose.url, config.mongoose.options)
             },
             {
                 step: workFlowSetpsIdsArray[4],
+                type: "and",
                 pendingUserIds: stepFiveusersIdsArray,
             }
         ],

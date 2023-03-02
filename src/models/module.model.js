@@ -56,6 +56,11 @@ const moduleSchema = mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'User' 
       }],
+      type: {  
+        type: String, 
+        enum: ["none","and","or"],
+        default: "none"
+      },
       status: { 
         type: String, 
         enum: ['pending', 'approved', 'rejected'], 

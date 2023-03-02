@@ -13,7 +13,7 @@ const getUserById = async (id) => {
     return Module.aggregate([
         {
             $match: {
-                _id: ObjectId(id)
+                _id: ObjectId(id)   
             }
         },
         {
@@ -58,13 +58,14 @@ const getUserById = async (id) => {
                 __v: { $first: "$__v" },
                 approvalStepStatus: {
                     $push: {
+                        _id: "$approvalStepStatus._id",
                         approvedUserIds: "$approvalStepStatus.approvedUserIds",
                         pendingUserIds: "$approvalStepStatus.pendingUserIds",
+                        activeUser: "$approvalStepStatus.activeUser",
+                        type: "$approvalStepStatus.type",
+                        step: "$approvalStepStatus.step",
                         status: "$approvalStepStatus.status",
                         isActive: "$approvalStepStatus.isActive",
-                        _id: "$approvalStepStatus._id",
-                        step: "$approvalStepStatus.step",
-                        activeUser: "$approvalStepStatus.activeUser",
                         pendingUsers: "$approvalStepStatus.pendingUsers"
                     }
                 }

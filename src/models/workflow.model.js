@@ -19,7 +19,8 @@ const workFlowSchema = mongoose.Schema(
         },
       	type: {  
           type: String, 
-          enum: ["none","and","or"] 
+          enum: ["none","and","or"],
+          default: "none"
         },
       	approverIds: [{ 
           type: mongoose.Schema.Types.ObjectId, 
