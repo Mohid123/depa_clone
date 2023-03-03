@@ -39,7 +39,7 @@ const moduleSchema = mongoose.Schema(
       }],
     },
     approvalStepStatus: [{
-      step: { 
+      stepId: { 
         type: String,  
         ref: 'ApprovalStep', 
         required: true 

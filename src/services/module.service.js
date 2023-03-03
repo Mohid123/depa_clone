@@ -46,16 +46,11 @@ const getUserById = async (id) => {
         {
             $group: {
                 _id: "$_id",
-                workFlow: { $first: "$workFlow" },
                 adminUsers: { $first: "$adminUsers" },
                 viewOnlyUsers: { $first: "$viewOnlyUsers" },
-                isApproved: { $first: "$isApproved" },
                 moduleCode: { $first: "$moduleCode" },
                 companyCode: { $first: "$companyCode" },
-                approvalRequest: { $first: "$approvalRequest" },
-                createdAt: { $first: "$createdAt" },
-                updatedAt: { $first: "$updatedAt" },
-                __v: { $first: "$__v" },
+                workFlow: { $first: "$workFlow" },
                 approvalStepStatus: {
                     $push: {
                         _id: "$approvalStepStatus._id",
@@ -63,12 +58,16 @@ const getUserById = async (id) => {
                         pendingUserIds: "$approvalStepStatus.pendingUserIds",
                         activeUser: "$approvalStepStatus.activeUser",
                         type: "$approvalStepStatus.type",
-                        step: "$approvalStepStatus.step",
+                        stepId: "$approvalStepStatus.stepId",
                         status: "$approvalStepStatus.status",
                         isActive: "$approvalStepStatus.isActive",
                         pendingUsers: "$approvalStepStatus.pendingUsers"
                     }
-                }
+                },
+                approvalRequest: { $first: "$approvalRequest" },
+                isApproved: { $first: "$isApproved" },
+                createdAt: { $first: "$createdAt" },
+                updatedAt: { $first: "$updatedAt" },
             }
         },
         {

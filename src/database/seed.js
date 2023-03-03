@@ -4,9 +4,9 @@ const config = require('./../config/config');
 const logger = require('./../config/logger');
 const bcrypt = require('bcryptjs');
 
-const User = require('./../models/user.model');
-const WorkFlow = require('./../models/workflow.model');
-const Module = require('./../models/module.model');
+const { User } = require('./../models/index');
+const { WorkFlow } = require('./../models/index');
+const { Module } = require('./../models/index');
 
 async function password(password) {
     const pass = await bcrypt.hash(password, 8);
@@ -136,26 +136,26 @@ mongoose.connect(config.mongoose.url, config.mongoose.options)
         workFlow: workFlow,
         approvalStepStatus: [
             {
-                step: workFlowSetpsIdsArray[0],
+                stepId: workFlowSetpsIdsArray[0],
                 activeUser: stepOneusersIdsArray,
                 pendingUserIds:  [],
                 type: "or",
                 isActive:true
             },
             {
-                step: workFlowSetpsIdsArray[1],
+                stepId: workFlowSetpsIdsArray[1],
                 pendingUserIds: stepTwousersIdsArray,
             },
             {
-                step: workFlowSetpsIdsArray[2],
+                stepId: workFlowSetpsIdsArray[2],
                 pendingUserIds: stepThreeusersIdsArray,
             },
             {
-                step: workFlowSetpsIdsArray[3],
+                stepId: workFlowSetpsIdsArray[3],
                 pendingUserIds: stepFourusersIdsArray,
             },
             {
-                step: workFlowSetpsIdsArray[4],
+                stepId: workFlowSetpsIdsArray[4],
                 type: "and",
                 pendingUserIds: stepFiveusersIdsArray,
             }
