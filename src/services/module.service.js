@@ -7,7 +7,16 @@ const ObjectId = require('mongoose').Types.ObjectId;
  * Get user by id
  * @returns {Promise<Module>}
  */
-const getUserById = async (id) => {
+const getFirstModule = async () => {
+
+    return Module.findOne({}, {}, { sort: { 'created_at' : -1 } });
+};
+
+/**
+ * Get user by id
+ * @returns {Promise<Module>}
+ */
+const getModuleById = async (id) => {
 
     return Module.findById(id);
 };
@@ -16,7 +25,7 @@ const getUserById = async (id) => {
  * Get user by id aggregate
  * @returns {Promise<Module>}
  */
-const getUserByIdAggregate = async (id) => {
+const getModuleByIdAggregate = async (id) => {
 
     return Module.aggregate([
         {
@@ -95,13 +104,14 @@ const getUserByIdAggregate = async (id) => {
  * Update one user by id
  * @returns {Promise<Module>}
  */
-const updateOneUserById = async (id, module) => {
+const updateOneModuleById = async (id, module) => {
 
     return Module.updateOne({'_id':  id}, module);
 };
 
 module.exports = {
-  getUserById,
-  getUserByIdAggregate,
-  updateOneUserById,
+  getModuleById,
+  getFirstModule,
+  getModuleByIdAggregate,
+  updateOneModuleById,
 };

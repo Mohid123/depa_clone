@@ -6,7 +6,7 @@ const { moduleService } = require('../services');
 
 const edit = catchAsync(async (req, res) => {
     // res.status(httpStatus.OK).send(mongoose.Types.ObjectId.isValid(req.params.moduleId));
-    const module = await moduleService.getUserByIdAggregate("6401a636d39d2b14e4895cba");
+    const module = await moduleService.getModuleByIdAggregate("6401bb7255b48c333c8a2897");
     if (!module) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Module not found!');
     }
@@ -14,9 +14,9 @@ const edit = catchAsync(async (req, res) => {
 });
 
 const update = catchAsync(async (req, res) => {
-    const module = await moduleService.getUserById("6401a636d39d2b14e4895cba");
-    if (!module) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Module not found!');
+    const module = await moduleService.getModuleById("6401bb7255b48c333c8a2897");
+    if (!module || module.isApproved == "rejected") {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Invalid Module!');
     }
 
     const approvalStep = await module.approvalStepStatus.filter( function(item){return (item.stepId==req.body.stepId);})[0];
@@ -47,15 +47,20 @@ const update = catchAsync(async (req, res) => {
                 }
             }
         }
-        
+
         if (approvalStep.type == "and") {
             approvalStep.activeUser.push(approvalStep.pendingUserIds[0]);
             approvalStep.pendingUserIds = approvalStep.pendingUserIds.filter( function(item){return (item!=approvalStep.pendingUserIds[0]);});
         }
 
+        const checkPendingStep = await module.approvalStepStatus.filter( function(item){return (item.status=="pending");})[0]
+        if (!checkPendingStep) {
+            module.isApproved = "approved";
+        }
     } else {
-        
+        module.isApproved = "rejected";
     }
+    
     module.approvalLog.push({
         step: approvalStep._id,
         approvedBy: stepActiveUserId,
@@ -64,8 +69,7 @@ const update = catchAsync(async (req, res) => {
         isApproved: req.body.isApproved
     });
 
-    
-    const moduleUpdated = await moduleService.updateOneUserById("6401a636d39d2b14e4895cba", module);
+    await moduleService.updateOneModuleById("6401bb7255b48c333c8a2897", module);
     res.status(httpStatus.OK).send(module);
 });
 

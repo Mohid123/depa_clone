@@ -91,8 +91,10 @@ const moduleSchema = mongoose.Schema(
       },
     }],
     isApproved: { 
-      type: Boolean, 
-      default: false
+      type: String, 
+      enum: ['none', 'approved', 'rejected'], 
+      required: true,
+      default: 'none' 
     },
   },
   {
