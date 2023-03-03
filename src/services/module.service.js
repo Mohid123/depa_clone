@@ -82,6 +82,7 @@ const getModuleByIdAggregate = async (id) => {
                     }
                 },
                 approvalLog: { $first: "$approvalLog" },
+                forms: { $first: "$forms" },
                 isApproved: { $first: "$isApproved" },
                 createdAt: { $first: "$createdAt" },
                 updatedAt: { $first: "$updatedAt" },

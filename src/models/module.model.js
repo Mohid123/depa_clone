@@ -90,6 +90,21 @@ const moduleSchema = mongoose.Schema(
         type: String 
       },
     }],
+    forms: [{
+      title: { 
+        type: String, 
+        required: true 
+      },
+      key: { 
+        type: String, 
+        required: true 
+      },
+      schema: { 
+        type: Object, 
+        required: true 
+      },
+    }],
+
     isApproved: { 
       type: String, 
       enum: ['none', 'approved', 'rejected'], 

@@ -6,7 +6,7 @@ const { moduleService } = require('../services');
 
 const edit = catchAsync(async (req, res) => {
     // res.status(httpStatus.OK).send(mongoose.Types.ObjectId.isValid(req.params.moduleId));
-    const module = await moduleService.getModuleByIdAggregate("6401bb7255b48c333c8a2897");
+    const module = await moduleService.getModuleByIdAggregate("6401c6efbb98d3231439e3ff");
     if (!module) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Module not found!');
     }
@@ -14,7 +14,7 @@ const edit = catchAsync(async (req, res) => {
 });
 
 const update = catchAsync(async (req, res) => {
-    const module = await moduleService.getModuleById("6401bb7255b48c333c8a2897");
+    const module = await moduleService.getModuleById("6401c6efbb98d3231439e3ff");
     if (!module || module.isApproved == "rejected") {
         throw new ApiError(httpStatus.NOT_FOUND, 'Invalid Module!');
     }
@@ -69,7 +69,7 @@ const update = catchAsync(async (req, res) => {
         isApproved: req.body.isApproved
     });
 
-    await moduleService.updateOneModuleById("6401bb7255b48c333c8a2897", module);
+    await moduleService.updateOneModuleById("6401c6efbb98d3231439e3ff", module);
     res.status(httpStatus.OK).send(module);
 });
 
