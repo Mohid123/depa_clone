@@ -72,7 +72,7 @@ const moduleSchema = mongoose.Schema(
         default: false 
       },
     }],
-    approvalRequest: [{
+    approvalLog: [{
       step: { 
         type: Number, 
         ref: 'ApprovalStep',

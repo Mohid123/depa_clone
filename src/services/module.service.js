@@ -3,12 +3,20 @@ const { Module } = require('../models');
 const ApiError = require('../utils/ApiError');
 const ObjectId = require('mongoose').Types.ObjectId;
 
-
 /**
  * Get user by id
- * @returns {Promise<User>}
+ * @returns {Promise<Module>}
  */
 const getUserById = async (id) => {
+
+    return Module.findById(id);
+};
+
+/**
+ * Get user by id aggregate
+ * @returns {Promise<Module>}
+ */
+const getUserByIdAggregate = async (id) => {
 
     return Module.aggregate([
         {
@@ -64,7 +72,7 @@ const getUserById = async (id) => {
                         pendingUsers: "$approvalStepStatus.pendingUsers"
                     }
                 },
-                approvalRequest: { $first: "$approvalRequest" },
+                approvalLog: { $first: "$approvalLog" },
                 isApproved: { $first: "$isApproved" },
                 createdAt: { $first: "$createdAt" },
                 updatedAt: { $first: "$updatedAt" },
@@ -76,10 +84,24 @@ const getUserById = async (id) => {
                     $mergeObjects: ["$$ROOT", { approvalStepStatus: "$approvalStepStatus" }]
                 }
             }
-        }
+        },
+        // {
+        //     $limit: 1
+        // }
     ]);
+};
+
+/**
+ * Update one user by id
+ * @returns {Promise<Module>}
+ */
+const updateOneUserById = async (id, module) => {
+
+    return Module.updateOne({'_id':  id}, module);
 };
 
 module.exports = {
   getUserById,
+  getUserByIdAggregate,
+  updateOneUserById,
 };
