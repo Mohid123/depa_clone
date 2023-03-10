@@ -2,11 +2,9 @@ const httpStatus = require('http-status');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { moduleService } = require('../services');
-// const mongoose = require('mongoose');
 
 const edit = catchAsync(async (req, res) => {
-    // res.status(httpStatus.OK).send(mongoose.Types.ObjectId.isValid(req.params.moduleId));
-    const module = await moduleService.getModuleByIdAggregate("6401c6efbb98d3231439e3ff");
+    const module = await moduleService.getModuleByIdAggregate(req.params.moduleId);
     if (!module) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Module not found!');
     }
@@ -14,7 +12,7 @@ const edit = catchAsync(async (req, res) => {
 });
 
 const update = catchAsync(async (req, res) => {
-    const module = await moduleService.getModuleById("6401c6efbb98d3231439e3ff");
+    const module = await moduleService.getModuleById(req.params.moduleId);
     if (!module || module.isApproved == "rejected") {
         throw new ApiError(httpStatus.NOT_FOUND, 'Invalid Module!');
     }
@@ -59,6 +57,7 @@ const update = catchAsync(async (req, res) => {
         }
     } else {
         module.isApproved = "rejected";
+        res.status(httpStatus.OK).send(approvalStep.pendingUserIds);
     }
     
     module.approvalLog.push({
@@ -69,7 +68,7 @@ const update = catchAsync(async (req, res) => {
         isApproved: req.body.isApproved
     });
 
-    await moduleService.updateOneModuleById("6401c6efbb98d3231439e3ff", module);
+    await moduleService.updateOneModuleById(req.params.moduleId, module);
     res.status(httpStatus.OK).send(module);
 });
 

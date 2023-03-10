@@ -26,7 +26,6 @@ const getModuleById = async (id) => {
  * @returns {Promise<Module>}
  */
 const getModuleByIdAggregate = async (id) => {
-
     return Module.aggregate([
         {
             $match: {
