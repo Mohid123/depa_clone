@@ -32,7 +32,7 @@ const loginUserWithEmailAndPassword = async (email, password) => {
  * Login with Windows Credentials
  * @param {string} username
  * @param {string} password
- * @returns {Promise<User>}
+ * @returns {Promise<{username, password, message}>}
  */
 const loginWithWindowsCreds = async (req, res) => {
   const { username, password } = req.body;

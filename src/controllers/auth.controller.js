@@ -16,7 +16,7 @@ const login = catchAsync(async (req, res) => {
 });
 
 const loginWithWindowsCredentials = async (req, res) => {
-  const user = await authService.loginWithWindowsCreds(req, res);
+  await authService.loginWithWindowsCreds(req, res);
   // add session create logic and save user to db
 }
 
