@@ -28,48 +28,48 @@ mongoose.connect(config.mongoose.url, config.mongoose.options)
 
     let userData = [
         {
-            name: "Admin",
+            username: "Admin",
             email: "admin@depa.com",
             password: passA,
             role: "admin"
         },
         {
-            name: "User A",
+            username: "User A",
             email: "user.a@depa.com",
             password: passA
         },
         {
-            name: "User B",
+            username: "User B",
             email: "user.b@depa.com",
             password: passB
         },
         {
-            name: "User C",
+            username: "User C",
             email: "user.c@depa.com",
             password: passC
         },
         {
-            name: "User D",
+            username: "User D",
             email: "user.d@depa.com",
             password: passD
         },
         {
-            name: "User E",
+            username: "User E",
             email: "user.e@depa.com",
             password: passE
         },
         {
-            name: "User F",
+            username: "User F",
             email: "user.f@depa.com",
             password: passF
         },
         {
-            name: "User G",
+            username: "User G",
             email: "user.g@depa.com",
             password: passG
         },
         {
-            name: "User H",
+            username: "User H",
             email: "user.h@depa.com",
             password: passH
         }
@@ -86,31 +86,31 @@ mongoose.connect(config.mongoose.url, config.mongoose.options)
     let stepFiveusersIdsArray = [ usersIdsArray[7],usersIdsArray[8] ]
 
     let workFlowData = {
-        name: "WorkFlow A",
+        username: "WorkFlow A",
         specialCaseUserId: [], // The special case user who can individually approve the workflow
         steps: [
             {
-                name: "Step One",
+                username: "Step One",
                 type: "or",
                 approverIds: stepOneusersIdsArray, // Reference to User document _id
             },
             {
-                name: "Step Two",
+                username: "Step Two",
                 type: "none",
                 approverIds: stepTwousersIdsArray, // Reference to User document _id
             },
             {
-                name: "Step Three",
+                username: "Step Three",
                 type: "none",
                 approverIds: stepThreeusersIdsArray, // Reference to User document _id
             },
             {
-                name: "Step Four",
+                username: "Step Four",
                 type: "none",
                 approverIds: stepFourusersIdsArray, // Reference to User document _id
             },
             {
-                name: "Step Five",
+                username: "Step Five",
                 type: "and",
                 approverIds: stepFiveusersIdsArray, // Reference to User document _id
             }
