@@ -86,31 +86,31 @@ mongoose.connect(config.mongoose.url, config.mongoose.options)
     let stepFiveusersIdsArray = [ usersIdsArray[7],usersIdsArray[8] ]
 
     let workFlowData = {
-        username: "WorkFlow A",
+        name: "WorkFlow A",
         specialCaseUserId: [], // The special case user who can individually approve the workflow
         steps: [
             {
-                username: "Step One",
+                name: "Step One",
                 type: "or",
                 approverIds: stepOneusersIdsArray, // Reference to User document _id
             },
             {
-                username: "Step Two",
+                name: "Step Two",
                 type: "none",
                 approverIds: stepTwousersIdsArray, // Reference to User document _id
             },
             {
-                username: "Step Three",
+                name: "Step Three",
                 type: "none",
                 approverIds: stepThreeusersIdsArray, // Reference to User document _id
             },
             {
-                username: "Step Four",
+                name: "Step Four",
                 type: "none",
                 approverIds: stepFourusersIdsArray, // Reference to User document _id
             },
             {
-                username: "Step Five",
+                name: "Step Five",
                 type: "and",
                 approverIds: stepFiveusersIdsArray, // Reference to User document _id
             }
