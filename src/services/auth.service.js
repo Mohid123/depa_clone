@@ -6,6 +6,14 @@ const ApiError = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
 const ActiveDirectory = require('activedirectory2');
 
+const config = {
+  url: 'ldap://192.168.56.101',
+  baseDN: 'dc=depa,dc=qt,dc=com',
+  username: 'mohid@qt.com',
+  password: 'Abc1234'
+}
+const ad = new ActiveDirectory(config);
+
 /**
  * Login with username and password
  * @param {string} email
@@ -26,25 +34,19 @@ const loginUserWithEmailAndPassword = async (email, password) => {
  * @param {string} password
  * @returns {Promise<User>}
  */
-const loginWithWindowsCreds = async (username, password) => {
-  const config = {
-    url: '', // example: ldap://18.212.1.30
-    baseDN: '', // example: dc=mohid,dc=qt,dc=com
-    username: '', // example: mohid.qt.com
-    password: '' // password: DSPxd4Uq?!s!!Nx5h$y%7evYtGU%Q?;A
-  }
-  const ad = new ActiveDirectory(config);
-  ad.authenticate(username, password, (err, auth) => {
+const loginWithWindowsCreds = async (req, res) => {
+  const { username, password } = req.body;
+  return ad.authenticate(username, password, (err, auth) => {
     if (err) {
       throw new ApiError(httpStatus.BAD_REQUEST, JSON.stringify(err));
     }
     if (auth) {
-      return res.status(200).send({ success: 'Authenticated!' });
+      return res.status(httpStatus.OK).send({ username, password, message: 'Successfully Authenticated' })
     }
     else {
       throw new ApiError(httpStatus.BAD_REQUEST, 'Authentication Failed');
     }
-});
+  });
 }
 
 /**

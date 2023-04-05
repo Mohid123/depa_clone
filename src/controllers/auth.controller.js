@@ -15,12 +15,10 @@ const login = catchAsync(async (req, res) => {
   res.send({ user, tokens });
 });
 
-const loginWithWindowsCredentials = catchAsync(async (req, res) => {
-  const { username, password } = req.body;
-  const user = await authService.loginWithWindowsCreds(username, password);
-  const tokens = await tokenService.generateAuthTokens(user);
-  res.send({ user, tokens });
-})
+const loginWithWindowsCredentials = async (req, res) => {
+  const user = await authService.loginWithWindowsCreds(req, res);
+  // add session create logic and save user to db
+}
 
 const logout = catchAsync(async (req, res) => {
   await authService.logout(req.body.refreshToken);
