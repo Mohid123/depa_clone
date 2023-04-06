@@ -5,10 +5,11 @@ const Token = require('../models/token.model');
 const ApiError = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
 const ActiveDirectory = require('activedirectory2');
+const { User } = require('../models');
 
 const config = {
   url: 'ldap://192.168.56.101',
-  baseDN: 'dc=depa,dc=qt,dc=com',
+  baseDN: 'dc=qt,dc=com',
   username: 'mohid@qt.com',
   password: 'Abc1234'
 }
@@ -36,17 +37,60 @@ const loginUserWithEmailAndPassword = async (email, password) => {
  */
 const loginWithWindowsCreds = async (req, res) => {
   const { username, password } = req.body;
-  return ad.authenticate(username, password, (err, auth) => {
+  return ad.authenticate(username, password, async (err, auth) => {
     if (err) {
       throw new ApiError(httpStatus.BAD_REQUEST, JSON.stringify(err));
     }
-    if (auth) {
+    if (auth) {;
       return res.status(httpStatus.OK).send({ username, password, message: 'Successfully Authenticated' })
     }
     else {
       throw new ApiError(httpStatus.BAD_REQUEST, 'Authentication Failed');
     }
   });
+}
+
+const findUserFromAD = async (req, res) => {
+  const { username, password } = req.body;
+  ad.findUser(username, async (err, user) => {
+    if (err) {
+      throw new ApiError(httpStatus.BAD_REQUEST, err);
+    }
+    const newUser = new User({
+      username: user.sAMAccountName,
+      email: user.mail,
+      password: password
+    });
+    const alreadySavedUser = await userService.getUserByEmail(newUser.email);
+    if(!alreadySavedUser) {
+      newUser.save((err) => {
+        if (err) {
+          throw new ApiError(httpStatus.BAD_REQUEST, err);
+        }
+        console.log('Saved user to db')
+      });
+      const session = generateNewSession(req, res, alreadySavedUser)
+      return {newUser, session}
+    }
+    else {
+      const session = generateNewSession(req, res, alreadySavedUser)
+      return {alreadySavedUser, session}
+    }
+  });
+}
+
+const generateNewSession = async (req, res, user) => {
+  req.session.regenerate((err) => {
+    if (err) {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR , err);
+    }
+    req.session.user = {
+      id: user.id,
+      username: user.username,
+      email: user.email
+    };
+  });
+  return req.session
 }
 
 /**
@@ -126,5 +170,6 @@ module.exports = {
   refreshAuth,
   resetPassword,
   verifyEmail,
-  loginWithWindowsCreds
+  loginWithWindowsCreds,
+  findUserFromAD
 };

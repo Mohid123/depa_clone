@@ -15,10 +15,15 @@ const login = catchAsync(async (req, res) => {
   res.send({ user, tokens });
 });
 
-const loginWithWindowsCredentials = async (req, res) => {
-  await authService.loginWithWindowsCreds(req, res);
-  // add session create logic and save user to db
-}
+const loginWithWindowsCredentials = catchAsync(async (req, res) => {
+  await authService.loginWithWindowsCreds(req, res).then(() => {
+    findUserFromActiveDirectory(req, res)
+  });
+})
+
+const findUserFromActiveDirectory = catchAsync(async (req, res) => {
+  await authService.findUserFromAD(req, res);
+})
 
 const logout = catchAsync(async (req, res) => {
   await authService.logout(req.body.refreshToken);
@@ -61,5 +66,6 @@ module.exports = {
   resetPassword,
   sendVerificationEmail,
   verifyEmail,
-  loginWithWindowsCredentials
+  loginWithWindowsCredentials,
+  findUserFromActiveDirectory
 };
