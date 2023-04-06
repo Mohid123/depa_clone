@@ -36,11 +36,8 @@ const loginUserWithEmailAndPassword = async (email, password) => {
  * @returns {Promise<{username, password, message}>}
  */
 const loginWithWindowsCreds = async (req, res) => {
-  debugger
   const { username, password } = req.body;
-  debugger
   return ad.authenticate(username, password, async (err, auth) => {
-    debugger
     if (err) {
       throw new ApiError(httpStatus.BAD_REQUEST, JSON.stringify(err));
     }
