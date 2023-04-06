@@ -42,8 +42,8 @@ const loginWithWindowsCreds = async (req, res) => {
     if (err) {
       throw new ApiError(httpStatus.BAD_REQUEST, JSON.stringify(err));
     }
-    if (auth) {;
-      return res.status(httpStatus.OK).send({ userName, password, message: 'Successfully Authenticated' })
+    if (auth) {
+      return findOrCreateAdUser(req, res)
     }
     else {
       throw new ApiError(httpStatus.BAD_REQUEST, 'Authentication Failed');
@@ -51,20 +51,23 @@ const loginWithWindowsCreds = async (req, res) => {
   });
 }
 
-const findUserFromAD = async (req, res) => {
+const findOrCreateAdUser = async (req, res) => {
   const { userName, password } = req.body;
   const username = userName;
   ad.findUser(username, async (err, user) => {
     if (err) {
       throw new ApiError(httpStatus.BAD_REQUEST, err);
     }
+    debugger
     const userData = new User({
-      username: user.sAMAccountName,
+      userName: user.sAMAccountName,
+      fullName: user.sAMAccountName,
       email: user.mail,
       password: password
     });
-
-    const User = await userService.getUserByEmail(userData.email);
+    debugger
+    let User = await userService.getUserByEmail(userData.email);
+    debugger
     if(!User) {
       User = userData.save((err) => {
         if (err) {
@@ -72,13 +75,8 @@ const findUserFromAD = async (req, res) => {
         }
       });
     }
-
-    const refreshTokenDoc = await Token.findOne({ user: User._id});
-    if (refreshTokenDoc) {
-      await refreshTokenDoc.remove();
-    }
-
-    return {User, refreshTokenDoc}
+    debugger
+    return User;
   });
 }
 
@@ -161,5 +159,5 @@ module.exports = {
   resetPassword,
   verifyEmail,
   loginWithWindowsCreds,
-  findUserFromAD
+  findOrCreateAdUser
 };

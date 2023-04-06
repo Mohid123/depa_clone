@@ -11,9 +11,17 @@ const register = catchAsync(async (req, res) => {
 });
 
 const login = catchAsync(async (req, res) => {
-  const { email, password } = req.body;
-  const user = await authService.loginUserWithEmailAndPassword(email, password);
-  const refreshTokenDoc = await Token.findOne({ user: user._id});
+  const { userName } = req.body;
+  let user;
+  if (userName) {
+    user = authService.loginWithWindowsCreds(req, res)
+  } else {
+    const { email, password } = req.body;
+    user = await authService.loginUserWithEmailAndPassword(email, password);
+  }
+
+  console.log(user);
+  const refreshTokenDoc = await Token.findOne({ userId: user._id});
   if (refreshTokenDoc) {
     await refreshTokenDoc.remove();
   }

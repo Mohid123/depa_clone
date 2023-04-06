@@ -247,7 +247,7 @@ describe('Auth routes', () => {
 
       expect(sendResetPasswordEmailSpy).toHaveBeenCalledWith(userOne.email, expect.any(String));
       const resetPasswordToken = sendResetPasswordEmailSpy.mock.calls[0][1];
-      const dbResetPasswordTokenDoc = await Token.findOne({ token: resetPasswordToken, user: userOne._id });
+      const dbResetPasswordTokenDoc = await Token.findOne({ token: resetPasswordToken, userId: userOne._id });
       expect(dbResetPasswordTokenDoc).toBeDefined();
     });
 
@@ -371,7 +371,7 @@ describe('Auth routes', () => {
 
       expect(sendVerificationEmailSpy).toHaveBeenCalledWith(userOne.email, expect.any(String));
       const verifyEmailToken = sendVerificationEmailSpy.mock.calls[0][1];
-      const dbVerifyEmailToken = await Token.findOne({ token: verifyEmailToken, user: userOne._id });
+      const dbVerifyEmailToken = await Token.findOne({ token: verifyEmailToken, userId: userOne._id });
 
       expect(dbVerifyEmailToken).toBeDefined();
     });
