@@ -8,7 +8,7 @@ const ActiveDirectory = require('activedirectory2');
 const { User } = require('../models');
 
 const config = {
-  url: 'ldap://192.168.56.101',
+  url: 'ldap://192.168.0.98',
   baseDN: 'dc=qt,dc=com',
   username: 'mohid@qt.com',
   password: 'Abc1234'
@@ -36,8 +36,11 @@ const loginUserWithEmailAndPassword = async (email, password) => {
  * @returns {Promise<{username, password, message}>}
  */
 const loginWithWindowsCreds = async (req, res) => {
+  debugger
   const { username, password } = req.body;
+  debugger
   return ad.authenticate(username, password, async (err, auth) => {
+    debugger
     if (err) {
       throw new ApiError(httpStatus.BAD_REQUEST, JSON.stringify(err));
     }
@@ -85,7 +88,7 @@ const generateNewSession = async (req, res, user) => {
       throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR , err);
     }
     req.session.user = {
-      id: user.id,
+      id: user._id,
       username: user.username,
       email: user.email
     };
