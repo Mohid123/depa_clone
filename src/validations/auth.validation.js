@@ -18,7 +18,7 @@ const login = {
 
 const loginWithWindows = {
   body: Joi.object().keys({
-    username: Joi.string().required(),
+    userName: Joi.string().required(),
     password: Joi.string().required(),
   }),
 };

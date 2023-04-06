@@ -36,13 +36,14 @@ const loginUserWithEmailAndPassword = async (email, password) => {
  * @returns {Promise<{username, password, message}>}
  */
 const loginWithWindowsCreds = async (req, res) => {
-  const { username, password } = req.body;
+  const { userName, password } = req.body;
+  const username = userName;
   return ad.authenticate(username, password, async (err, auth) => {
     if (err) {
       throw new ApiError(httpStatus.BAD_REQUEST, JSON.stringify(err));
     }
     if (auth) {;
-      return res.status(httpStatus.OK).send({ username, password, message: 'Successfully Authenticated' })
+      return res.status(httpStatus.OK).send({ userName, password, message: 'Successfully Authenticated' })
     }
     else {
       throw new ApiError(httpStatus.BAD_REQUEST, 'Authentication Failed');
@@ -51,47 +52,36 @@ const loginWithWindowsCreds = async (req, res) => {
 }
 
 const findUserFromAD = async (req, res) => {
-  const { username, password } = req.body;
+  const { userName, password } = req.body;
+  const username = userName;
   ad.findUser(username, async (err, user) => {
     if (err) {
       throw new ApiError(httpStatus.BAD_REQUEST, err);
     }
-    const newUser = new User({
+    const userData = new User({
       username: user.sAMAccountName,
       email: user.mail,
       password: password
     });
-    const alreadySavedUser = await userService.getUserByEmail(newUser.email);
-    if(!alreadySavedUser) {
-      newUser.save((err) => {
+
+    const User = await userService.getUserByEmail(userData.email);
+    if(!User) {
+      User = userData.save((err) => {
         if (err) {
           throw new ApiError(httpStatus.BAD_REQUEST, err);
         }
-        console.log('Saved user to db')
       });
-      const session = generateNewSession(req, res, alreadySavedUser)
-      return {newUser, session}
     }
-    else {
-      const session = generateNewSession(req, res, alreadySavedUser)
-      return {alreadySavedUser, session}
+
+    const refreshTokenDoc = await Token.findOne({ user: User._id});
+    if (refreshTokenDoc) {
+      await refreshTokenDoc.remove();
     }
+
+    return {User, refreshTokenDoc}
   });
 }
 
-const generateNewSession = async (req, res, user) => {
-  req.session.regenerate((err) => {
-    if (err) {
-      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR , err);
-    }
-    req.session.user = {
-      id: user._id,
-      username: user.username,
-      email: user.email
-    };
-  });
-  return req.session
-}
 
 /**
  * Logout
