@@ -13,6 +13,7 @@ const { authLimiter } = require('./middlewares/rateLimiter');
 const routes = require('./routes/v1');
 const { errorConverter, errorHandler } = require('./middlewares/error');
 const ApiError = require('./utils/ApiError');
+const session = require('express-session');
 
 const app = express();
 
@@ -23,6 +24,32 @@ if (config.env !== 'test') {
 
 // set security HTTP headers
 app.use(helmet());
+
+// set express session config
+app.use(session({
+  secret: 'set_my_very_secret_key_here',
+  resave: false,
+  saveUninitialized: true
+}));
+
+// middleware function to handle session
+// app.use((req, res, next) => {
+//   if (!req.session || !req.session.user || !req.sessionID) {
+//     return res.redirect('/login');
+//   }
+//   const sessionIdFromDB = ''; //get session id here
+
+//   if (req.sessionID !== sessionIdFromDB) {
+//     req.session.destroy((err) => {
+//       if (err) {
+//         throw new ApiError(httpStatus.BAD_REQUEST, err)
+//       }
+//       res.redirect('/login');
+//     });
+//   } else {
+//     next();
+//   }
+// })
 
 // parse json request body
 app.use(express.json());

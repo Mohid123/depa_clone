@@ -14,7 +14,11 @@ const userSchema = mongoose.Schema(
         }
       },
     },
-    password: { type: String, required: true, trim: true, minlength: 8,
+    password: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 6,
       validate(value) {
         if (!value.match(/\d/) || !value.match(/[a-zA-Z]/)) {
           throw new Error('Password must contain at least one letter and one number');

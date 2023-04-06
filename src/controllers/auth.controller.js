@@ -21,6 +21,16 @@ const login = catchAsync(async (req, res) => {
   res.send({ user, tokens });
 });
 
+const loginWithWindowsCredentials = catchAsync(async (req, res) => {
+  await authService.loginWithWindowsCreds(req, res).then(() => {
+    findUserFromActiveDirectory(req, res)
+  });
+})
+
+const findUserFromActiveDirectory = catchAsync(async (req, res) => {
+  await authService.findUserFromAD(req, res);
+})
+
 const logout = catchAsync(async (req, res) => {
   await authService.logout(req.body.refreshToken);
   res.status(httpStatus.NO_CONTENT).send();
@@ -62,4 +72,6 @@ module.exports = {
   resetPassword,
   sendVerificationEmail,
   verifyEmail,
+  loginWithWindowsCredentials,
+  findUserFromActiveDirectory
 };
