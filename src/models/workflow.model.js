@@ -4,29 +4,17 @@ const { toJSON } = require('./plugins');
 
 const workFlowSchema = mongoose.Schema(
   {
-    name: { 
-      type: String, 
-      required: true 
+    name: { type: String, required: true },
+    anyUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    defaultUsers: {
+        userIds:  [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+        type: { type: String, enum: ["none","and","or"], default: "none"}
     },
-    specialCaseUserId: [{ 
-      type: mongoose.Schema.Types.ObjectId, 
-      ref: 'User' 
-    }], // The special case user who can individually approve the workflow
-    steps: [{
-      	name: { 
-          type: String, 
-          required: true 
-        },
-      	type: {  
-          type: String, 
-          enum: ["none","and","or"],
-          default: "none"
-        },
-      	approverIds: [{ 
-          type: mongoose.Schema.Types.ObjectId, 
-          ref: 'User',
-        }], // Reference to User document _id
-    }],
+    finalUsers: {
+        userIds:  [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+        type: { type: String, enum: ["none","and","or"], default: "none"}
+    },
+    stepIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'WorkflowStep' }]
   },
   {
     timestamps: true,

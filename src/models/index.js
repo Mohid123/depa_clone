@@ -1,4 +1,12 @@
 module.exports.Token = require('./token.model');
 module.exports.User = require('./user.model');
 module.exports.WorkFlow = require('./workflow.model');
-module.exports.Module = require('./module.model');
+// module.exports.WorkFlow = require('./workflow.model');
+// module.exports.Module = require('./module.model');
+// module.exports.Module = require('./ApprovalLog.model');
+// module.exports.Module = require('./ApprovalStepStatus.model');
+// module.exports.Module = require('./Email.model');
+// module.exports.Module = require('./Form.model');
+// module.exports.Module = require('./ModuleSummary.model');
+// module.exports.Module = require('./SubModule.model');
+// module.exports.Module = require('./WorkflowStep.model');
