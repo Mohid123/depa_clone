@@ -36,14 +36,13 @@ const loginUserWithEmailAndPassword = async (email, password) => {
  * @returns {Promise<{username, password, message}>}
  */
 const loginWithWindowsCreds = async (req, res) => {
-  const { userName, password } = req.body;
-  const username = userName;
+  const { username, password } = req.body;
   return ad.authenticate(username, password, async (err, auth) => {
     if (err) {
       throw new ApiError(httpStatus.BAD_REQUEST, JSON.stringify(err));
     }
     if (auth) {
-      return findOrCreateAdUser(req, res)
+      return res.status(httpStatus.OK).send({ username, password, message: 'Successfully Authenticated' })
     }
     else {
       throw new ApiError(httpStatus.BAD_REQUEST, 'Authentication Failed');
@@ -51,33 +50,40 @@ const loginWithWindowsCreds = async (req, res) => {
   });
 }
 
-const findOrCreateAdUser = async (req, res) => {
-  const { userName, password } = req.body;
-  const username = userName;
+const findUserFromAD = async (req, res) => {
+  const { username, password } = req.body;
   ad.findUser(username, async (err, user) => {
     if (err) {
       throw new ApiError(httpStatus.BAD_REQUEST, err);
     }
-    debugger
-    const userData = new User({
+    const newUser = new User({
       userName: user.sAMAccountName,
       fullName: user.sAMAccountName,
       email: user.mail,
       password: password
     });
-    debugger
-    let User = await userService.getUserByEmail(userData.email);
-    debugger
-    if(!User) {
-      User = userData.save((err) => {
+    const alreadySavedUser = await userService.getUserByEmail(newUser.email);
+    if(!alreadySavedUser) {
+      newUser.save((err) => {
         if (err) {
           throw new ApiError(httpStatus.BAD_REQUEST, err);
         }
       });
+      findOrCreateToken(newUser)
     }
-    debugger
-    return User;
+    else {
+      findOrCreateToken(alreadySavedUser)
+    }
   });
+}
+
+const findOrCreateToken = async(user) => {
+  const refreshTokenDoc = await Token.findOne({ user: user.id});
+  if (refreshTokenDoc) {
+    await refreshTokenDoc.remove();
+  }
+  const tokens = await tokenService.generateAuthTokens(user);
+  return { user, tokens };
 }
 
 
@@ -159,5 +165,6 @@ module.exports = {
   resetPassword,
   verifyEmail,
   loginWithWindowsCreds,
-  findOrCreateAdUser
+  findUserFromAD,
+  findOrCreateToken
 };
