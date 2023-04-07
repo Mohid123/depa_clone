@@ -42,7 +42,7 @@ const loginWithWindowsCreds = async (req, res) => {
       throw new ApiError(httpStatus.BAD_REQUEST, JSON.stringify(err));
     }
     if (auth) {
-      return res.status(httpStatus.OK).send({ username, password, message: 'Successfully Authenticated' })
+      return { username, password, message: 'Successfully Authenticated' }
     }
     else {
       throw new ApiError(httpStatus.BAD_REQUEST, 'Authentication Failed');
@@ -69,21 +69,21 @@ const findUserFromAD = async (req, res) => {
           throw new ApiError(httpStatus.BAD_REQUEST, err);
         }
       });
-      findOrCreateToken(newUser)
+      findOrCreateToken(newUser, res)
     }
     else {
-      findOrCreateToken(alreadySavedUser)
+      findOrCreateToken(alreadySavedUser, res)
     }
   });
 }
 
-const findOrCreateToken = async(user) => {
+const findOrCreateToken = async(user, res) => {
   const refreshTokenDoc = await Token.findOne({ user: user.id});
   if (refreshTokenDoc) {
     await refreshTokenDoc.remove();
   }
   const tokens = await tokenService.generateAuthTokens(user);
-  return { user, tokens };
+  res.status(httpStatus.OK).send({user, tokens});
 }
 
 
