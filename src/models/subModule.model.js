@@ -4,28 +4,23 @@ const { toJSON } = require('./plugins');
 
 const subModuleSchema = mongoose.Schema(
   {
-    section: { type: String, required: true },
-    WorkFlow: {
-        name: { type: String, required: true },
-        anyUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        defaultUsers: {
-            userIds:  [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-            type: { type: String, enum: ["none","and","or"], default: "none"}
-        },
-        finalUsers: {
-            userIds:  [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-            type: { type: String, enum: ["none","and","or"], default: "none"}
-        },
-        stepIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'WorkflowStep' }]
-    },
-    approvalStepStatus: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ApprovalStepStatus', required: true }],
-    approvalLog: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ApprovalLog', required: true }],
-    form: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Form', required: true }],
-    achievedScore: { type: mongoose.Types.Decimal128, required: true, default: 0 },
-    status: { type: String, enum: ['inProgress', 'approved', 'rejected','declined'], required: true, default: 'inProgress' }
-  },
-  {
-    timestamps: true,
+    moduleId: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Module' }],
+    companyId: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Company' }],
+
+    code: { type: String, required: true },
+    adminUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }],
+    viewOnlyUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    defaultWorkFlow: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkFlow', required: true },
+    formIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Form', required: true }],
+    summarySchema: [{ type: Object, required: true }],
+    viewSchema: [{ type: Object, required: true }],
+
+    revisionNo: { type: Number, default: 0, required: true },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    createdAt: { type: Date, default: Date.now, required: true },
+    updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    updatedAt: { type: Date, default: Date.now, required: true },
+    status: { type: Number, default: 1, required: true },
   }
 );
 

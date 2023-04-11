@@ -5,19 +5,14 @@ const { toJSON } = require('./plugins');
 const workFlowSchema = mongoose.Schema(
   {
     name: { type: String, required: true },
-    anyUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    defaultUsers: {
-        userIds:  [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        type: { type: String, enum: ["none","and","or"], default: "none"}
-    },
-    finalUsers: {
-        userIds:  [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        type: { type: String, enum: ["none","and","or"], default: "none"}
-    },
-    stepIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'WorkflowStep' }]
-  },
-  {
-    timestamps: true,
+    stepIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'WorkflowStep' }],
+
+    revisionNo: { type: Number, default: 0, required: true },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    createdAt: { type: Date, default: Date.now, required: true },
+    updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    updatedAt: { type: Date, default: Date.now, required: true },
+    status: { type: Number, default: 1, required: true },
   }
 );
 
