@@ -2,43 +2,42 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const { toJSON, paginate } = require('./plugins');
+const { defaultFields } = require('./index');
 
 const userSchema = mongoose.Schema(
-  {
-    userName: { type: String, required: true, trim: true },
-    fullName: { type: String, required: true, trim: true },
-    email: { type: String, required: true, unique: true, trim: true, lowercase: true,
-      validate(value) {
-        if (!validator.isEmail(value)) {
-          throw new Error('Invalid email');
-        }
+  Object.assign(
+    {},
+    defaultFields,
+    {
+      userName: { type: String, required: true, trim: true },
+      fullName: { type: String, required: true, trim: true },
+      email: {
+        type: String, required: true, unique: true, trim: true, lowercase: true,
+        validate(value) {
+          if (!validator.isEmail(value)) {
+            throw new Error('Invalid email');
+          }
+        },
       },
-    },
-    password: {
-      type: String,
-      required: true,
-      trim: true,
-      minlength: 6,
-      validate(value) {
-        if (!value.match(/\d/) || !value.match(/[a-zA-Z]/)) {
-          throw new Error('Password must contain at least one letter and one number');
-        }
+      password: {
+        type: String,
+        required: true,
+        trim: true,
+        minlength: 6,
+        validate(value) {
+          if (!value.match(/\d/) || !value.match(/[a-zA-Z]/)) {
+            throw new Error('Password must contain at least one letter and one number');
+          }
+        },
+        private: true, // used by the toJSON plugin
       },
-      private: true, // used by the toJSON plugin
-    },
-    role: {  type: String, enum: ["admin","authenticated"], default: "authenticated" },
-    autheticatedBy: {  type: String, enum: ["none","activeDirectory","database"], default: "none" },
-    supervisorGID: {  type: Number, default: null, default: null },
-    image: {  type: String, default: null },
-    isEmailVerified: { type: Boolean, default: false },
-
-    revisionNo: {  type: Number, default: 0, required: true},
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    createdAt: { type: Date, default: Date.now, required: true },
-    updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    updatedAt: { type: Date, default: Date.now, required: true },
-    status: { type: Number, default: 1, required: true },
-  }
+      role: { type: String, enum: ["admin", "authenticated"], default: "authenticated" },
+      autheticatedBy: { type: String, enum: ["none", "activeDirectory", "database"], default: "none" },
+      supervisorGID: { type: Number, default: null, default: null },
+      image: { type: String, default: null },
+      isEmailVerified: { type: Boolean, default: false },
+    }
+  )
 );
 
 // add plugin that converts mongoose to json

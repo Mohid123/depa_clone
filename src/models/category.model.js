@@ -3,23 +3,22 @@ const validator = require('validator');
 const { toJSON } = require('./plugins');
 const { defaultFields } = require('./index');
 
-const workFlowSchema = mongoose.Schema(
+const categorySchema = mongoose.Schema(
   Object.assign(
     {},
     defaultFields,
     {
       name: { type: String, required: true },
-      stepIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'WorkflowStep' }],
     }
   )
 );
 
 // add plugin that converts mongoose to json
-workFlowSchema.plugin(toJSON);
+categorySchema.plugin(toJSON);
 
 /**
- * @typedef WorkFlow
+ * @typedef Category
  */
-const WorkFlow = mongoose.model('WorkFlow', workFlowSchema);
+const Category = mongoose.model('Category', categorySchema);
 
-module.exports = WorkFlow;
+module.exports = Category;
