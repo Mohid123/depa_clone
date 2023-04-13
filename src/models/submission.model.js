@@ -10,7 +10,7 @@ const submissionSchema = mongoose.Schema(
     formIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Form' }],
     formDataIds: { type: mongoose.Schema.Types.ObjectId, ref: 'FormData' },
     submissionStatus: { type: Number, default: 1, required: true },
-    workflow: WorkFlow,
+    // workflow: WorkFlow,
     workflowStatus: [{
       stepId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkflowStep' },
       activeUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
