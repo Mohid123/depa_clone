@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const { toJSON } = require('./plugins');
+const { toJSON, paginate } = require('./plugins');
 const { defaultFields } = require('./index');
 
 const subModuleSchema = mongoose.Schema(
@@ -24,6 +24,7 @@ const subModuleSchema = mongoose.Schema(
 
 // add plugin that converts mongoose to json
 subModuleSchema.plugin(toJSON);
+subModuleSchema.plugin(paginate);
 
 /**
  * @typedef SubModule

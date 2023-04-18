@@ -6,7 +6,7 @@ import httpStatus from "http-status";
 const baseSchema = new mongoose.Schema({}, { strict: false });
 
 export class baseApiHelper {
-  constructor() {}
+  constructor() { }
   /**
    * create new dto
    * @param {Object} body 
@@ -51,7 +51,7 @@ export class baseApiHelper {
   async put(id, body, collectionName) {
     const Model = mongoose.model('Model', baseSchema, collectionName);
     const oldItem = await Model.findOne({ _id: id });
-    if(!oldItem) {
+    if (!oldItem) {
       throw new ApiError(httpStatus.NOT_FOUND, 'Item does not exist')
     }
     return this.mapAndCatchError(Model.updateOne({ _id: id }, body));
@@ -66,7 +66,7 @@ export class baseApiHelper {
   async delete(id, collectionName) {
     const Model = mongoose.model('Model', baseSchema, collectionName);
     const oldItem = await Model.findOne({ _id: id });
-    if(!oldItem) {
+    if (!oldItem) {
       throw new ApiError(httpStatus.NOT_FOUND, 'Item does not exist')
     }
     return this.mapAndCatchError(Model.deleteOne({ _id: id }));
@@ -79,21 +79,21 @@ export class baseApiHelper {
    */
   async mapAndCatchError(response) {
     return await response
-    .then(res => {
-      const result = new BaseResponse();
-      result.status = true;
-      Object.assign(result.data, res);
-      return result;
-    })
-    .catch(err => {
-      const result = new BaseResponse();
-      result.status = false;
-      result.errors.push({
-        code: err.code,
-        message: err.name
-      });
-      return result
-    })
+      .then(res => {
+        const result = new BaseResponse();
+        result.status = true;
+        Object.assign(result.data, res);
+        return result;
+      })
+      .catch(err => {
+        const result = new BaseResponse();
+        result.status = false;
+        result.errors.push({
+          code: err.code,
+          message: err.name
+        });
+        return result
+      })
   }
 }
 

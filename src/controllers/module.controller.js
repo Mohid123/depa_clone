@@ -17,29 +17,29 @@ const update = catchAsync(async (req, res) => {
         throw new ApiError(httpStatus.NOT_FOUND, 'Invalid Module!');
     }
 
-    const approvalStep = await module.approvalStepStatus.filter( function(item){return (item.stepId==req.body.stepId);})[0];
+    const approvalStep = await module.approvalStepStatus.filter(function (item) { return (item.stepId == req.body.stepId); })[0];
     if (!approvalStep || !approvalStep.isActive) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Invalid Approval Step!');
     }
 
-    const stepActiveUserId = await approvalStep.activeUser.filter( function(item){return (item==req.body.userId);})[0];
+    const stepActiveUserId = await approvalStep.activeUser.filter(function (item) { return (item == req.body.userId); })[0];
     if (!stepActiveUserId) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Invalid User!');
-    } 
+    }
 
 
     if (req.body.isApproved) {
         approvalStep.approvedUserIds.push(stepActiveUserId);
-        approvalStep.activeUser = approvalStep.activeUser.filter( function(item){return (item!=req.body.userId);});
+        approvalStep.activeUser = approvalStep.activeUser.filter(function (item) { return (item != req.body.userId); });
 
         if (!approvalStep.pendingUserIds.length) {
             approvalStep.status = "approved";
             approvalStep.isActive = "false";
             for (let index = 0; index < module.approvalStepStatus.length; index++) {
-                const element =  module.approvalStepStatus[index];
+                const element = module.approvalStepStatus[index];
                 if (element.status == "pending") {
                     element.activeUser.push(element.pendingUserIds[0]);
-                    element.pendingUserIds = element.pendingUserIds.filter( function(item){return (item!=element.pendingUserIds[0]);}); 
+                    element.pendingUserIds = element.pendingUserIds.filter(function (item) { return (item != element.pendingUserIds[0]); });
                     element.isActive = true;
                     break;
                 }
@@ -48,10 +48,10 @@ const update = catchAsync(async (req, res) => {
 
         if (approvalStep.type == "and") {
             approvalStep.activeUser.push(approvalStep.pendingUserIds[0]);
-            approvalStep.pendingUserIds = approvalStep.pendingUserIds.filter( function(item){return (item!=approvalStep.pendingUserIds[0]);});
+            approvalStep.pendingUserIds = approvalStep.pendingUserIds.filter(function (item) { return (item != approvalStep.pendingUserIds[0]); });
         }
 
-        const checkPendingStep = await module.approvalStepStatus.filter( function(item){return (item.status=="pending");})[0]
+        const checkPendingStep = await module.approvalStepStatus.filter(function (item) { return (item.status == "pending"); })[0]
         if (!checkPendingStep) {
             module.isApproved = "approved";
         }
@@ -59,7 +59,7 @@ const update = catchAsync(async (req, res) => {
         module.isApproved = "rejected";
         res.status(httpStatus.OK).send(approvalStep.pendingUserIds);
     }
-    
+
     module.approvalLog.push({
         step: approvalStep._id,
         approvedBy: stepActiveUserId,

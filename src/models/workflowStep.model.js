@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const { toJSON } = require('./plugins');
+const { toJSON, paginate } = require('./plugins');
 const { defaultFields } = require('./index');
 
 const workflowStepSchema = mongoose.Schema(
@@ -16,6 +16,7 @@ const workflowStepSchema = mongoose.Schema(
 
 // add plugin that converts mongoose to json
 workflowStepSchema.plugin(toJSON);
+workflowStepSchema.plugin(paginate);
 
 /**
  * @typedef WorkflowStep

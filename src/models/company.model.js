@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const { toJSON } = require('./plugins');
+const { toJSON, paginate } = require('./plugins');
 const { defaultFields } = require('./index');
 
 const companySchema = mongoose.Schema(
@@ -16,6 +16,7 @@ const companySchema = mongoose.Schema(
 
 // add plugin that converts mongoose to json
 companySchema.plugin(toJSON);
+companySchema.plugin(paginate);
 
 /**
  * @typedef Company

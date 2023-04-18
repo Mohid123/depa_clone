@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const { toJSON } = require('./plugins');
+const { toJSON, paginate } = require('./plugins');
 const { defaultFields } = require('./index');
 
 const emailNotifyToSchema = mongoose.Schema(
@@ -16,7 +16,9 @@ const emailNotifyToSchema = mongoose.Schema(
   )
 );
 
-// add plugin that converts mongoose to json emailNotifyToSchema.plugin(toJSON);
+// add plugin that converts mongoose to json
+emailNotifyToSchema.plugin(toJSON);
+emailNotifyToSchema.plugin(paginate);
 
 /**
  * @typedef EmailNotifyTo

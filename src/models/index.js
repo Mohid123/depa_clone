@@ -1,6 +1,7 @@
 module.exports.defaultFields = require('./defaultFields');
 module.exports.Token = require('./token.model');
 module.exports.User = require('./user.model');
+module.exports.Category = require('./category.model');
 module.exports.Company = require('./company.model');
 module.exports.Module = require('./module.model');
 module.exports.SubModule = require('./subModule.model');

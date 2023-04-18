@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const { toJSON } = require('./plugins');
+const { toJSON, paginate } = require('./plugins');
 const { defaultFields } = require('./index');
 
 const categorySchema = mongoose.Schema(
@@ -15,6 +15,7 @@ const categorySchema = mongoose.Schema(
 
 // add plugin that converts mongoose to json
 categorySchema.plugin(toJSON);
+categorySchema.plugin(paginate);
 
 /**
  * @typedef Category

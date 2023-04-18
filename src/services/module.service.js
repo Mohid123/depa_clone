@@ -1,117 +1,89 @@
 const httpStatus = require('http-status');
 const { Module } = require('../models');
 const ApiError = require('../utils/ApiError');
-const ObjectId = require('mongoose').Types.ObjectId;
 
 /**
- * Get user by id
+ * Create a Module
+ * @param {Object} ModuleBody
  * @returns {Promise<Module>}
  */
-const getFirstModule = async () => {
-
-    return Module.findOne({}, {}, { sort: { 'created_at' : -1 } });
+const createModule = async (ModuleBody) => {
+  // if (await Module.isEmailTaken(ModuleBody.email)) {
+  //   throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+  // }
+  return Module.create(ModuleBody);
 };
 
 /**
- * Get user by id
+ * Query for Modules
+ * @param {Object} filter - Mongo filter
+ * @param {Object} options - Query options
+ * @param {string} [options.sortBy] - Sort option in the format: sortField:(desc|asc)
+ * @param {number} [options.limit] - Maximum number of results per page (default = 10)
+ * @param {number} [options.page] - Current page (default = 1)
+ * @returns {Promise<QueryResult>}
+ */
+const queryModules = async (filter, options) => {
+  const Modules = await Module.paginate(filter, options);
+  return Modules;
+};
+
+/**
+ * Get Module by id
+ * @param {ObjectId} id
  * @returns {Promise<Module>}
  */
 const getModuleById = async (id) => {
-
-    return Module.findById(id);
+  return Module.findById(id);
 };
 
 /**
- * Get user by id aggregate
+ * Get Module by email
+ * @param {string} email
  * @returns {Promise<Module>}
  */
-const getModuleByIdAggregate = async (id) => {
-    return Module.aggregate([
-        {
-            $match: {
-                _id: ObjectId(id)   
-            }
-        },
-        {
-            $unwind: "$approvalStepStatus"
-        },
-        {
-            $lookup: {
-                from: "users",
-                localField: "approvalStepStatus.pendingUserIds",
-                foreignField: "_id",
-                as: "approvalStepStatus.pendingUserIds"
-            }
-        },
-        {
-            $lookup: {
-                from: "users",
-                localField: "approvalStepStatus.activeUser",
-                foreignField: "_id",
-                as: "approvalStepStatus.activeUser"
-            }
-        },
-        {
-            $lookup: {
-                from: "users",
-                localField: "approvalStepStatus.approvedUserIds",
-                foreignField: "_id",
-                as: "approvalStepStatus.approvedUserIds"
-            }
-        },
-        {
-            $group: {
-                _id: "$_id",
-                adminUsers: { $first: "$adminUsers" },
-                viewOnlyUsers: { $first: "$viewOnlyUsers" },
-                moduleCode: { $first: "$moduleCode" },
-                companyCode: { $first: "$companyCode" },
-                workFlow: { $first: "$workFlow" },
-                approvalStepStatus: {
-                    $push: {
-                        _id: "$approvalStepStatus._id",
-                        approvedUserIds: "$approvalStepStatus.approvedUserIds",
-                        pendingUserIds: "$approvalStepStatus.pendingUserIds",
-                        activeUser: "$approvalStepStatus.activeUser",
-                        type: "$approvalStepStatus.type",
-                        stepId: "$approvalStepStatus.stepId",
-                        status: "$approvalStepStatus.status",
-                        isActive: "$approvalStepStatus.isActive",
-                        pendingUsers: "$approvalStepStatus.pendingUsers"
-                    }
-                },
-                approvalLog: { $first: "$approvalLog" },
-                forms: { $first: "$forms" },
-                isApproved: { $first: "$isApproved" },
-                createdAt: { $first: "$createdAt" },
-                updatedAt: { $first: "$updatedAt" },
-            }
-        },
-        {
-            $replaceRoot: {
-                newRoot: {
-                    $mergeObjects: ["$$ROOT", { approvalStepStatus: "$approvalStepStatus" }]
-                }
-            }
-        },
-        // {
-        //     $limit: 1
-        // }
-    ]);
+const getModuleByEmail = async (email) => {
+  return Module.findOne({ email });
 };
 
 /**
- * Update one user by id
+ * Update Module by id
+ * @param {ObjectId} ModuleId
+ * @param {Object} updateBody
  * @returns {Promise<Module>}
  */
-const updateOneModuleById = async (id, module) => {
+const updateModuleById = async (ModuleId, updateBody) => {
+  const Module = await getModuleById(ModuleId);
+  if (!Module) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
+  }
+  if (updateBody.email && (await Module.isEmailTaken(updateBody.email, ModuleId))) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+  }
+  Object.assign(Module, updateBody);
+  await Module.save();
+  return Module;
+};
 
-    return Module.updateOne({'_id':  id}, module);
+/**
+ * Delete Module by id
+ * @param {ObjectId} ModuleId
+ * @returns {Promise<Module>}
+ */
+const deleteModuleById = async (ModuleId) => {
+  const Module = await getModuleById(ModuleId);
+  if (!Module) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
+  }
+  await Module.remove();
+  return Module;
 };
 
 module.exports = {
+  createModule,
+  queryModules,
   getModuleById,
-  getFirstModule,
-  getModuleByIdAggregate,
-  updateOneModuleById,
+  getModuleByEmail,
+  updateModuleById,
+  deleteModuleById,
 };

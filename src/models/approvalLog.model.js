@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const { toJSON } = require('./plugins');
+const { toJSON, paginate } = require('./plugins');
 const { defaultFields } = require('./index');
 
 const approvalLogSchema = mongoose.Schema(
@@ -22,6 +22,7 @@ const approvalLogSchema = mongoose.Schema(
 
 // add plugin that converts mongoose to json
 approvalLogSchema.plugin(toJSON);
+approvalLogSchema.plugin(paginate);
 
 /**
  * @typedef ApprovalLog

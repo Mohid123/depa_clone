@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const { toJSON } = require('./plugins');
+const { toJSON, paginate } = require('./plugins');
 const { defaultFields } = require('./index');
 
 const emailSchema = mongoose.Schema(
@@ -39,6 +39,7 @@ const emailSchema = mongoose.Schema(
 
 // add plugin that converts mongoose to json
 emailSchema.plugin(toJSON);
+emailSchema.plugin(paginate);
 
 /**
  * @typedef Email
