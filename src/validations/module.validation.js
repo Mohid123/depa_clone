@@ -1,47 +1,51 @@
 const Joi = require('joi');
-const { password, objectId } = require('./custom.validation');
+const { objectId } = require('./custom.validation');
 
 const createModule = {
   body: Joi.object().keys({
-    // email: Joi.string().required().email(),
-    // password: Joi.string().required().custom(password),
-    // name: Joi.string().required(),
-    // role: Joi.string().required().valid('user', 'admin'),
+    categoryId: Joi.required().custom(objectId),
+    defaultWorkFlow: Joi.required().custom(objectId),
+    code: Joi.string().required(),
+    title: Joi.string().required(),
+    description: Joi.string().required(),
+    url: Joi.string().required(),
+    image: Joi.string().required(),
   }),
 };
 
 const getModules = {
   query: Joi.object().keys({
-    // name: Joi.string(),
-    // role: Joi.string(),
-    // sortBy: Joi.string(),
-    // limit: Joi.number().integer(),
-    // page: Joi.number().integer(),
+    categoryId: Joi.custom(objectId),
+    code: Joi.string(),
+    title: Joi.string(),
   }),
 };
 
 const getModule = {
   params: Joi.object().keys({
-    ModuleId: Joi.string().custom(objectId),
+    moduleId: Joi.required().custom(objectId),
   }),
 };
 
 const updateModule = {
   params: Joi.object().keys({
-    ModuleId: Joi.required().custom(objectId),
+    moduleId: Joi.required().custom(objectId),
   }),
   body: Joi.object()
     .keys({
-      // email: Joi.string().email(),
-      // password: Joi.string().custom(password),
-      // name: Joi.string(),
+      categoryId: Joi.custom(objectId),
+      code: Joi.string(),
+      title: Joi.string(),
+      description: Joi.string(),
+      url: Joi.string(),
+      image: Joi.string(),
     })
     .min(1),
 };
 
 const deleteModule = {
   params: Joi.object().keys({
-    ModuleId: Joi.string().custom(objectId),
+    moduleId: Joi.string().custom(objectId),
   }),
 };
 

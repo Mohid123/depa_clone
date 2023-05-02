@@ -94,7 +94,14 @@ mongoose.connect(config.mongoose.url, config.mongoose.options)
         // Function call
         const users = await User.insertMany(userData);
 
-        console.log(users);
+        // Check if all documents were inserted successfully
+        if (users.length === userData.length) {
+            console.log("Data seeded successfully");
+            console.log(users);
+            process.exit(); // Exit the seeder process
+        } else {
+            console.log("Error seeding data");
+        }
 
         /////////////////////////////////////////////////////////////////////////////////////////////
         // let usersIdsArray = users.map(({ _id }) => _id);

@@ -8,9 +8,9 @@ const ApiError = require('../utils/ApiError');
  * @returns {Promise<Module>}
  */
 const createModule = async (ModuleBody) => {
-  // if (await Module.isEmailTaken(ModuleBody.email)) {
-  //   throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
-  // }
+  if (await Module.isCodeTaken(ModuleBody.code)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Code already taken');
+  }
   return Module.create(ModuleBody);
 };
 
@@ -56,9 +56,6 @@ const updateModuleById = async (ModuleId, updateBody) => {
   const Module = await getModuleById(ModuleId);
   if (!Module) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
-  }
-  if (updateBody.email && (await Module.isEmailTaken(updateBody.email, ModuleId))) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
   Object.assign(Module, updateBody);
   await Module.save();

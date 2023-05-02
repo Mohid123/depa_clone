@@ -10,7 +10,7 @@ const createCategory = catchAsync(async (req, res) => {
 });
 
 const getCategories = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['categoryname', 'role']);
+  const filter = pick(req.query, ['categoryName']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await categoryService.queryCategories(filter, options);
   res.send(result);

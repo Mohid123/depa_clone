@@ -8,9 +8,10 @@ const ApiError = require('../utils/ApiError');
  * @returns {Promise<Category>}
  */
 const createCategory = async (CategoryBody) => {
-  // if (await Category.isEmailTaken(CategoryBody.email)) {
-  //   throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
-  // }
+  if (await Category.isNameTaken(CategoryBody.name)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Name already taken');
+  }
+
   return Category.create(CategoryBody);
 };
 
@@ -56,9 +57,6 @@ const updateCategoryById = async (CategoryId, updateBody) => {
   const Category = await getCategoryById(CategoryId);
   if (!Category) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Category not found');
-  }
-  if (updateBody.email && (await Category.isEmailTaken(updateBody.email, CategoryId))) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
   Object.assign(Category, updateBody);
   await Category.save();

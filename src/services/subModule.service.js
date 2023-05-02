@@ -8,9 +8,9 @@ const ApiError = require('../utils/ApiError');
  * @returns {Promise<SubModule>}
  */
 const createSubModule = async (SubModuleBody) => {
-  // if (await SubModule.isEmailTaken(SubModuleBody.email)) {
-  //   throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
-  // }
+  if (await SubModule.isCodeTaken(SubModuleBody.code)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Code already taken');
+  }
   return SubModule.create(SubModuleBody);
 };
 
@@ -56,9 +56,6 @@ const updateSubModuleById = async (SubModuleId, updateBody) => {
   const SubModule = await getSubModuleById(SubModuleId);
   if (!SubModule) {
     throw new ApiError(httpStatus.NOT_FOUND, 'SubModule not found');
-  }
-  if (updateBody.email && (await SubModule.isEmailTaken(updateBody.email, SubModuleId))) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
   Object.assign(SubModule, updateBody);
   await SubModule.save();

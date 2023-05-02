@@ -5,7 +5,7 @@ const catchAsync = require('../../utils/catchAsync');
 const { subModuleService } = require('../../services');
 
 const createSubModule = catchAsync(async (req, res) => {
-  const subModule = await subModuleService.createSubModule(req.body);
+  const SubModule = await subModuleService.createSubModule(req.body);
   res.status(httpStatus.CREATED).send(SubModule);
 });
 

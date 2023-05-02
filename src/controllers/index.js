@@ -1,5 +1,9 @@
 module.exports.authController = require('./v1/auth.controller');
 module.exports.userController = require('./v1/user.controller');
 module.exports.categoryController = require('./v1/category.controller');
+module.exports.companyController = require('./v1/company.controller');
 module.exports.moduleController = require('./v1/module.controller');
+module.exports.formController = require('./v1/form.controller');
+module.exports.workFlowController = require('./v1/workFlow.controller');
 module.exports.subModuleController = require('./v1/subModule.controller');
+module.exports.dashboardController = require('./v1/dashboard.controller');

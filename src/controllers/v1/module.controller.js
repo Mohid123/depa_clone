@@ -10,7 +10,7 @@ const createModule = catchAsync(async (req, res) => {
 });
 
 const getModules = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['Modulename', 'role']);
+  const filter = pick(req.query, ['moduleName', 'role']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await moduleService.queryModules(filter, options);
   res.send(result);
