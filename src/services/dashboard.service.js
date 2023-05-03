@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { Category, Module } = require('../models');
 const ApiError = require('../utils/ApiError');
+const SubModule = require('../models/subModule.model');
 
 /**
  * Query for Categories
@@ -47,7 +48,7 @@ const queryModulesByCategory = async (filter, options) => {
  * @returns {Promise<Module>}
  */
 const querySubModulesByModule = async (id) => {
-  return Module.findById(id);
+  return SubModule.where('moduleId').equals(id).populate(['moduleId', 'companyId']);
 };
 
 

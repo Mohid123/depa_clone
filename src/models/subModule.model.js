@@ -8,8 +8,8 @@ const subModuleSchema = mongoose.Schema(
     {},
     defaultFields,
     {
-      moduleId: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Module' }],
-      companyId: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Company' }],
+      moduleId: { type: mongoose.Schema.Types.ObjectId, ref: 'Module' },
+      companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
 
       code: { type: String, required: true },
       adminUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }],

@@ -5,7 +5,6 @@ const catchAsync = require('../../utils/catchAsync');
 const { dashboardService } = require('../../services');
 
 const getModulesByCategory = catchAsync(async (req, res) => {
-  console.log('heheh')
   const filter = pick(req.query, ['categoryName']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await dashboardService.queryModulesByCategory(filter, options);

@@ -14,9 +14,4 @@ router
     .route('/module/:moduleId')
     .get(auth(), validate(dashboardValidation.getSubModulesByModule), dashboardController.getSubModulesByModule);
 
-// router
-//     .route('/:categoryId')
-//     .get(auth(), validate(categoryValidation.getCategory), categoryController.getCategory)
-//     .patch(auth(), validate(categoryValidation.updateCategory), categoryController.updateCategory)
-//     .delete(auth(), validate(categoryValidation.deleteCategory), categoryController.deleteCategory);
 module.exports = router;
