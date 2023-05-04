@@ -71,7 +71,6 @@ const updateWorkFlowById = async (workFlowId, updateBody) => {
   let workflowStep = null; // initialize here
   for (const step of updateBody.steps) {
     if (step.id) {
-      debugger
       const stepId = step.id;
       delete step.id;
 

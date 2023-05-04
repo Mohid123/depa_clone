@@ -23,13 +23,13 @@ const getSubmissions = {
 
 const getSubmission = {
   params: Joi.object().keys({
-    SubmissionId: Joi.required().custom(objectId),
+    submissionId: Joi.required().custom(objectId),
   }),
 };
 
 const updateSubmission = {
   params: Joi.object().keys({
-    SubmissionId: Joi.required().custom(objectId),
+    submissionId: Joi.required().custom(objectId),
   }),
   body: Joi.object()
     .keys({
@@ -38,7 +38,6 @@ const updateSubmission = {
       formIds: Joi.array().items(Joi.string().custom(objectId)),
       formDataIds: Joi.array().items(Joi.string().custom(objectId)),
       submissionStatus: Joi.number().min(1).max(4),
-      workflow: Joi.object(),
       stepId: Joi.required().custom(objectId),
       userId: Joi.required().custom(objectId),
       remarks: "I think it is good to go",
@@ -49,7 +48,7 @@ const updateSubmission = {
 
 const deleteSubmission = {
   params: Joi.object().keys({
-    SubmissionId: Joi.string().custom(objectId),
+    submissionId: Joi.string().custom(objectId),
   }),
 };
 

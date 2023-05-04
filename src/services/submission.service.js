@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-const { Submission, WorkflowStep } = require('../models');
+const { Submission, WorkflowStep, User } = require('../models');
 const ApiError = require('../utils/ApiError');
 const workFlowService = require('./workFlow.service');
 
@@ -55,7 +55,29 @@ const querySubmissions = async (filter, options) => {
  * @returns {Promise<Submission>}
  */
 const getSubmissionById = async (id) => {
-  return Submission.findById(id);
+  const submission = await Submission.findById(id).populate(['formIds', {
+    path: 'workFlowId',
+    populate: {
+      path: 'stepIds',
+      populate: {
+        path: 'approverIds'
+      }
+    }
+  }]);
+
+  const statusArr = submission.workflowStatus;
+
+  for (const stepStatus of statusArr) {
+    const activeUsers = await User.find({ _id: { $in: stepStatus.activeUserIds } });
+    const approvedUsers = await User.find({ _id: { $in: stepStatus.approvedUserIds } });
+    const pendingUsers = await User.find({ _id: { $in: stepStatus.pendingUserIds } });
+
+    stepStatus.activeUserIds = activeUsers;
+    stepStatus.approvedUserIds = approvedUsers;
+    stepStatus.pendingUserIds = pendingUsers;
+  }
+
+  return submission;
 };
 
 /**
