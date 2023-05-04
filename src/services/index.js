@@ -9,3 +9,6 @@ module.exports.formService = require('./form.service');
 module.exports.workFlowService = require('./workFlow.service');
 module.exports.subModuleService = require('./subModule.service');
 module.exports.dashboardService = require('./dashboard.service');
+module.exports.formDataService = require('./formData.service');
+module.exports.submissionService = require('./submission.service');
+module.exports.workFlowStepService = require('./workFlowStep.service');

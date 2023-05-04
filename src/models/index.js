@@ -13,3 +13,4 @@ module.exports.FormData = require('./formData.model');
 module.exports.Email = require('./email.model');
 module.exports.ApprovalLog = require('./approvalLog.model');
 module.exports.EmailNotifyTo = require('./emailNotifyTo.model');
+module.exports.Submission = require('./submission.model');

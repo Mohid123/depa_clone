@@ -1,6 +1,8 @@
 const httpStatus = require('http-status');
 const { Module } = require('../models');
 const ApiError = require('../utils/ApiError');
+const workFlowService = require('./workFlow.service');
+const mongoose = require('mongoose');
 
 /**
  * Create a Module
@@ -11,7 +13,12 @@ const createModule = async (ModuleBody) => {
   if (await Module.isCodeTaken(ModuleBody.code)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Code already taken');
   }
+
+  const createdWorkflow = await workFlowService.createWorkFlow(ModuleBody);
+  ModuleBody.workFlowId = createdWorkflow._id;
+
   return Module.create(ModuleBody);
+
 };
 
 /**
@@ -34,16 +41,15 @@ const queryModules = async (filter, options) => {
  * @returns {Promise<Module>}
  */
 const getModuleById = async (id) => {
-  return Module.findById(id);
-};
-
-/**
- * Get Module by email
- * @param {string} email
- * @returns {Promise<Module>}
- */
-const getModuleByEmail = async (email) => {
-  return Module.findOne({ email });
+  return Module.findById(id).populate(['categoryId', {
+    path: 'workFlowId',
+    populate: {
+      path: 'stepIds',
+      populate: {
+        path: 'approverIds'
+      }
+    }
+  }]);
 };
 
 /**
@@ -57,6 +63,11 @@ const updateModuleById = async (ModuleId, updateBody) => {
   if (!Module) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
   }
+
+  if (updateBody.defaultWorkFlow) {
+    workFlowService.updateWorkFlowById(ModuleBody);
+  }
+
   Object.assign(Module, updateBody);
   await Module.save();
   return Module;
@@ -80,7 +91,6 @@ module.exports = {
   createModule,
   queryModules,
   getModuleById,
-  getModuleByEmail,
   updateModuleById,
   deleteModuleById,
 };

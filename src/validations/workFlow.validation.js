@@ -3,7 +3,6 @@ const { objectId } = require('./custom.validation');
 
 const createWorkFlow = {
   body: Joi.object().keys({
-    name: Joi.string().required(),
     steps: Joi.array().items(Joi.object({
       "condition": Joi.string().valid("none", "and", "or").required(),
       "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
@@ -29,8 +28,8 @@ const updateWorkFlow = {
   }),
   body: Joi.object()
     .keys({
-      name: Joi.string().required(),
       steps: Joi.array().items(Joi.object({
+        "id": Joi.required().custom(objectId),
         "condition": Joi.string().valid("none", "and", "or").required(),
         "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
       }).required()).required(),

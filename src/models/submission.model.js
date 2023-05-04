@@ -12,7 +12,7 @@ const submissionSchema = mongoose.Schema(
       subModuleId: { type: mongoose.Schema.Types.ObjectId, ref: 'SubModule' },
       summaryData: { type: Object },
       formIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Form' }],
-      formDataIds: { type: mongoose.Schema.Types.ObjectId, ref: 'FormData' },
+      formDataIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'FormData' }],
       submissionStatus: { type: Number, default: 1, required: true },
       workflow: { type: WorkFlow.schema, required: true },
       workflowStatus: [{
@@ -20,9 +20,8 @@ const submissionSchema = mongoose.Schema(
         activeUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
         approvedUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
         pendingUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        condition: { type: String, enum: ["none", "and", "or"] },
-        status: { type: String, enum: ["pending", "approved", "rejected"] },
-        isActive: { type: Boolean, default: false },
+        condition: { type: String, enum: ["none", "and", "or"], default: "none" },
+        status: { type: String, enum: ["inProgress", "pending", "approved", "rejected"], default: "pending" },
       }],
     }
   )

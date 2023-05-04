@@ -8,6 +8,9 @@ const formRoute = require('./form.route');
 const workFlow = require('./workFlow.route');
 const subModuleRoute = require('./subModule.route');
 const dashboardRoute = require('./dashboard.route');
+const formDataRoute = require('./formData.route');
+const submissionRoute = require('./submission.route');
+const workFlowStep = require('./workFlowStep.route');
 const docsRoute = require('./docs.route');
 const config = require('../../config/config');
 
@@ -50,6 +53,18 @@ const defaultRoutes = [
     path: '/',
     route: dashboardRoute,
   },
+  {
+    path: '/formsData',
+    route: formDataRoute,
+  },
+  {
+    path: '/submissions',
+    route: submissionRoute,
+  },
+  {
+    path: '/workFlowSteps',
+    route: workFlowStep,
+  }
 ];
 
 const devRoutes = [

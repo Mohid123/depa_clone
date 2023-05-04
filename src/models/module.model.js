@@ -8,8 +8,8 @@ const moduleSchema = mongoose.Schema(
     {},
     defaultFields,
     {
-      categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
-      defaultWorkFlow: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkFlow', required: true },
+      categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
+      workFlowId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkFlow', required: true },
       code: { type: String, required: true },
       title: { type: String, required: true },
       description: { type: String, required: true },

@@ -6,3 +6,7 @@ module.exports.moduleValidation = require('./module.validation');
 module.exports.formValidation = require('./form.validation');
 module.exports.workFlowValidation = require('./workFlow.validation');
 module.exports.subModuleValidation = require('./subModule.validation');
+module.exports.dashboardValidation = require('./dashboard.validation');
+module.exports.formDataValidation = require('./formData.validation');
+module.exports.submissionValidation = require('./submission.validation');
+module.exports.workFlowStepValidation = require('./workFlowStep.validation');

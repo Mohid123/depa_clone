@@ -8,14 +8,9 @@ const ApiError = require('../utils/ApiError');
  * @returns {Promise<WorkFlow>}
  */
 const createWorkFlow = async (WorkFlowBody) => {
-  // if (await WorkFlow.isTitleTaken(WorkFlowBody.title)) {
-  //   throw new ApiError(httpStatus.BAD_REQUEST, 'Title already taken');
-  // }
-
   const steps = await WorkflowStep.insertMany(WorkFlowBody.steps);
 
   return WorkFlow.create({
-    "name": WorkFlowBody.name,
     "stepIds": steps.map(({ _id }) => _id)
   });
 };
@@ -40,7 +35,12 @@ const queryWorkFlows = async (filter, options) => {
  * @returns {Promise<WorkFlow>}
  */
 const getWorkFlowById = async (id) => {
-  return WorkFlow.findById(id);
+  return WorkFlow.findById(id).populate({
+    path: 'stepIds',
+    populate: {
+      path: 'approverIds'
+    }
+  });
 };
 
 /**
@@ -63,9 +63,24 @@ const updateWorkFlowById = async (workFlowId, updateBody) => {
   if (!WorkFlow) {
     throw new ApiError(httpStatus.NOT_FOUND, 'WorkFlow not found');
   }
-  Object.assign(WorkFlow, updateBody);
-  await WorkFlow.save();
-  return WorkFlow;
+
+  let workflowStep = null; // initialize here
+
+  for (const step of updateBody.steps) {
+    const stepId = step.id;
+    delete step.id;
+
+    workflowStep = await WorkflowStep.findById(stepId);
+    console.log(workflowStep);
+    if (!workflowStep) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'WorkflowStep not found');
+    }
+
+    Object.assign(workflowStep, step);
+    await workflowStep.save();
+  }
+
+  return await getWorkFlowById(workFlowId);
 };
 
 /**

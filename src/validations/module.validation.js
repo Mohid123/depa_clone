@@ -4,12 +4,15 @@ const { objectId } = require('./custom.validation');
 const createModule = {
   body: Joi.object().keys({
     categoryId: Joi.required().custom(objectId),
-    defaultWorkFlow: Joi.required().custom(objectId),
     code: Joi.string().required(),
     title: Joi.string().required(),
     description: Joi.string().required(),
     url: Joi.string().required(),
     image: Joi.string().required(),
+    steps: Joi.array().items(Joi.object({
+      "condition": Joi.string().valid("none", "and", "or").required(),
+      "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
+    }).required()).required(),
   }),
 };
 
@@ -39,6 +42,12 @@ const updateModule = {
       description: Joi.string(),
       url: Joi.string(),
       image: Joi.string(),
+      steps: Joi.array().items(Joi.object({
+        "id": Joi.required().custom(objectId),
+        "condition": Joi.string().valid("none", "and", "or").required(),
+        "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
+      }).required()),
+      workFlowId: Joi.custom(objectId),
     })
     .min(1),
 };

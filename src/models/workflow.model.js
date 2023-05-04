@@ -8,7 +8,6 @@ const workFlowSchema = mongoose.Schema(
     {},
     defaultFields,
     {
-      name: { type: String, required: true },
       stepIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'WorkflowStep' }],
     }
   )

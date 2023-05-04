@@ -7,3 +7,6 @@ module.exports.formController = require('./v1/form.controller');
 module.exports.workFlowController = require('./v1/workFlow.controller');
 module.exports.subModuleController = require('./v1/subModule.controller');
 module.exports.dashboardController = require('./v1/dashboard.controller');
+module.exports.formDataController = require('./v1/formData.controller');
+module.exports.submissionController = require('./v1/submission.controller');
+module.exports.workFlowStepController = require('./v1/workFlowStep.controller');
