@@ -1,6 +1,8 @@
 const httpStatus = require('http-status');
 const { SubModule } = require('../models');
 const ApiError = require('../utils/ApiError');
+const formService = require('./form.service');
+const submissionService = require('./submission.service');
 
 /**
  * Create a SubModule
@@ -11,7 +13,19 @@ const createSubModule = async (SubModuleBody) => {
   if (await SubModule.isCodeTaken(SubModuleBody.code)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Code already taken');
   }
-  return SubModule.create(SubModuleBody);
+
+  const forms = await formService.createManyForms(SubModuleBody.formIds)
+  SubModuleBody.formIds = forms.map(({ _id }) => _id)
+
+  const subModule = await SubModule.create(SubModuleBody);
+  SubModuleBody.subModuleId = subModule._id;
+
+  const submission = await submissionService.createSubmission(SubModuleBody);
+
+  return await {
+    'subModule': subModule,
+    'submission': submission
+  };
 };
 
 /**

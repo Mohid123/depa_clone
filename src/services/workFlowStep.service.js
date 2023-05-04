@@ -54,9 +54,7 @@ const updateWorkflowStepById = async (workflowStepId, updateBody) => {
   if (!WorkflowStep) {
     throw new ApiError(httpStatus.NOT_FOUND, 'WorkflowStep not found');
   }
-  if (updateBody.email && (await WorkflowStep.isEmailTaken(updateBody.email, workflowStepId))) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
-  }
+
   Object.assign(WorkflowStep, updateBody);
   await WorkflowStep.save();
   return WorkflowStep;

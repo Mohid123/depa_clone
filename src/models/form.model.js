@@ -9,9 +9,9 @@ const formSchema = mongoose.Schema(
     defaultFields,
     {
       title: { type: String, required: true },
-      name: { type: String, required: true },
+      display: { type: String, required: true },
       key: { type: String, required: true },
-      schema: [{ type: Object, required: true }],
+      components: [{ type: Object, required: true }],
     }
   )
 );

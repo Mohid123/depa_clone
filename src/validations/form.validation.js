@@ -4,9 +4,9 @@ const { objectId } = require('./custom.validation');
 const createForm = {
   body: Joi.object().keys({
     title: Joi.string().required(),
-    name: Joi.string().required(),
-    key: Joi.string().required(),
-    schema: Joi.array().items(Joi.object().required()),
+    display: Joi.string().required(),
+    key: Joi.string(),
+    components: Joi.array().items(Joi.object().required()),
   }),
 };
 
@@ -31,9 +31,9 @@ const updateForm = {
   body: Joi.object()
     .keys({
       title: Joi.string(),
-      name: Joi.string(),
+      display: Joi.string(),
       key: Joi.string(),
-      schema: Joi.array().items(Joi.object()),
+      components: Joi.array().items(Joi.object()),
     })
     .min(1),
 };

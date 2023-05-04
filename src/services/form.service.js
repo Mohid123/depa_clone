@@ -9,10 +9,26 @@ const ApiError = require('../utils/ApiError');
  */
 const createForm = async (FormBody) => {
   if (await Form.isKeyTaken(FormBody.key)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Key already taken');
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Form Key already taken');
   }
 
   return Form.create(FormBody);
+};
+
+/**
+ * Create a Form
+ * @param {Object} FormBody
+ * @returns {Promise<Form>}
+ */
+const createManyForms = async (FormBody) => {
+  for (const form of FormBody) {
+    if (await Form.isKeyTaken(form.key)) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Form Key already taken');
+    }
+  }
+
+  const forms = await Form.insertMany(FormBody);
+  return forms;
 };
 
 /**
@@ -36,15 +52,6 @@ const queryForms = async (filter, options) => {
  */
 const getFormById = async (id) => {
   return Form.findById(id);
-};
-
-/**
- * Get Form by email
- * @param {string} email
- * @returns {Promise<Form>}
- */
-const getFormByEmail = async (email) => {
-  return Form.findOne({ email });
 };
 
 /**
@@ -79,9 +86,9 @@ const deleteFormById = async (FormId) => {
 
 module.exports = {
   createForm,
+  createManyForms,
   queryForms,
   getFormById,
-  getFormByEmail,
   updateFormById,
   deleteFormById,
 };

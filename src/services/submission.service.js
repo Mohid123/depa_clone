@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { Submission, WorkflowStep } = require('../models');
 const ApiError = require('../utils/ApiError');
+const workFlowService = require('./workFlow.service');
 
 /**
  * Create a Submission
@@ -8,18 +9,13 @@ const ApiError = require('../utils/ApiError');
  * @returns {Promise<Submission>}
  */
 const createSubmission = async (submissionBody) => {
-  // submissionBody.workflowStatus = [{
-  //   stepId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkflowStep' },
-  //   activeUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  //   approvedUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  //   pendingUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  //   condition: { type: String, enum: ["none", "and", "or"] },
-  //   status: { type: String, enum: ["none","pending", "approved", "rejected"] },
-  // }];
+  const workFlow = await workFlowService.createWorkFlow(submissionBody);
+  submissionBody.workFlowId = workFlow._id;
+  delete submissionBody.steps;
 
   const workflowStatusArray = [];
-  for (let index = 0; index < submissionBody.workflow.stepIds.length; index++) {
-    const element = submissionBody.workflow.stepIds[index];
+  for (let index = 0; index < workFlow.stepIds.length; index++) {
+    const element = workFlow.stepIds[index];
     let step = await WorkflowStep.findById(element);
     let aproverIdsArray = step.approverIds;
     let stepStatusData = {

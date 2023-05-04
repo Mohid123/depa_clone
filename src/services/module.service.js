@@ -2,7 +2,6 @@ const httpStatus = require('http-status');
 const { Module } = require('../models');
 const ApiError = require('../utils/ApiError');
 const workFlowService = require('./workFlow.service');
-const mongoose = require('mongoose');
 
 /**
  * Create a Module
@@ -64,13 +63,13 @@ const updateModuleById = async (ModuleId, updateBody) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
   }
 
-  if (updateBody.defaultWorkFlow) {
-    workFlowService.updateWorkFlowById(ModuleBody);
+  if (updateBody.steps) {
+    const updatedWorkFlow = await workFlowService.updateWorkFlowById(Module.workFlowId.id, updateBody);
   }
 
   Object.assign(Module, updateBody);
   await Module.save();
-  return Module;
+  return await getModuleById(ModuleId);
 };
 
 /**

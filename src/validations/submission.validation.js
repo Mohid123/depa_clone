@@ -8,7 +8,7 @@ const createSubmission = {
     formIds: Joi.array().items(Joi.required().custom(objectId)).required(),
     formDataIds: Joi.array().items(Joi.string().custom(objectId)),
     submissionStatus: Joi.number().min(1).max(4),
-    workflow: Joi.object().required(),
+    steps: Joi.array().items(Joi.object().required()),
   }),
 };
 

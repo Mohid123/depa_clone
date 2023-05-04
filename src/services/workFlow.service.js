@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { WorkFlow, WorkflowStep } = require('../models');
 const ApiError = require('../utils/ApiError');
+const workFlowStepService = require('./workFlowStep.service');
 
 /**
  * Create a WorkFlow
@@ -65,19 +66,11 @@ const updateWorkFlowById = async (workFlowId, updateBody) => {
   }
 
   let workflowStep = null; // initialize here
-
   for (const step of updateBody.steps) {
     const stepId = step.id;
     delete step.id;
 
-    workflowStep = await WorkflowStep.findById(stepId);
-    console.log(workflowStep);
-    if (!workflowStep) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'WorkflowStep not found');
-    }
-
-    Object.assign(workflowStep, step);
-    await workflowStep.save();
+    workflowStep = await workFlowStepService.updateWorkflowStepById(stepId, step);
   }
 
   return await getWorkFlowById(workFlowId);

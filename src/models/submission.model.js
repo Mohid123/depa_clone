@@ -9,12 +9,12 @@ const submissionSchema = mongoose.Schema(
     {},
     defaultFields,
     {
-      subModuleId: { type: mongoose.Schema.Types.ObjectId, ref: 'SubModule' },
+      subModuleId: { type: mongoose.Schema.Types.ObjectId, ref: 'SubModule', required: true },
       summaryData: { type: Object },
-      formIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Form' }],
+      formIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Form', required: true }],
       formDataIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'FormData' }],
       submissionStatus: { type: Number, default: 1, required: true },
-      workflow: { type: WorkFlow.schema, required: true },
+      workFlowId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkFlow', required: true },
       workflowStatus: [{
         stepId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkflowStep' },
         activeUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],

@@ -9,10 +9,10 @@ const createSubModule = {
     code: Joi.string().required(),
     adminUsers: Joi.array().items(Joi.string().custom(objectId)),
     viewOnlyUsers: Joi.array().items(Joi.string().custom(objectId)),
-    // defaultWorkFlow: Joi.string().required().custom(objectId),
-    formIds: Joi.array().items(Joi.string().custom(objectId)),
     summarySchema: Joi.array().items(Joi.object()),
     viewSchema: Joi.array().items(Joi.object()),
+    formIds: Joi.array().items(Joi.object().required()),
+    steps: Joi.array().items(Joi.object().required()),
   }),
 };
 
@@ -42,10 +42,10 @@ const updateSubModule = {
       code: Joi.string(),
       adminUsers: Joi.array().items(Joi.string().custom(objectId)),
       viewOnlyUsers: Joi.array().items(Joi.string().custom(objectId)),
-      defaultWorkFlow: Joi.string().custom(objectId),
-      formIds: Joi.array().items(Joi.string().custom(objectId)),
       summarySchema: Joi.array().items(Joi.object()),
       viewSchema: Joi.array().items(Joi.object()),
+      formIds: Joi.array().items(Joi.object().required()),
+      steps: Joi.object().required(),
     })
     .min(1),
 };
