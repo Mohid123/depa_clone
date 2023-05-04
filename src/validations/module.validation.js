@@ -43,7 +43,7 @@ const updateModule = {
       url: Joi.string(),
       image: Joi.string(),
       steps: Joi.array().items(Joi.object({
-        "id": Joi.required().custom(objectId),
+        "id": Joi.string().custom(objectId),
         "condition": Joi.string().valid("none", "and", "or").required(),
         "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
       }).required()),

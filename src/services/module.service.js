@@ -65,6 +65,7 @@ const updateModuleById = async (ModuleId, updateBody) => {
 
   if (updateBody.steps) {
     const updatedWorkFlow = await workFlowService.updateWorkFlowById(Module.workFlowId.id, updateBody);
+    return updatedWorkFlow;
   }
 
   Object.assign(Module, updateBody);
