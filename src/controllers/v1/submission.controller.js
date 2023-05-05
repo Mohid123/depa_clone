@@ -10,7 +10,7 @@ const createSubmission = catchAsync(async (req, res) => {
 });
 
 const getSubmissions = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['submissionName', 'role']);
+  const filter = pick(req.query, ['subModuleId']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await submissionService.querySubmissions(filter, options);
   res.send(result);

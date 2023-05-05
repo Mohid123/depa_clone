@@ -52,7 +52,11 @@ const createSubmission = async (submissionBody) => {
  * @param {number} [options.page] - Current page (default = 1)
  * @returns {Promise<QueryResult>}
  */
-const querySubmissions = async (filter, options) => {
+const querySubmissions = async (filter, options, getBody) => {
+  if (filter.subModuleId) {
+    return await Submission.find(filter);
+  }
+
   const submissions = await Submission.paginate(filter, options);
   return submissions;
 };
