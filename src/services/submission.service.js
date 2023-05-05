@@ -125,7 +125,9 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'Submission not found');
   }
 
-  const approvalStep = await submission.workflowStatus.filter(function (item) { return (item.stepId == updateBody.stepId); })[0];
+  const workFlowStatus = submission.workflowStatus;
+
+  const approvalStep = await workFlowStatus.filter(function (item) { return (item.stepId == updateBody.stepId); })[0];
   if (!approvalStep || approvalStep.status != "inProgress") {
     throw new ApiError(httpStatus.NOT_FOUND, 'Invalid Approval Step!');
   }
@@ -141,8 +143,8 @@ const updateSubmissionById = async (submissionId, updateBody) => {
 
     if (!approvalStep.pendingUserIds.length) {
       approvalStep.status = "approved";
-      for (let index = 0; index < submission.workflowStatus.length; index++) {
-        const element = submission.workflowStatus[index];
+      for (let index = 0; index < workFlowStatus.length; index++) {
+        const element = workFlowStatus[index];
         if (element.status == "pending") {
           element.activeUserIds.push(element.pendingUserIds[0]);
           element.pendingUserIds = element.pendingUserIds.filter(function (item) { return (item != element.pendingUserIds[0]); });
@@ -157,23 +159,60 @@ const updateSubmissionById = async (submissionId, updateBody) => {
       approvalStep.pendingUserIds = approvalStep.pendingUserIds.filter(function (item) { return (item != approvalStep.pendingUserIds[0]); });
     }
 
-    const checkPendingStep = await submission.workflowStatus.filter(function (item) { return (item.status == "pending"); })[0]
+    const checkPendingStep = await workFlowStatus.filter(function (item) { return (item.status == "pending"); })[0]
     if (!checkPendingStep) {
       submission.submissionStatus = 3;
     }
   } else {
-    submission.isApproved = "pending";
-    return submission;
-    // res.status(httpStatus.OK).send(approvalStep.pendingUserIds);
-  }
+    // Get the first object in the array that has approvedUserIds
+    const approvedObject = workFlowStatus.find((obj) => obj.approvedUserIds.length > 0);
 
-  const approvalLog = await approvalLogService.createApprovalLog({
+    if (approvedObject) {
+      // Move activeUserIds to pendingUserIds
+      const activeUserIds = workFlowStatus[0].activeUserIds;
+      workFlowStatus[0].pendingUserIds.push(...activeUserIds);
+      workFlowStatus[0].activeUserIds = [];
+
+      // Pop the last approvedUserId and set it to activeUserIds
+      const lastApprovedUserId = approvedObject.approvedUserIds.pop();
+      workFlowStatus[0].activeUserIds.push(lastApprovedUserId);
+
+      // If approvedUserIds is now empty, remove the object
+      if (approvedObject.approvedUserIds.length === 0) {
+        const index = workFlowStatus.indexOf(approvedObject);
+        workFlowStatus.splice(index, 1);
+      }
+    } else {
+      // Move activeUserIds to pendingUserIds
+      const activeUserIds = workFlowStatus[0].activeUserIds;
+      workFlowStatus[0].pendingUserIds.push(...activeUserIds);
+      workFlowStatus[0].activeUserIds = [];
+
+      // If previous object exists, change its status to in progress
+      if (workFlowStatus.length > 1) {
+        workFlowStatus[workFlowStatus.length - 2].status = 'inProgress';
+      }
+
+      // Change current object status to pending
+      workFlowStatus[0].status = 'pending';
+    }
+  }
+  // res.status(httpStatus.OK).send(approvalStep.pendingUserIds);
+
+  const totalLength = workFlowStatus.length;
+  const approvedCount = workFlowStatus.filter(step => step.status === "approved").length;
+  submission.summaryData = {
+    progress: (approvedCount / totalLength) * 100
+  };
+
+  await approvalLogService.createApprovalLog({
     subModuleId: submission.subModuleId,
     workFlowId: submission.workFlowId,
     stepId: approvalStep._id,
-    approvedBy: stepActiveUserId,
     approvedOn: new Date().getTime(),
     remarks: updateBody.remarks,
+    approvalStatus: updateBody.isApproved ? 'approved' : 'rejected',
+    performedById: stepActiveUserId,
     isApproved: updateBody.isApproved
   });
 
