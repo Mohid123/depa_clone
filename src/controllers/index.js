@@ -10,3 +10,4 @@ module.exports.dashboardController = require('./v1/dashboard.controller');
 module.exports.formDataController = require('./v1/formData.controller');
 module.exports.submissionController = require('./v1/submission.controller');
 module.exports.workFlowStepController = require('./v1/workFlowStep.controller');
+module.exports.approvalLogController = require('./v1/approvalLog.controller');

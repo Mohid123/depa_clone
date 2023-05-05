@@ -8,14 +8,14 @@ const approvalLogSchema = mongoose.Schema(
     {},
     defaultFields,
     {
+      subModuleId: { type: mongoose.Schema.Types.ObjectId, ref: 'SubModule', required: true },
       workFlowId: { type: mongoose.Schema.Types.ObjectId, ref: 'Workflow', required: true },
       stepId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkflowStep', required: true },
       performedById: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
       approvalStatus: { type: String, enum: ['pending', 'approved', 'rejected'], required: true, default: 'pending' },
       remarks: { type: String },
-      companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
-      moduleId: { type: mongoose.Schema.Types.ObjectId, ref: 'Module', required: true },
-      subModuleId: { type: mongoose.Schema.Types.ObjectId, ref: 'SubModule', required: true },
+      companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
+      moduleId: { type: mongoose.Schema.Types.ObjectId, ref: 'Module' },
     }
   )
 );

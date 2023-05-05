@@ -2,6 +2,7 @@ const httpStatus = require('http-status');
 const { Submission, WorkflowStep, User, ApprovalLog } = require('../models');
 const ApiError = require('../utils/ApiError');
 const workFlowService = require('./workFlow.service');
+const approvalLogService = require('./approvalLog.service');
 
 /**
  * Create a Submission
@@ -124,61 +125,61 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'Submission not found');
   }
 
-  // return submission;
-
-  const stepActiveUserId = await WorkflowStep.findById(updateBody.stepId);
-  if (!stepActiveUserId) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'WorkFlow Step not found');
+  const approvalStep = await submission.workflowStatus.filter(function (item) { return (item.stepId == updateBody.stepId); })[0];
+  if (!approvalStep || approvalStep.status != "inProgress") {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Invalid Approval Step!');
   }
 
-  const workFlowStatus = submission.workflowStatus;
-  return workFlowStatus;
-  if (req.body.isApproved) {
+  const stepActiveUserId = await approvalStep.activeUserIds.filter(function (item) { return (item == updateBody.userId); })[0];
+  if (!stepActiveUserId) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Invalid User!');
+  }
+
+  if (updateBody.isApproved) {
     approvalStep.approvedUserIds.push(stepActiveUserId);
-    approvalStep.activeUser = approvalStep.activeUser.filter(function (item) { return (item != req.body.userId); });
+    approvalStep.activeUser = approvalStep.activeUserIds.filter(function (item) { return (item != updateBody.userId); });
 
     if (!approvalStep.pendingUserIds.length) {
       approvalStep.status = "approved";
-      approvalStep.isActive = "false";
-      for (let index = 0; index < module.approvalStepStatus.length; index++) {
-        const element = module.approvalStepStatus[index];
+      for (let index = 0; index < submission.workflowStatus.length; index++) {
+        const element = submission.workflowStatus[index];
         if (element.status == "pending") {
-          element.activeUser.push(element.pendingUserIds[0]);
+          element.activeUserIds.push(element.pendingUserIds[0]);
           element.pendingUserIds = element.pendingUserIds.filter(function (item) { return (item != element.pendingUserIds[0]); });
-          element.isActive = true;
+          element.status = "inProgress";
           break;
         }
       }
     }
 
     if (approvalStep.type == "and") {
-      approvalStep.activeUser.push(approvalStep.pendingUserIds[0]);
+      approvalStep.activeUserIds.push(approvalStep.pendingUserIds[0]);
       approvalStep.pendingUserIds = approvalStep.pendingUserIds.filter(function (item) { return (item != approvalStep.pendingUserIds[0]); });
     }
 
-    const checkPendingStep = await module.approvalStepStatus.filter(function (item) { return (item.status == "pending"); })[0]
+    const checkPendingStep = await submission.workflowStatus.filter(function (item) { return (item.status == "pending"); })[0]
     if (!checkPendingStep) {
-      module.isApproved = "approved";
+      submission.submissionStatus = 3;
     }
   } else {
-    module.isApproved = "rejected";
-    res.status(httpStatus.OK).send(approvalStep.pendingUserIds);
+    submission.isApproved = "pending";
+    return submission;
+    // res.status(httpStatus.OK).send(approvalStep.pendingUserIds);
   }
 
-  module.approvalLog.push({
-    step: approvalStep._id,
+  const approvalLog = await approvalLogService.createApprovalLog({
+    subModuleId: submission.subModuleId,
+    workFlowId: submission.workFlowId,
+    stepId: approvalStep._id,
     approvedBy: stepActiveUserId,
     approvedOn: new Date().getTime(),
-    remarks: req.body.remarks,
-    isApproved: req.body.isApproved
+    remarks: updateBody.remarks,
+    isApproved: updateBody.isApproved
   });
 
-  await moduleService.updateOneModuleById(req.params.moduleId, module);
-
-
-  Object.assign(Submission, updateBody);
-  await Submission.save();
-  return Submission;
+  Object.assign(submission, updateBody);
+  await submission.save();
+  return getSubmissionById(submissionId);
 };
 
 /**

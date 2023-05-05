@@ -10,3 +10,4 @@ module.exports.dashboardValidation = require('./dashboard.validation');
 module.exports.formDataValidation = require('./formData.validation');
 module.exports.submissionValidation = require('./submission.validation');
 module.exports.workFlowStepValidation = require('./workFlowStep.validation');
+module.exports.approvalLogValidation = require('./approvalLog.validation');

@@ -12,3 +12,4 @@ module.exports.dashboardService = require('./dashboard.service');
 module.exports.formDataService = require('./formData.service');
 module.exports.submissionService = require('./submission.service');
 module.exports.workFlowStepService = require('./workFlowStep.service');
+module.exports.approvalLogService = require('./approvalLog.service');

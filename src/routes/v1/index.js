@@ -11,6 +11,7 @@ const dashboardRoute = require('./dashboard.route');
 const formDataRoute = require('./formData.route');
 const submissionRoute = require('./submission.route');
 const workFlowStep = require('./workFlowStep.route');
+const approvalLog = require('./approvalLog.route');
 const docsRoute = require('./docs.route');
 const config = require('../../config/config');
 
@@ -64,6 +65,10 @@ const defaultRoutes = [
   {
     path: '/workFlowSteps',
     route: workFlowStep,
+  },
+  {
+    path: '/approvalLogs',
+    route: approvalLog,
   }
 ];
 
