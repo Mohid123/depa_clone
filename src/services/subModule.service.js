@@ -20,6 +20,10 @@ const createSubModule = async (SubModuleBody) => {
   const subModule = await SubModule.create(SubModuleBody);
   SubModuleBody.subModuleId = subModule._id;
 
+  if (SubModuleBody.submissionStatus) {
+    SubModuleBody.status = 3;
+  }
+
   const submission = await submissionService.createSubmission(SubModuleBody);
 
   return await {

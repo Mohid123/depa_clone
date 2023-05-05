@@ -13,6 +13,7 @@ const createSubModule = {
     viewSchema: Joi.array().items(Joi.object()),
     formIds: Joi.array().items(Joi.object().required()),
     steps: Joi.array().items(Joi.object().required()),
+    submissionStatus: Joi.number(),
   }),
 };
 

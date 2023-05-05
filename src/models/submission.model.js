@@ -17,6 +17,7 @@ const submissionSchema = mongoose.Schema(
       workFlowId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkFlow', required: true },
       workflowStatus: [{
         stepId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkflowStep' },
+        allUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
         activeUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
         approvedUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
         pendingUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],

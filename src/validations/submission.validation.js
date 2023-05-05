@@ -33,15 +33,14 @@ const updateSubmission = {
   }),
   body: Joi.object()
     .keys({
-      subModuleId: Joi.string().custom(objectId),
       summaryData: Joi.object(),
       formIds: Joi.array().items(Joi.string().custom(objectId)),
       formDataIds: Joi.array().items(Joi.string().custom(objectId)),
       submissionStatus: Joi.number().min(1).max(4),
       stepId: Joi.required().custom(objectId),
       userId: Joi.required().custom(objectId),
-      remarks: "I think it is good to go",
-      isApproved: true
+      remarks: Joi.string().required(),
+      isApproved: Joi.boolean().required()
     })
     .min(1),
 };
