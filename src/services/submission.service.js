@@ -80,10 +80,12 @@ const getSubmissionById = async (id) => {
   const statusArr = submission.workflowStatus;
 
   for (const stepStatus of statusArr) {
+    const allUsers = await User.find({ _id: { $in: stepStatus.allUserIds } });
     const activeUsers = await User.find({ _id: { $in: stepStatus.activeUserIds } });
     const approvedUsers = await User.find({ _id: { $in: stepStatus.approvedUserIds } });
     const pendingUsers = await User.find({ _id: { $in: stepStatus.pendingUserIds } });
 
+    stepStatus.allUserIds = allUsers;
     stepStatus.activeUserIds = activeUsers;
     stepStatus.approvedUserIds = approvedUsers;
     stepStatus.pendingUserIds = pendingUsers;
@@ -129,8 +131,8 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'WorkFlow Step not found');
   }
 
-  return stepActiveUserId;
-
+  const workFlowStatus = submission.workflowStatus;
+  return workFlowStatus;
   if (req.body.isApproved) {
     approvalStep.approvedUserIds.push(stepActiveUserId);
     approvalStep.activeUser = approvalStep.activeUser.filter(function (item) { return (item != req.body.userId); });
