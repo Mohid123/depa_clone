@@ -14,14 +14,12 @@ const createSubmission = async (submissionBody) => {
   submissionBody.workFlowId = workFlow._id;
   delete submissionBody.steps;
 
+  // Create workflow execution setup
   const workflowStatusArray = [];
   for (let index = 0; index < workFlow.stepIds.length; index++) {
     const element = workFlow.stepIds[index];
     let step = await WorkflowStep.findById(element);
     let aproverIdsArray = step.approverIds;
-    if (step.condition == 'or') {
-
-    }
     let stepStatusData = {
       stepId: element,
       allUserIds: aproverIdsArray,
@@ -36,12 +34,16 @@ const createSubmission = async (submissionBody) => {
     workflowStatusArray.push(stepStatusData);
   }
 
+  // Add default progress 0 in summary object
   submissionBody.summaryData = {
     progress: 0,
   }
 
+  // Assign workflowStatus to submissionBody
   submissionBody.workflowStatus = workflowStatusArray;
-  return Submission.create(submissionBody);
+
+  const submission = await Submission.create(submissionBody);
+  return getSubmissionById(submission._id);
 };
 
 /**
@@ -68,12 +70,12 @@ const querySubmissions = async (filter, options, getBody) => {
  * @returns {Promise<Submission>}
  */
 const getSubmissionById = async (id) => {
-  const submission = await Submission.findById(id).populate(['formIds', {
-    path: 'workFlowId',
+  const submission = await Submission.findById(id).populate(["subModuleId", "formIds", "formDataIds", {
+    path: "workFlowId",
     populate: {
-      path: 'stepIds',
+      path: "stepIds",
       populate: {
-        path: 'approverIds'
+        path: "approverIds"
       }
     }
   }]);
@@ -142,7 +144,6 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     approvalStep.activeUser = approvalStep.activeUserIds.filter(function (item) { return (item != updateBody.userId); });
 
     if (!approvalStep.pendingUserIds.length) {
-      approvalStep.status = "approved";
       for (let index = 0; index < workFlowStatus.length; index++) {
         const element = workFlowStatus[index];
         if (element.status == "pending") {
@@ -157,6 +158,8 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     if (approvalStep.type == "and") {
       approvalStep.activeUserIds.push(approvalStep.pendingUserIds[0]);
       approvalStep.pendingUserIds = approvalStep.pendingUserIds.filter(function (item) { return (item != approvalStep.pendingUserIds[0]); });
+    } else {
+      approvalStep.status = "approved";
     }
 
     const checkPendingStep = await workFlowStatus.filter(function (item) { return (item.status == "pending"); })[0]

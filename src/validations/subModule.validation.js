@@ -5,15 +5,15 @@ const createSubModule = {
   body: Joi.object().keys({
     moduleId: Joi.string().required().custom(objectId),
     companyId: Joi.string().required().custom(objectId),
-
-    code: Joi.string().required(),
     adminUsers: Joi.array().items(Joi.string().custom(objectId)),
     viewOnlyUsers: Joi.array().items(Joi.string().custom(objectId)),
-    summarySchema: Joi.array().items(Joi.object()),
-    viewSchema: Joi.array().items(Joi.object()),
     formIds: Joi.array().items(Joi.object().required()),
     steps: Joi.array().items(Joi.object().required()),
-    submissionStatus: Joi.number(),
+
+    summarySchema: Joi.array().items(Joi.object()),
+    viewSchema: Joi.array().items(Joi.object()),
+    code: Joi.string().required(),
+    url: Joi.string().required(),
   }),
 };
 
@@ -31,6 +31,12 @@ const getSubModule = {
   }),
 };
 
+const getSubModuleBySlug = {
+  params: Joi.object().keys({
+    subModuleSlug: Joi.string().required(),
+  }),
+};
+
 const updateSubModule = {
   params: Joi.object().keys({
     subModuleId: Joi.required().custom(objectId),
@@ -41,12 +47,18 @@ const updateSubModule = {
       companyId: Joi.string().custom(objectId),
 
       code: Joi.string(),
+      url: Joi.string(),
       adminUsers: Joi.array().items(Joi.string().custom(objectId)),
       viewOnlyUsers: Joi.array().items(Joi.string().custom(objectId)),
       summarySchema: Joi.array().items(Joi.object()),
       viewSchema: Joi.array().items(Joi.object()),
       formIds: Joi.array().items(Joi.object().required()),
-      steps: Joi.object().required(),
+      steps: Joi.array().items(Joi.object({
+        "id": Joi.string().custom(objectId),
+        "condition": Joi.string().valid("none", "and", "or").required(),
+        "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
+      }).required()),
+      workFlowId: Joi.custom(objectId),
     })
     .min(1),
 };
@@ -61,6 +73,7 @@ module.exports = {
   createSubModule,
   getSubModules,
   getSubModule,
+  getSubModuleBySlug,
   updateSubModule,
   deleteSubModule,
 };

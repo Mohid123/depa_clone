@@ -24,6 +24,15 @@ const getSubModule = catchAsync(async (req, res) => {
   res.send(subModule);
 });
 
+const getSubModuleBySlug = catchAsync(async (req, res) => {
+  const subModule = await subModuleService.getSubModuleBySlug(req.params.subModuleSlug);
+  if (!subModule) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'SubModule not found');
+  }
+  res.send(subModule);
+});
+
+
 const updateSubModule = catchAsync(async (req, res) => {
   const subModule = await subModuleService.updateSubModuleById(req.params.subModuleId, req.body);
   res.send(subModule);
@@ -38,6 +47,7 @@ module.exports = {
   createSubModule,
   getSubModules,
   getSubModule,
+  getSubModuleBySlug,
   updateSubModule,
   deleteSubModule,
 };

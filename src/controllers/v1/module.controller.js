@@ -24,6 +24,14 @@ const getModule = catchAsync(async (req, res) => {
   res.send(module);
 });
 
+const getModuleBySlug = catchAsync(async (req, res) => {
+  const module = await moduleService.getModuleBySlug(req.params.moduleSlug);
+  if (!module) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
+  }
+  res.send(module);
+});
+
 const updateModule = catchAsync(async (req, res) => {
   const module = await moduleService.updateModuleById(req.params.moduleId, req.body);
   res.send(module);
@@ -38,6 +46,7 @@ module.exports = {
   createModule,
   getModules,
   getModule,
+  getModuleBySlug,
   updateModule,
   deleteModule,
 };

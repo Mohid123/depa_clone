@@ -3,6 +3,7 @@ const { SubModule } = require('../models');
 const ApiError = require('../utils/ApiError');
 const formService = require('./form.service');
 const submissionService = require('./submission.service');
+const workFlowService = require('./workFlow.service');
 
 /**
  * Create a SubModule
@@ -15,21 +16,14 @@ const createSubModule = async (SubModuleBody) => {
   }
 
   const forms = await formService.createManyForms(SubModuleBody.formIds)
-  SubModuleBody.formIds = forms.map(({ _id }) => _id)
+  SubModuleBody.formIds = forms.map(({ _id }) => _id);
 
-  const subModule = await SubModule.create(SubModuleBody);
-  SubModuleBody.subModuleId = subModule._id;
+  const workFlow = await workFlowService.createWorkFlow(SubModuleBody);
+  SubModuleBody.workFlowId = workFlow;
 
-  if (SubModuleBody.submissionStatus) {
-    SubModuleBody.status = 3;
-  }
+  const subModule = await SubModule.create(SubModuleBody)
 
-  const submission = await submissionService.createSubmission(SubModuleBody);
-
-  return await {
-    'subModule': subModule,
-    'submission': submission
-  };
+  return getSubModuleById(subModule._id);
 };
 
 /**
@@ -52,16 +46,16 @@ const querySubModules = async (filter, options) => {
  * @returns {Promise<SubModule>}
  */
 const getSubModuleById = async (id) => {
-  return SubModule.findById(id);
+  return SubModule.findById(id).populate(["adminUsers", "viewOnlyUsers", "formIds", "moduleId", "companyId"]);
 };
 
 /**
- * Get SubModule by email
- * @param {string} email
+ * Get SubModule by slug
+ * @param {string} slug
  * @returns {Promise<SubModule>}
  */
-const getSubModuleByEmail = async (email) => {
-  return SubModule.findOne({ email });
+const getSubModuleBySlug = async (slug) => {
+  return SubModule.findOne({ 'code': slug });
 };
 
 /**
@@ -98,7 +92,7 @@ module.exports = {
   createSubModule,
   querySubModules,
   getSubModuleById,
-  getSubModuleByEmail,
+  getSubModuleBySlug,
   updateSubModuleById,
   deleteSubModuleById,
 };

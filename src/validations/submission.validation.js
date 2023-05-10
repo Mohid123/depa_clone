@@ -4,10 +4,8 @@ const { objectId } = require('./custom.validation');
 const createSubmission = {
   body: Joi.object().keys({
     subModuleId: Joi.required().custom(objectId),
-    summaryData: Joi.object(),
     formIds: Joi.array().items(Joi.required().custom(objectId)).required(),
-    formDataIds: Joi.array().items(Joi.string().custom(objectId)),
-    submissionStatus: Joi.number().min(1).max(4),
+    formDataIds: Joi.array().items(Joi.string().required().custom(objectId)).required(),
     steps: Joi.array().items(Joi.object().required()),
   }),
 };

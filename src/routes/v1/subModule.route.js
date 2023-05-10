@@ -12,6 +12,10 @@ router
     .get(auth(), validate(subModuleValidation.getSubModules), subModuleController.getSubModules);
 
 router
+    .route('/slug/:subModuleSlug')
+    .get(auth(), validate(subModuleValidation.getSubModuleBySlug), subModuleController.getSubModuleBySlug);
+
+router
     .route('/:subModuleId')
     .get(auth(), validate(subModuleValidation.getSubModule), subModuleController.getSubModule)
     .patch(auth(), validate(subModuleValidation.updateSubModule), subModuleController.updateSubModule)

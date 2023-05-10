@@ -52,6 +52,23 @@ const getModuleById = async (id) => {
 };
 
 /**
+ * Get Module by slug
+ * @param {String} slug
+ * @returns {Promise<Module>}
+ */
+const getModuleBySlug = async (slug) => {
+  return Module.findOne({ 'code': slug }).populate(['categoryId', {
+    path: 'workFlowId',
+    populate: {
+      path: 'stepIds',
+      populate: {
+        path: 'approverIds'
+      }
+    }
+  }]);
+};
+
+/**
  * Update Module by id
  * @param {ObjectId} ModuleId
  * @param {Object} updateBody
@@ -91,6 +108,7 @@ module.exports = {
   createModule,
   queryModules,
   getModuleById,
+  getModuleBySlug,
   updateModuleById,
   deleteModuleById,
 };

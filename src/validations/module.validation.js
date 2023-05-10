@@ -30,6 +30,12 @@ const getModule = {
   }),
 };
 
+const getModuleBySlug = {
+  params: Joi.object().keys({
+    moduleSlug: Joi.string().required(),
+  }),
+};
+
 const updateModule = {
   params: Joi.object().keys({
     moduleId: Joi.required().custom(objectId),
@@ -62,6 +68,7 @@ module.exports = {
   createModule,
   getModules,
   getModule,
+  getModuleBySlug,
   updateModule,
   deleteModule,
 };
