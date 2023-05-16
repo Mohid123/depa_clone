@@ -20,6 +20,7 @@ const createSubModule = {
 const getSubModules = {
   query: Joi.object().keys({
     moduleId: Joi.string().custom(objectId),
+    moduleSlug: Joi.string(),
     companyId: Joi.string().custom(objectId),
     code: Joi.string(),
   }),

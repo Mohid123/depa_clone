@@ -15,7 +15,14 @@ const getSubModulesByModule = {
   }),
 };
 
+const getSubModulesByModuleSlug = {
+  params: Joi.object().keys({
+    moduleSlug: Joi.string().required(),
+  }),
+};
+
 module.exports = {
   getModulesByCategory,
-  getSubModulesByModule
+  getSubModulesByModule,
+  getSubModulesByModuleSlug
 };

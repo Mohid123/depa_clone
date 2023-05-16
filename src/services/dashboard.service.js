@@ -51,8 +51,25 @@ const querySubModulesByModule = async (id) => {
   return SubModule.where('moduleId').equals(id).populate(['moduleId', 'companyId']);
 };
 
+/**
+ * Get Category by Slug
+ * @param {string} slug
+ * @returns {Promise<Module>}
+ */
+const querySubModulesByModuleSlug = async (slug) => {
+  const module = await Module.findOne({ 'code': slug });
+  if (!module) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
+  }
+
+  const subModules = await SubModule.find({ 'moduleId': module.id }).populate('moduleId');
+
+  return subModules;
+};
+
 
 module.exports = {
   queryModulesByCategory,
-  querySubModulesByModule
+  querySubModulesByModule,
+  querySubModulesByModuleSlug
 };
