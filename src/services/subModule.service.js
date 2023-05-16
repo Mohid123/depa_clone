@@ -46,7 +46,15 @@ const querySubModules = async (filter, options) => {
  * @returns {Promise<SubModule>}
  */
 const getSubModuleById = async (id) => {
-  return SubModule.findById(id).populate(["adminUsers", "viewOnlyUsers", "formIds", "moduleId", "companyId", "workFlowId"]);
+  return SubModule.findById(id).populate(["adminUsers", "viewOnlyUsers", "formIds", "moduleId", "companyId", {
+    path: 'workFlowId',
+    populate: {
+      path: 'stepIds',
+      populate: {
+        path: 'approverIds'
+      }
+    }
+  }]);
 };
 
 /**
