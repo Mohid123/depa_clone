@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
-const { Form } = require('../models');
+const { Form, SubModule } = require('../models');
 const ApiError = require('../utils/ApiError');
+const mongoose = require('mongoose');
 
 /**
  * Create a Form
@@ -12,7 +13,25 @@ const createForm = async (FormBody) => {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Form Key already taken');
   }
 
-  return Form.create(FormBody);
+  const form = await Form.create(FormBody);
+
+  if (FormBody.subModuleId) {
+    const subModule = await SubModule.findById(FormBody.subModuleId);
+    if (!subModule) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'SubModule not found');
+    }
+
+    let formIDs = subModule.formIds;
+
+    const objectId = mongoose.Types.ObjectId(form.id);
+    formIDs = [...formIDs, objectId];
+
+    subModule.formIds = formIDs;
+
+    await subModule.save();
+  }
+
+  return form;
 };
 
 /**

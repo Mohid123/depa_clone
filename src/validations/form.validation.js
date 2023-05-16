@@ -3,6 +3,7 @@ const { objectId } = require('./custom.validation');
 
 const createForm = {
   body: Joi.object().keys({
+    subModuleId: Joi.string().custom(objectId),
     title: Joi.string().required(),
     display: Joi.string().required(),
     key: Joi.string(),
