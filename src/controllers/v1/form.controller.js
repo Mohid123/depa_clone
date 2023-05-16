@@ -30,7 +30,7 @@ const updateForm = catchAsync(async (req, res) => {
 });
 
 const deleteForm = catchAsync(async (req, res) => {
-  await formService.deleteFormById(req.params.FormId);
+  await formService.deleteFormById(req.params.formId);
   res.status(httpStatus.NO_CONTENT).send();
 });
 

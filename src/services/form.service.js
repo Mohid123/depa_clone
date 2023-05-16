@@ -75,12 +75,12 @@ const getFormById = async (id) => {
 
 /**
  * Update Form by id
- * @param {ObjectId} FormId
+ * @param {ObjectId} formId
  * @param {Object} updateBody
  * @returns {Promise<Form>}
  */
-const updateFormById = async (FormId, updateBody) => {
-  const Form = await getFormById(FormId);
+const updateFormById = async (formId, updateBody) => {
+  const Form = await getFormById(formId);
   if (!Form) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Form not found');
   }
@@ -91,16 +91,16 @@ const updateFormById = async (FormId, updateBody) => {
 
 /**
  * Delete Form by id
- * @param {ObjectId} FormId
+ * @param {ObjectId} formId
  * @returns {Promise<Form>}
  */
-const deleteFormById = async (FormId) => {
-  const Form = await getFormById(FormId);
-  if (!Form) {
+const deleteFormById = async (formId) => {
+  const form = await getFormById(formId);
+  if (!form) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Form not found');
   }
-  await Form.remove();
-  return Form;
+  await form.remove();
+  return form;
 };
 
 module.exports = {
