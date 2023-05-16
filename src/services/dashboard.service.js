@@ -62,7 +62,7 @@ const querySubModulesByModuleSlug = async (slug) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
   }
 
-  const subModules = await SubModule.find({ 'moduleId': module.id }).populate('moduleId');
+  const subModules = await SubModule.find({ 'moduleId': module.id }).populate(['moduleId', 'companyId']);
 
   return subModules;
 };
