@@ -63,7 +63,15 @@ const getSubModuleById = async (id) => {
  * @returns {Promise<SubModule>}
  */
 const getSubModuleBySlug = async (slug) => {
-  return SubModule.findOne({ 'code': slug });
+  return SubModule.findOne({ 'code': slug }).populate(["formIds", {
+    path: 'workFlowId',
+    populate: {
+      path: 'stepIds',
+      populate: {
+        path: 'approverIds'
+      }
+    }
+  }]);
 };
 
 /**

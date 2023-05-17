@@ -25,7 +25,7 @@ const getSubModule = catchAsync(async (req, res) => {
 });
 
 const getSubModuleBySlug = catchAsync(async (req, res) => {
-  const subModule = await subModuleService.getSubModuleBySlug(req.params.subModuleSlug);
+  const subModule = (await subModuleService.getSubModuleBySlug(req.params.subModuleSlug));
   if (!subModule) {
     throw new ApiError(httpStatus.NOT_FOUND, 'SubModule not found');
   }
