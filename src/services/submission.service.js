@@ -2,6 +2,7 @@ const httpStatus = require('http-status');
 const { Submission, WorkflowStep, User, ApprovalLog } = require('../models');
 const ApiError = require('../utils/ApiError');
 const workFlowService = require('./workFlow.service');
+const formDataService = require('./formData.service');
 const approvalLogService = require('./approvalLog.service');
 
 /**
@@ -10,6 +11,14 @@ const approvalLogService = require('./approvalLog.service');
  * @returns {Promise<Submission>}
  */
 const createSubmission = async (submissionBody) => {
+  const { formDataIds } = submissionBody;
+
+  const formsData = await formDataService.createManyFormsData(formDataIds);
+  if (!formsData) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Forms Data is Invalid');
+  }
+  submissionBody.formDataIds = formsData.map(({ _id }) => _id);
+
   const workFlow = await workFlowService.createWorkFlow(submissionBody);
   submissionBody.workFlowId = workFlow._id;
   delete submissionBody.steps;

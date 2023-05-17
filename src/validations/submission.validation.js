@@ -5,7 +5,10 @@ const createSubmission = {
   body: Joi.object().keys({
     subModuleId: Joi.required().custom(objectId),
     formIds: Joi.array().items(Joi.required().custom(objectId)).required(),
-    formDataIds: Joi.array().items(Joi.string().required().custom(objectId)).required(),
+    formDataIds: Joi.array().items(Joi.object({
+      "formId": Joi.required().custom(objectId),
+      "data": Joi.object().required(),
+    }).required()).required(),
     steps: Joi.array().items(Joi.object().required()),
   }),
 };

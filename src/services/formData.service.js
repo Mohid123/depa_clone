@@ -12,6 +12,16 @@ const createFormData = async (FormDataBody) => {
 };
 
 /**
+ * Create a Form
+ * @param {Object} FormsDataBody
+ * @returns {Promise<Form>}
+ */
+const createManyFormsData = async (FormsDataBody) => {
+  const formsData = await FormData.insertMany(FormsDataBody);
+  return formsData;
+};
+
+/**
  * Query for FormsData
  * @param {Object} filter - Mongo filter
  * @param {Object} options - Query options
@@ -75,6 +85,7 @@ const deleteFormDataById = async (formDataId) => {
 
 module.exports = {
   createFormData,
+  createManyFormsData,
   queryFormsData,
   getFormDataById,
   getFormDataByEmail,
