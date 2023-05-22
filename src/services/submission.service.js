@@ -89,15 +89,11 @@ const getSubmissionById = async (id) => {
   const statusArr = submission.workflowStatus;
 
   for (const stepStatus of statusArr) {
-    const allUsers = await User.find({ _id: { $in: stepStatus.allUserIds } });
-    const activeUsers = await User.find({ _id: { $in: stepStatus.activeUserIds } });
-    const approvedUsers = await User.find({ _id: { $in: stepStatus.approvedUserIds } });
-    const pendingUsers = await User.find({ _id: { $in: stepStatus.pendingUserIds } });
+    const allUsers = await User.find({ _id: { $in: stepStatus.users } });
+    const approvedUsers = await User.find({ _id: { $in: stepStatus.approvedUsers } });
 
-    stepStatus.allUserIds = allUsers;
-    stepStatus.activeUserIds = activeUsers;
-    stepStatus.approvedUserIds = approvedUsers;
-    stepStatus.pendingUserIds = pendingUsers;
+    stepStatus.users = allUsers;
+    stepStatus.approvedUsers = approvedUsers;
   }
 
   const approvalLog = await ApprovalLog.find({ workFlowId: submission.workFlowId._id });
