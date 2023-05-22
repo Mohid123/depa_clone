@@ -30,7 +30,8 @@ const createSubmission = async (submissionBody) => {
     let step = await WorkflowStep.findById(element);
     let stepStatusData = {
       stepId: element,
-      users: step.approverIds,
+      allUsers: step.approverIds,
+      activeUsers: step.approverIds,
       approvedUserIds: [],
       condition: step.condition,
     };
@@ -89,14 +90,16 @@ const getSubmissionById = async (id) => {
   const statusArr = submission.workflowStatus;
 
   for (const stepStatus of statusArr) {
-    const allUsers = await User.find({ _id: { $in: stepStatus.users } });
+    const allUsers = await User.find({ _id: { $in: stepStatus.activeUsers } });
+    const activeUsers = await User.find({ _id: { $in: stepStatus.activeUsers } });
     const approvedUsers = await User.find({ _id: { $in: stepStatus.approvedUsers } });
 
-    stepStatus.users = allUsers;
+    stepStatus.allUsers = allUsers;
+    stepStatus.activeUsers = activeUsers;
     stepStatus.approvedUsers = approvedUsers;
   }
 
-  const approvalLog = await ApprovalLog.find({ workFlowId: submission.workFlowId._id });
+  const approvalLog = await ApprovalLog.find({ workFlowId: submission.workFlowId._id }).populate("performedById");
 
   // Convert the submission model instance to a plain JavaScript object
   const submissionObj = submission.toObject();
@@ -141,7 +144,7 @@ const nextWorkFlowStep = async (workFlowStatus, workFlowStatusStep) => {
 const approveStep = async (workFlowStatus, workFlowStatusStep, approvingUser) => {
   const step = workFlowStatusStep;
 
-  if (step.users.length === 1) {
+  if (step.activeUsers.length === 1) {
     // none condition step
     step.status = "approved";
     step.approvedUsers.push(approvingUser);
@@ -162,12 +165,12 @@ const approveStep = async (workFlowStatus, workFlowStatusStep, approvingUser) =>
     }
   } else if (step.condition === "and") {
     // and condition step
-    if (step.users.includes(approvingUser)) {
+    if (step.activeUsers.includes(approvingUser)) {
       // User is part of the current step
-      if (step.users.some(user => step.users.includes(user) && user !== approvingUser)) {
+      if (step.activeUsers.some(user => step.activeUsers.includes(user) && user !== approvingUser)) {
         // At least one pending approval in the step
         step.approvedUsers.push(approvingUser);
-        step.users.splice(step.users.indexOf(approvingUser), 1);
+        step.activeUsers.splice(step.activeUsers.indexOf(approvingUser), 1);
         // step.status = "approved";
       } else {
         // Last user performing approval in the step
@@ -217,8 +220,8 @@ const rejectStep = async (workFlowStatus, workFlowStatusStep, rejectingUser) => 
       step.status = "pending";
       previousStep.status = "inProgress";
       const index = previousStep.approvedUsers.pop();
-      if (!previousStep.users.includes(index)) {
-        previousStep.users.push(index);
+      if (!previousStep.activeUsers.includes(index)) {
+        previousStep.activeUsers.push(index);
       }
     }
   }
@@ -247,7 +250,7 @@ const rejectStep = async (workFlowStatus, workFlowStatusStep, rejectingUser) => 
   // }
   else if (step.condition === "and") {
     // and condition step
-    if (step.users.includes(rejectingUser)) {
+    if (step.activeUsers.includes(rejectingUser)) {
       // User is part of the current step
       if (step.approvedUsers.length === 0) {
         // No approved user in the step, set as pending
@@ -256,14 +259,14 @@ const rejectStep = async (workFlowStatus, workFlowStatusStep, rejectingUser) => 
           step.status = "pending";
           previousStep.status = "inProgress";
           const index = previousStep.approvedUsers.pop();
-          if (!previousStep.users.includes(index)) {
-            previousStep.users.push(index);
+          if (!previousStep.activeUsers.includes(index)) {
+            previousStep.activeUsers.push(index);
           }
         }
       } else {
         // Rollback to the same hierarchy or previous step
         const index = step.approvedUsers.pop();
-        step.users.push(index);
+        step.activeUsers.push(index);
         // if (index !== -1) {
         //   step.approvedUsers.splice(index);
         //   if (step.approvedUsers.length === 0) {
@@ -311,7 +314,7 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'Invalid Approval Step!');
   }
 
-  const stepActiveUserId = await approvalStep.users.filter(function (item) { return (item == updateBody.userId); })[0];
+  const stepActiveUserId = await approvalStep.activeUsers.filter(function (item) { return (item == updateBody.userId); })[0];
   if (!stepActiveUserId) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Invalid User!');
   }
