@@ -90,7 +90,7 @@ const getSubmissionById = async (id) => {
   const statusArr = submission.workflowStatus;
 
   for (const stepStatus of statusArr) {
-    const allUsers = await User.find({ _id: { $in: stepStatus.activeUsers } });
+    const allUsers = await User.find({ _id: { $in: stepStatus.allUsers } });
     const activeUsers = await User.find({ _id: { $in: stepStatus.activeUsers } });
     const approvedUsers = await User.find({ _id: { $in: stepStatus.approvedUsers } });
 
@@ -144,7 +144,7 @@ const nextWorkFlowStep = async (workFlowStatus, workFlowStatusStep) => {
 const approveStep = async (workFlowStatus, workFlowStatusStep, approvingUser) => {
   const step = workFlowStatusStep;
 
-  if (step.activeUsers.length === 1) {
+  if (step.condition === "none" || step.condition === "or") {
     // none condition step
     step.status = "approved";
     step.approvedUsers.push(approvingUser);
@@ -152,18 +152,20 @@ const approveStep = async (workFlowStatus, workFlowStatusStep, approvingUser) =>
     if (nextStep) {
       nextStep.status = "inProgress";
     }
-  } else if (step.condition === "or") {
-    // or condition step
-    if (step.approvedUsers.length === 0) {
-      // First approval in the step
-      step.approvedUsers.push(approvingUser);
-      step.status = "approved";
-      const nextStep = await nextWorkFlowStep(workFlowStatus, workFlowStatusStep);
-      if (nextStep) {
-        nextStep.status = "inProgress";
-      }
-    }
-  } else if (step.condition === "and") {
+  }
+  // else if (step.condition === "or") {
+  //   // or condition step
+  //   if (step.approvedUsers.length === 0) {
+  //     // First approval in the step
+  //     step.approvedUsers.push(approvingUser);
+  //     step.status = "approved";
+  //     const nextStep = await nextWorkFlowStep(workFlowStatus, workFlowStatusStep);
+  //     if (nextStep) {
+  //       nextStep.status = "inProgress";
+  //     }
+  //   }
+  // }
+  else if (step.condition === "and") {
     // and condition step
     if (step.activeUsers.includes(approvingUser)) {
       // User is part of the current step
