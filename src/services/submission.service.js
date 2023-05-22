@@ -28,13 +28,10 @@ const createSubmission = async (submissionBody) => {
   for (let index = 0; index < workFlow.stepIds.length; index++) {
     const element = workFlow.stepIds[index];
     let step = await WorkflowStep.findById(element);
-    let aproverIdsArray = step.approverIds;
     let stepStatusData = {
       stepId: element,
-      allUserIds: aproverIdsArray,
-      activeUserIds: (step.condition == 'and') ? [aproverIdsArray[0]] : aproverIdsArray,
+      users: step.approverIds,
       approvedUserIds: [],
-      pendingUserIds: (step.condition == 'and') ? aproverIdsArray.slice(1) : [],
       condition: step.condition,
     };
 
@@ -124,6 +121,180 @@ const getSubmissionByEmail = async (email) => {
 };
 
 /**
+ * Find next workflow step
+ * @param {Object} workFlowStatus workFlowStatus
+ * @param {Object} workFlowStatusStep workFlowStatus
+ */
+const nextWorkFlowStep = async (workFlowStatus, workFlowStatusStep) => {
+  const currentIndex = workFlowStatus.findIndex(obj => obj.stepId == workFlowStatusStep.stepId);
+
+  let nextObject = false;
+  if (currentIndex !== -1 && currentIndex < workFlowStatus.length - 1) {
+    nextObject = workFlowStatus[currentIndex + 1];
+  }
+
+  return nextObject;
+};
+
+/**
+ * Function to perform approval action
+ * @param {Object} workFlowStatus workFlowStatus
+ * @param {Object} workFlowStatusStep workFlowStatus
+ * @param {Object} approvingUser
+ */
+const approveStep = async (workFlowStatus, workFlowStatusStep, approvingUser) => {
+  const step = workFlowStatusStep;
+
+  if (step.users.length === 1) {
+    // none condition step
+    step.status = "approved";
+    step.approvedUsers.push(approvingUser);
+    const nextStep = await nextWorkFlowStep(workFlowStatus, workFlowStatusStep);
+    if (nextStep) {
+      nextStep.status = "inProgress";
+    }
+  } else if (step.condition === "or") {
+    // or condition step
+    if (step.approvedUsers.length === 0) {
+      // First approval in the step
+      step.approvedUsers.push(approvingUser);
+      step.status = "approved";
+      const nextStep = await nextWorkFlowStep(workFlowStatus, workFlowStatusStep);
+      if (nextStep) {
+        nextStep.status = "inProgress";
+      }
+    }
+  } else if (step.condition === "and") {
+    // and condition step
+    if (step.users.includes(approvingUser)) {
+      // User is part of the current step
+      if (step.users.some(user => step.users.includes(user) && user !== approvingUser)) {
+        // At least one pending approval in the step
+        step.approvedUsers.push(approvingUser);
+        step.users.splice(step.users.indexOf(approvingUser), 1);
+        // step.status = "approved";
+      } else {
+        // Last user performing approval in the step
+        step.approvedUsers.push(approvingUser);
+        step.status = "approved";
+        const nextStep = workflow.find(step => step.stepId > stepId);
+        if (nextStep) {
+          nextStep.status = "inProgress";
+        }
+      }
+    }
+  }
+
+  return workFlowStatus;
+}
+
+/**
+ * Find previous workflow step
+ * @param {Object} workFlowStatus workFlowStatus
+ * @param {Object} workFlowStatusStep workFlowStatus
+ */
+const previousWorkFlowStep = async (workFlowStatus, workFlowStatusStep) => {
+  const currentIndex = workFlowStatus.findIndex(obj => obj.stepId === workFlowStatusStep.stepId);
+
+  let previousObject = false;
+
+  if (currentIndex !== -1 && currentIndex > 0) {
+    previousObject = workFlowStatus[currentIndex - 1];
+  }
+
+  return previousObject
+};
+
+/**
+ * Function to perform rejection action
+ * @param {Object} workFlowStatus workFlowStatus
+ * @param {Object} workFlowStatusStep workFlowStatus
+ * @param {Object} rejectingUser
+ */
+const rejectStep = async (workFlowStatus, workFlowStatusStep, rejectingUser) => {
+  const step = workFlowStatusStep;
+
+  if (step.condition === "none" || step.condition === "or") {
+    // none condition step
+    const previousStep = await previousWorkFlowStep(workFlowStatus, workFlowStatusStep);
+    if (previousStep) {
+      step.status = "pending";
+      previousStep.status = "inProgress";
+      const index = previousStep.approvedUsers.pop();
+      if (!previousStep.users.includes(index)) {
+        previousStep.users.push(index);
+      }
+    }
+  }
+  // else if (step.condition === "or") {
+  //   // or condition step
+  //   if (step.approvedUsers.length === 0) {
+  //     // First rejection in the step
+  //     step.status = "pending";
+  //     const previousStep = await previousWorkFlowStep(workFlowStatus, workFlowStatusStep)
+  //     if (previousStep) {
+  //       previousStep.status = "inProgress";
+  //     }
+  //   } else {
+  //     // Rollback to the same hierarchy
+  //     const index = step.approvedUsers.indexOf(rejectingUser);
+  //     if (index !== -1) {
+  //       step.approvedUsers.splice(index);
+  //       step.status = "pending";
+  //       const previousStep = await previousWorkFlowStep(workFlowStatus, workFlowStatusStep)
+  //       if (previousStep) {
+  //         previousStep.status = "inProgress";
+  //         previousStep.approvedUsers.push(rejectingUser);
+  //       }
+  //     }
+  //   }
+  // }
+  else if (step.condition === "and") {
+    // and condition step
+    if (step.users.includes(rejectingUser)) {
+      // User is part of the current step
+      if (step.approvedUsers.length === 0) {
+        // No approved user in the step, set as pending
+        const previousStep = await previousWorkFlowStep(workFlowStatus, workFlowStatusStep)
+        if (previousStep) {
+          step.status = "pending";
+          previousStep.status = "inProgress";
+          const index = previousStep.approvedUsers.pop();
+          if (!previousStep.users.includes(index)) {
+            previousStep.users.push(index);
+          }
+        }
+      } else {
+        // Rollback to the same hierarchy or previous step
+        const index = step.approvedUsers.pop();
+        step.users.push(index);
+        // if (index !== -1) {
+        //   step.approvedUsers.splice(index);
+        //   if (step.approvedUsers.length === 0) {
+        //     // Rollback to the previous step
+        //     const previousStep = await previousWorkFlowStep(workFlowStatus, workFlowStatusStep)
+        //     if (previousStep) {
+        //       step.status = "pending";
+        //       previousStep.status = "inProgress";
+        //       previousStep.approvedUsers.push(rejectingUser);
+        //     }
+        //   } else {
+        //     // Rollback to the same step
+        //     step.status = "approved";
+        //     const nextStep = workflow.find(step => step.stepId > stepId);
+        //     if (nextStep) {
+        //       nextStep.status = "inProgress";
+        //     }
+        //   }
+        // }
+      }
+    }
+  }
+
+  return workFlowStatus;
+}
+
+/**
  * Update Submission by id
  * @param {ObjectId} submissionId
  * @param {Object} updateBody
@@ -139,75 +310,25 @@ const updateSubmissionById = async (submissionId, updateBody) => {
   const workFlowStatus = submission.workflowStatus;
 
   const approvalStep = await workFlowStatus.filter(function (item) { return (item.stepId == updateBody.stepId); })[0];
+
   if (!approvalStep || approvalStep.status != "inProgress") {
     throw new ApiError(httpStatus.NOT_FOUND, 'Invalid Approval Step!');
   }
 
-  const stepActiveUserId = await approvalStep.activeUserIds.filter(function (item) { return (item == updateBody.userId); })[0];
+  const stepActiveUserId = await approvalStep.users.filter(function (item) { return (item == updateBody.userId); })[0];
   if (!stepActiveUserId) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Invalid User!');
   }
 
   if (updateBody.isApproved) {
-    approvalStep.approvedUserIds.push(stepActiveUserId);
-    approvalStep.activeUser = approvalStep.activeUserIds.filter(function (item) { return (item != updateBody.userId); });
+    const updatedworkFlowStatus = await approveStep(workFlowStatus, approvalStep, stepActiveUserId);
 
-    if (!approvalStep.pendingUserIds.length) {
-      for (let index = 0; index < workFlowStatus.length; index++) {
-        const element = workFlowStatus[index];
-        if (element.status == "pending") {
-          element.activeUserIds.push(element.pendingUserIds[0]);
-          element.pendingUserIds = element.pendingUserIds.filter(function (item) { return (item != element.pendingUserIds[0]); });
-          element.status = "inProgress";
-          break;
-        }
-      }
-    }
-
-    if (approvalStep.type == "and") {
-      approvalStep.activeUserIds.push(approvalStep.pendingUserIds[0]);
-      approvalStep.pendingUserIds = approvalStep.pendingUserIds.filter(function (item) { return (item != approvalStep.pendingUserIds[0]); });
-    } else {
-      approvalStep.status = "approved";
-    }
-
-    const checkPendingStep = await workFlowStatus.filter(function (item) { return (item.status == "pending"); })[0]
-    if (!checkPendingStep) {
-      submission.submissionStatus = 3;
-    }
+    // Update submission status when all steps are approved
+    const allStepsApproved = updatedworkFlowStatus.every(step => step.status === "approved");
+    updateBody.submissionStatus = allStepsApproved ? 3 : 2;
   } else {
-    // Get the first object in the array that has approvedUserIds
-    const approvedObject = workFlowStatus.find((obj) => obj.approvedUserIds.length > 0);
-
-    if (approvedObject) {
-      // Move activeUserIds to pendingUserIds
-      const activeUserIds = workFlowStatus[0].activeUserIds;
-      workFlowStatus[0].pendingUserIds.push(...activeUserIds);
-      workFlowStatus[0].activeUserIds = [];
-
-      // Pop the last approvedUserId and set it to activeUserIds
-      const lastApprovedUserId = approvedObject.approvedUserIds.pop();
-      workFlowStatus[0].activeUserIds.push(lastApprovedUserId);
-
-      // If approvedUserIds is now empty, remove the object
-      if (approvedObject.approvedUserIds.length === 0) {
-        const index = workFlowStatus.indexOf(approvedObject);
-        workFlowStatus.splice(index, 1);
-      }
-    } else {
-      // Move activeUserIds to pendingUserIds
-      const activeUserIds = workFlowStatus[0].activeUserIds;
-      workFlowStatus[0].pendingUserIds.push(...activeUserIds);
-      workFlowStatus[0].activeUserIds = [];
-
-      // If previous object exists, change its status to in progress
-      if (workFlowStatus.length > 1) {
-        workFlowStatus[workFlowStatus.length - 2].status = 'inProgress';
-      }
-
-      // Change current object status to pending
-      workFlowStatus[0].status = 'pending';
-    }
+    await rejectStep(workFlowStatus, approvalStep, stepActiveUserId);
+    updateBody.submissionStatus = 2;
   }
   // res.status(httpStatus.OK).send(approvalStep.pendingUserIds);
 

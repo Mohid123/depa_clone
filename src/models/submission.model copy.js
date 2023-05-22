@@ -17,9 +17,11 @@ const submissionSchema = mongoose.Schema(
       workFlowId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkFlow', required: true },
       workflowStatus: [{
         stepId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkflowStep' },
+        allUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+        activeUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+        approvedUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+        pendingUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
         condition: { type: String, enum: ["none", "and", "or"], default: "none" },
-        users: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        approvedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
         status: { type: String, enum: ["inProgress", "pending", "approved", "rejected"], default: "pending" },
       }],
     }
