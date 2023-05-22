@@ -178,7 +178,7 @@ const approveStep = async (workFlowStatus, workFlowStatusStep, approvingUser) =>
         // Last user performing approval in the step
         step.approvedUsers.push(approvingUser);
         step.status = "approved";
-        const nextStep = workflow.find(step => step.stepId > stepId);
+        const nextStep = await nextWorkFlowStep(workFlowStatus, workFlowStatusStep);
         if (nextStep) {
           nextStep.status = "inProgress";
         }
