@@ -56,10 +56,19 @@ const updateWorkFlowById = async (workFlowId, updateBody) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'WorkFlow not found');
   }
 
-  // const workFlowStepIdsArr = workFlow.stepIds.map(({ _id }) => _id);
-  // const updateBodyStepIdsArr = updateBody.steps.map(({ id }) => id).filter((val) => val != null);
+  // Check for the diff in workflow steps and body steps
+  // delete the difference
+  const workFlowStepIdsArr = workFlow.stepIds.map(({ _id }) => String(_id));
+  const updateBodyStepIdsArr = updateBody.steps.map(({ id }) => id);
+  workFlowStepIdsArr.forEach(async element => {
+    if (!updateBodyStepIdsArr.includes(element)) {
+      await workFlowStepService.deleteWorkflowStepById(element);
+    }
+  });
 
-  let workflowStep = null; // initialize here
+  // check of the steps edit 
+  // also add new steps
+  let workflowStep = null;
   for (const step of updateBody.steps) {
     if (step.id) {
       const stepId = step.id;

@@ -29,6 +29,34 @@ categorySchema.statics.isNameTaken = async function (name, excludeCategoryId) {
 };
 
 /**
+ * Custom method to perform soft delete
+ * 
+ * @returns {Promise<boolean>}
+ */
+categorySchema.methods.softDelete = function () {
+  this.isDeleted = true;
+  return this.save();
+};
+
+/**
+ * Method to remove documents from the trash
+ * 
+ * @returns {Promise<boolean>}
+ */
+categorySchema.statics.removeFromTrash = function () {
+  return this.deleteMany({ isDeleted: true });
+};
+
+/**
+ * Static method to retrieve only non-Deleted documents
+ * 
+ * @returns {Promise<boolean>}
+ */
+categorySchema.statics.findWithoutTrashed = function () {
+  return this.find({ isDeleted: false });
+};
+
+/**
  * @typedef Category
  */
 const Category = mongoose.model('Category', categorySchema);

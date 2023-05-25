@@ -69,7 +69,7 @@ const deleteCategoryById = async (categoryId) => {
   if (!category) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Category not found');
   }
-  await category.remove();
+  await category.softDelete();
   return category;
 };
 
