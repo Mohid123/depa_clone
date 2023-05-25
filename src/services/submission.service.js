@@ -65,10 +65,26 @@ const createSubmission = async (submissionBody) => {
  */
 const querySubmissions = async (filter, options, getBody) => {
   if (filter.subModuleId) {
-    return await Submission.find(filter);
+    return await Submission.find(filter).populate(["subModuleId", "formIds", "formDataIds", {
+      path: "workFlowId",
+      populate: {
+        path: "stepIds",
+        populate: {
+          path: "approverIds"
+        }
+      }
+    }]);
   }
 
-  const submissions = await Submission.paginate(filter, options);
+  const submissions = await Submission.find().populate(["subModuleId", "formIds", "formDataIds", {
+    path: "workFlowId",
+    populate: {
+      path: "stepIds",
+      populate: {
+        path: "approverIds"
+      }
+    }
+  }]);
   return submissions;
 };
 
