@@ -5,15 +5,7 @@ const logger = require('./../config/logger');
 const bcrypt = require('bcryptjs');
 
 const { User } = require('./../models/index');
-// const { WorkFlow } = require('./../models/index');
-// const { Module } = require('./../models/index');
-// const { ApprovalLog } = require('./../models/index');
-// const { ApprovalStepStatus } = require('./../models/index');
-// const { Email } = require('./../models/index');
-// const { Form } = require('./../models/index');
-// const { ModuleSummary } = require('./../models/index');
-// const { SubModule } = require('./../models/index');
-// const { WorkflowStep } = require('./../models/index');
+const { formService } = require('../services');
 
 async function password(password) {
     const pass = await bcrypt.hash(password, 8);
@@ -94,403 +86,304 @@ mongoose.connect(config.mongoose.url, config.mongoose.options)
         // Function call
         const users = await User.insertMany(userData);
 
+        // Default forms data
+        const formsData = [
+            {
+                "title": "Login Form",
+                "components": [
+                    {
+                        "label": "Email",
+                        "tableView": true,
+                        "validate": {
+                            "required": true,
+                            "customMessage": "A valid email is required"
+                        },
+                        "key": "email",
+                        "type": "email",
+                        "input": true
+                    },
+                    {
+                        "label": "Password",
+                        "showCharCount": true,
+                        "tableView": false,
+                        "validate": {
+                            "required": true,
+                            "minLength": 8
+                        },
+                        "key": "password",
+                        "type": "password",
+                        "input": true,
+                        "protected": true
+                    },
+                    {
+                        "label": "Login",
+                        "showValidations": false,
+                        "disableOnInvalid": true,
+                        "tableView": false,
+                        "key": "submit",
+                        "type": "button",
+                        "input": true,
+                        "saveOnEnter": true
+                    }
+                ],
+                "display": "default",
+                "key": "login_form",
+            },
+            {
+                "title": "Login Form Active Directory",
+                "components": [
+                    {
+                        "label": "Username",
+                        "tableView": true,
+                        "validate": {
+                            "required": true,
+                            "customMessage": "Username is required"
+                        },
+                        "key": "username",
+                        "type": "textfield",
+                        "input": true
+                    },
+                    {
+                        "label": "Password",
+                        "showCharCount": true,
+                        "tableView": false,
+                        "validate": {
+                            "required": true,
+                            "minLength": 8
+                        },
+                        "key": "password",
+                        "type": "password",
+                        "input": true,
+                        "protected": true
+                    },
+                    {
+                        "label": "Login",
+                        "showValidations": false,
+                        "disableOnInvalid": true,
+                        "tableView": false,
+                        "key": "submit",
+                        "type": "button",
+                        "input": true,
+                        "saveOnEnter": true
+                    }
+                ],
+                "display": "default",
+                "key": "login_form_ac",
+            },
+            {
+                "title": "Module details form",
+                "components": [
+                    {
+                        "label": "Module Title",
+                        "tableView": true,
+                        "validate": {
+                            "required": true
+                        },
+                        "key": "moduleTitle",
+                        "type": "textfield",
+                        "input": true
+                    },
+                    {
+                        "label": "Module URL",
+                        "tableView": true,
+                        "validate": {
+                            "required": true
+                        },
+                        "key": "moduleUrl",
+                        "type": "url",
+                        "input": true
+                    },
+                    {
+                        "label": "Description",
+                        "autoExpand": false,
+                        "tableView": true,
+                        "validate": {
+                            "required": true
+                        },
+                        "key": "description",
+                        "type": "textarea",
+                        "input": true
+                    },
+                    {
+                        "label": "Code",
+                        "tableView": true,
+                        "validate": {
+                            "required": true
+                        },
+                        "key": "code",
+                        "type": "textfield",
+                        "input": true
+                    },
+                    {
+                        "label": "Proceed to Default Workflow",
+                        "showValidations": false,
+                        "customClass": "flex justify-end",
+                        "tableView": false,
+                        "key": "proceedToDefaultWorkflow",
+                        "type": "button",
+                        "input": true,
+                        "saveOnEnter": false,
+                        "disableOnInvalid": true
+                    }
+                ],
+                "display": "default",
+                "key": "module_details_form",
+            },
+            {
+                "title": "Workflow Form",
+                "components": [
+                    {
+                        "label": "Add Default Workflow",
+                        "columns": [
+                            {
+                                "components": [
+                                    {
+                                        "type": "select",
+                                        "label": "Approvers",
+                                        "key": "approvers",
+                                        "data": {
+                                            "values": [
+                                                {
+                                                    "value": "raindropsOnRoses",
+                                                    "label": "Raindrops on roses"
+                                                },
+                                                {
+                                                    "value": "whiskersOnKittens",
+                                                    "label": "Whiskers on Kittens"
+                                                },
+                                                {
+                                                    "value": "brightCopperKettles",
+                                                    "label": "Bright Copper Kettles"
+                                                },
+                                                {
+                                                    "value": "warmWoolenMittens",
+                                                    "label": "Warm Woolen Mittens"
+                                                }
+                                            ]
+                                        },
+                                        "dataSrc": "values",
+                                        "template": "<span>{{ item.label }}</span>",
+                                        "multiple": true,
+                                        "input": true
+                                    }
+                                ],
+                                "width": 6,
+                                "offset": 0,
+                                "push": 0,
+                                "pull": 0,
+                                "size": "md",
+                                "currentWidth": 6
+                            },
+                            {
+                                "components": [
+                                    {
+                                        "label": "Condition",
+                                        "widget": "html5",
+                                        "tableView": true,
+                                        "data": {
+                                            "values": [
+                                                {
+                                                    "label": "OR",
+                                                    "value": "or"
+                                                },
+                                                {
+                                                    "label": "AND",
+                                                    "value": "and"
+                                                },
+                                                {
+                                                    "label": "ANY",
+                                                    "value": "any"
+                                                }
+                                            ]
+                                        },
+                                        "key": "condition",
+                                        "type": "select",
+                                        "input": true
+                                    }
+                                ],
+                                "width": 6,
+                                "offset": 0,
+                                "push": 0,
+                                "pull": 0,
+                                "size": "md",
+                                "currentWidth": 6
+                            }
+                        ],
+                        "key": "addDefaultWorkflow",
+                        "type": "columns",
+                        "input": false,
+                        "tableView": false
+                    },
+                    {
+                        "label": "Proceed to Module Graphics",
+                        "showValidations": false,
+                        "customClass": "flex justify-end",
+                        "tableView": false,
+                        "key": "proceedToModuleGraphics",
+                        "type": "button",
+                        "disableOnInvalid": true,
+                        "saveOnEnter": false,
+                        "input": true
+                    }
+                ],
+                "display": "default",
+                "key": "workflow_form",
+            },
+            {
+                "title": "Submodule Form",
+                "components": [
+                    {
+                        "label": "Submodule Url",
+                        "tableView": true,
+                        "validate": {
+                            "required": true
+                        },
+                        "key": "submoduleUrl",
+                        "type": "url",
+                        "input": true
+                    },
+                    {
+                        "label": "Company Name",
+                        "widget": "html5",
+                        "tableView": true,
+                        "validate": {
+                            "required": true
+                        },
+                        "key": "companyName",
+                        "type": "select",
+                        "data": {
+                            "values": []
+                        },
+                        "input": true
+                    },
+                    {
+                        "label": "Code",
+                        "tableView": true,
+                        "validate": {
+                            "required": true
+                        },
+                        "key": "code",
+                        "type": "textfield",
+                        "input": true
+                    },
+                ],
+                "display": "default",
+                "key": "submodule_form",
+            }
+        ];
+
+        // Function call
+        const forms = await formService.createManyForms(formsData);
+
         // Check if all documents were inserted successfully
-        if (users.length === userData.length) {
+        if (users.length === userData.length
+            && forms.length === formsData.length
+        ) {
             console.log("Data seeded successfully");
             console.log(users);
+            console.log(forms);
             process.exit(); // Exit the seeder process
         } else {
             console.log("Error seeding data");
         }
-
-        /////////////////////////////////////////////////////////////////////////////////////////////
-        // let usersIdsArray = users.map(({ _id }) => _id);
-        // let stepOneusersIdsArray = [usersIdsArray[1], usersIdsArray[2], usersIdsArray[3]]
-        // let stepTwousersIdsArray = [usersIdsArray[4]]
-        // let stepThreeusersIdsArray = [usersIdsArray[5]]
-        // let stepFourusersIdsArray = [usersIdsArray[6]]
-        // let stepFiveusersIdsArray = [usersIdsArray[7], usersIdsArray[8]]
-
-        // // Workflow Step Data
-        // let workflowStepData = [
-        //     { type: "or", approverIds: stepOneusersIdsArray },
-        //     { type: "none", approverIds: stepTwousersIdsArray },
-        //     { type: "none", approverIds: stepThreeusersIdsArray },
-        //     { type: "none", approverIds: stepFourusersIdsArray },
-        //     { type: "and", approverIds: stepFiveusersIdsArray }
-        // ];
-
-        // const workflowStep = await new WorkflowStep(workflowStepData);
-        // workflowStep.save(function (err, result) {
-        //     if (err) {
-        //         console.log(err);
-        //     }
-        //     else {
-        //         console.log(result)
-        //     }
-        // });
-
-        // // Workflow Data
-        // let workFlowSetpsIdsArray = workflowStep.map(({ _id }) => _id);
-
-        // let workFlowData = {
-        //     name: "WorkFlow A",    
-        //     anyUserIds: [],
-        //     defaultUsers: {},
-        //     finalUsers: {},
-        //     stepIds: workFlowSetpsIdsArray
-        // };
-
-        // const workFlow = await new WorkFlow(workFlowData);
-        // workFlow.save(function (err, result) {
-        //     if (err) {
-        //         console.log(err);
-        //     }
-        //     else {
-        //         console.log(result)
-        //     }
-        // });
-
-        // //////// Modules and Submodules Data
-        // ///////////////////////////////////////////////////////////////////////////////////////
-
-        // let approvalStepData =  [
-        //     {
-        //         stepId: workFlowSetpsIdsArray[0],
-        //         activeUser: [stepOneusersIdsArray],
-        //         type: "or",
-        //         isActive: true,
-        //     },
-        //     {
-        //         stepId: workFlowSetpsIdsArray[1],
-        //         pendingUserIds: [stepTwousersIdsArray],
-        //     },
-        //     {
-        //         stepId: workFlowSetpsIdsArray[2],
-        //         pendingUserIds: [stepThreeusersIdsArray],
-        //     },
-        //     {
-        //         stepId: workFlowSetpsIdsArray[3],
-        //         pendingUserIds: [stepFourusersIdsArray],
-        //     },
-        //     {
-        //         stepId: workFlowSetpsIdsArray[4],
-        //         pendingUserIds: [stepFiveusersIdsArray],
-        //         type: "and",
-        //     }
-        // ];
-
-        // const approvalStep = await new ApprovalStep(approvalStepDataData);
-        // approvalStep.save(function (err, result) {
-        //     if (err) {
-        //         console.log(err);
-        //     }
-        //     else {
-        //         console.log(result)
-        //     }
-        // });
-
-        // // Workflow Data
-        // let approvalStepsIdsArray = approvalStep.map(({ _id }) => _id);
-
-        // let subModulesData = {
-        //     section: "Section A",
-        //     WorkFlow: {
-        //         name: "WorkFlow A",
-        //         anyUserIds: [],
-        //         defaultUsers: {},
-        //         finalUsers: {},
-        //         stepIds: workFlowSetpsIdsArray
-        //     },
-        //     approvalStepStatus: [approvalStepsIdsArray],
-        //     approvalLog: [],
-        //     form: [{
-        //         title: "Form A",
-        //         key: "Form-A",
-        //         schema: {
-        //             "components": [
-        //                 {
-        //                     "label": "Email",
-        //                     "labelPosition": "top",
-        //                     "placeholder": "",
-        //                     "description": "",
-        //                     "tooltip": "",
-        //                     "prefix": "",
-        //                     "suffix": "",
-        //                     "widget": {
-        //                         "type": "input"
-        //                     },
-        //                     "inputMask": "",
-        //                     "displayMask": "",
-        //                     "allowMultipleMasks": false,
-        //                     "customClass": "",
-        //                     "tabindex": "",
-        //                     "autocomplete": "",
-        //                     "hidden": false,
-        //                     "hideLabel": false,
-        //                     "showWordCount": false,
-        //                     "showCharCount": false,
-        //                     "mask": false,
-        //                     "autofocus": false,
-        //                     "spellcheck": true,
-        //                     "disabled": false,
-        //                     "tableView": true,
-        //                     "modalEdit": false,
-        //                     "multiple": false,
-        //                     "defaultValue": "",
-        //                     "persistent": true,
-        //                     "inputFormat": "plain",
-        //                     "protected": false,
-        //                     "dbIndex": false,
-        //                     "case": "",
-        //                     "truncateMultipleSpaces": false,
-        //                     "encrypted": false,
-        //                     "redrawOn": "",
-        //                     "clearOnHide": true,
-        //                     "customDefaultValue": "",
-        //                     "calculateValue": "",
-        //                     "calculateServer": false,
-        //                     "allowCalculateOverride": false,
-        //                     "validateOn": "change",
-        //                     "validate": {
-        //                         "required": false,
-        //                         "pattern": "",
-        //                         "customMessage": "",
-        //                         "custom": "",
-        //                         "customPrivate": false,
-        //                         "json": "",
-        //                         "minLength": "",
-        //                         "maxLength": "",
-        //                         "strictDateValidation": false,
-        //                         "multiple": false,
-        //                         "unique": false
-        //                     },
-        //                     "unique": false,
-        //                     "errorLabel": "",
-        //                     "errors": "",
-        //                     "key": "email",
-        //                     "tags": [],
-        //                     "properties": {},
-        //                     "conditional": {
-        //                         "show": null,
-        //                         "when": null,
-        //                         "eq": "",
-        //                         "json": ""
-        //                     },
-        //                     "customConditional": "",
-        //                     "logic": [],
-        //                     "attributes": {},
-        //                     "overlay": {
-        //                         "style": "",
-        //                         "page": "",
-        //                         "left": "",
-        //                         "top": "",
-        //                         "width": "",
-        //                         "height": ""
-        //                     },
-        //                     "type": "textfield",
-        //                     "input": true,
-        //                     "refreshOn": "",
-        //                     "dataGridLabel": false,
-        //                     "addons": [],
-        //                     "inputType": "text",
-        //                     "id": "e6kr2sp"
-        //                 }
-        //             ]
-        //         },
-        //     }]
-        // };
-
-        // let moduleData = {
-        //     moduleCode: "Module-A",
-        //     companyCode: "Company-XYZ",
-        //     adminUsers: usersIdsArray,
-        //     defaultWorkFlow: workFlow._id,
-        //     WorkFlow: {
-        //         name: "First Sub Module",
-        //         anyUserIds: [],
-        //         defaultUsers: {},
-        //         finalUsers: {},
-        //         stepIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'WorkflowStep' }]
-        //     },
-        //     subModules: [
-        //         {
-        //             stepId: { type: String, ref: 'WorkflowStep', required: true },
-        //             activeUser: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        //             approvedUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        //             pendingUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        //             type: { type: String, enum: ["none", "and", "or"], default: "none" },
-        //             status: { type: String, enum: ['pending', 'approved', 'rejected'], required: true, default: 'pending' },
-        //             isActive: { type: Boolean, default: false },
-        //         },
-        //         {
-        //             stepId: { type: String, ref: 'WorkflowStep', required: true },
-        //             activeUser: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        //             approvedUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        //             pendingUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        //             type: { type: String, enum: ["none", "and", "or"], default: "none" },
-        //             status: { type: String, enum: ['pending', 'approved', 'rejected'], required: true, default: 'pending' },
-        //             isActive: { type: Boolean, default: false },
-        //         },
-        //         {
-        //             stepId: { type: String, ref: 'WorkflowStep', required: true },
-        //             activeUser: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        //             approvedUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        //             pendingUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        //             type: { type: String, enum: ["none", "and", "or"], default: "none" },
-        //             status: { type: String, enum: ['pending', 'approved', 'rejected'], required: true, default: 'pending' },
-        //             isActive: { type: Boolean, default: false },
-        //         },
-        //         {
-        //             stepId: { type: String, ref: 'WorkflowStep', required: true },
-        //             activeUser: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        //             approvedUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        //             pendingUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        //             type: { type: String, enum: ["none", "and", "or"], default: "none" },
-        //             status: { type: String, enum: ['pending', 'approved', 'rejected'], required: true, default: 'pending' },
-        //             isActive: { type: Boolean, default: false },
-        //         },
-        //         {
-        //             stepId: { type: String, ref: 'WorkflowStep', required: true },
-        //             activeUser: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        //             approvedUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        //             pendingUserIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        //             type: { type: String, enum: ["none", "and", "or"], default: "none" },
-        //             status: { type: String, enum: ['pending', 'approved', 'rejected'], required: true, default: 'pending' },
-        //             isActive: { type: Boolean, default: false },
-        //         },
-        //     ],
-        //     approvalStepStatus: [
-        //         {
-        //             stepId: workFlowSetpsIdsArray[0],
-        //             activeUser: stepOneusersIdsArray,
-        //             pendingUserIds: [],
-        //             type: "or",
-        //             isActive: true
-        //         },
-        //         {
-        //             stepId: workFlowSetpsIdsArray[1],
-        //             pendingUserIds: stepTwousersIdsArray,
-        //         },
-        //         {
-        //             stepId: workFlowSetpsIdsArray[2],
-        //             pendingUserIds: stepThreeusersIdsArray,
-        //         },
-        //         {
-        //             stepId: workFlowSetpsIdsArray[3],
-        //             pendingUserIds: stepFourusersIdsArray,
-        //         },
-        //         {
-        //             stepId: workFlowSetpsIdsArray[4],
-        //             type: "and",
-        //             pendingUserIds: stepFiveusersIdsArray,
-        //         }
-        //     ],
-        //     forms: [{
-        //         title: "Form A",
-        //         key: "Form-A",
-        //         schema: {
-        //             "components": [
-        //                 {
-        //                     "label": "Email",
-        //                     "labelPosition": "top",
-        //                     "placeholder": "",
-        //                     "description": "",
-        //                     "tooltip": "",
-        //                     "prefix": "",
-        //                     "suffix": "",
-        //                     "widget": {
-        //                         "type": "input"
-        //                     },
-        //                     "inputMask": "",
-        //                     "displayMask": "",
-        //                     "allowMultipleMasks": false,
-        //                     "customClass": "",
-        //                     "tabindex": "",
-        //                     "autocomplete": "",
-        //                     "hidden": false,
-        //                     "hideLabel": false,
-        //                     "showWordCount": false,
-        //                     "showCharCount": false,
-        //                     "mask": false,
-        //                     "autofocus": false,
-        //                     "spellcheck": true,
-        //                     "disabled": false,
-        //                     "tableView": true,
-        //                     "modalEdit": false,
-        //                     "multiple": false,
-        //                     "defaultValue": "",
-        //                     "persistent": true,
-        //                     "inputFormat": "plain",
-        //                     "protected": false,
-        //                     "dbIndex": false,
-        //                     "case": "",
-        //                     "truncateMultipleSpaces": false,
-        //                     "encrypted": false,
-        //                     "redrawOn": "",
-        //                     "clearOnHide": true,
-        //                     "customDefaultValue": "",
-        //                     "calculateValue": "",
-        //                     "calculateServer": false,
-        //                     "allowCalculateOverride": false,
-        //                     "validateOn": "change",
-        //                     "validate": {
-        //                         "required": false,
-        //                         "pattern": "",
-        //                         "customMessage": "",
-        //                         "custom": "",
-        //                         "customPrivate": false,
-        //                         "json": "",
-        //                         "minLength": "",
-        //                         "maxLength": "",
-        //                         "strictDateValidation": false,
-        //                         "multiple": false,
-        //                         "unique": false
-        //                     },
-        //                     "unique": false,
-        //                     "errorLabel": "",
-        //                     "errors": "",
-        //                     "key": "email",
-        //                     "tags": [],
-        //                     "properties": {},
-        //                     "conditional": {
-        //                         "show": null,
-        //                         "when": null,
-        //                         "eq": "",
-        //                         "json": ""
-        //                     },
-        //                     "customConditional": "",
-        //                     "logic": [],
-        //                     "attributes": {},
-        //                     "overlay": {
-        //                         "style": "",
-        //                         "page": "",
-        //                         "left": "",
-        //                         "top": "",
-        //                         "width": "",
-        //                         "height": ""
-        //                     },
-        //                     "type": "textfield",
-        //                     "input": true,
-        //                     "refreshOn": "",
-        //                     "dataGridLabel": false,
-        //                     "addons": [],
-        //                     "inputType": "text",
-        //                     "id": "e6kr2sp"
-        //                 }
-        //             ]
-        //         },
-        //     }],
-        // };
-
-        // // Function call
-        // const module = await new Module(moduleData);
-        // module.save(function (err, result) {
-        //     if (err) {
-        //         console.log(err);
-        //     }
-        //     else {
-        //         console.log(result)
-        //     }
-        // });
     }).catch((error) => { console.log(error) });

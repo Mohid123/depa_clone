@@ -5,8 +5,9 @@ const catchAsync = require('../../utils/catchAsync');
 const { submissionService } = require('../../services');
 
 const createSubmission = catchAsync(async (req, res) => {
-  const Submission = await submissionService.createSubmission(req.body);
-  res.status(httpStatus.CREATED).send(Submission);
+  req.body.createdBy = req.user.id;
+  const submission = await submissionService.createSubmission(req.body);
+  res.status(httpStatus.CREATED).send(submission);
 });
 
 const getSubmissions = catchAsync(async (req, res) => {
@@ -17,16 +18,17 @@ const getSubmissions = catchAsync(async (req, res) => {
 });
 
 const getSubmission = catchAsync(async (req, res) => {
-  const Submission = await submissionService.getSubmissionById(req.params.submissionId);
-  if (!Submission) {
+  const submission = await submissionService.getSubmissionById(req.params.submissionId);
+  if (!submission) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Submission not found');
   }
-  res.send(Submission);
+  res.send(submission);
 });
 
 const updateSubmission = catchAsync(async (req, res) => {
-  const Submission = await submissionService.updateSubmissionById(req.params.submissionId, req.body);
-  res.send(Submission);
+  req.body.updatedBy = req.user.id;
+  const submission = await submissionService.updateSubmissionById(req.params.submissionId, req.body);
+  res.send(submission);
 });
 
 const deleteSubmission = catchAsync(async (req, res) => {

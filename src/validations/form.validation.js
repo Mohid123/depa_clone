@@ -8,6 +8,10 @@ const createForm = {
     display: Joi.string().required(),
     key: Joi.string(),
     components: Joi.array().items(Joi.object().required()),
+    permissions: Joi.array().items(Joi.object({
+      "options": Joi.array().items(Joi.string().valid("canEdit", "canDelete", "canView", "canSave", "canAdd").required()),
+      "user": Joi.required().custom(objectId),
+    }))
   }),
 };
 
@@ -25,6 +29,13 @@ const getForm = {
   }),
 };
 
+
+const getFormSlug = {
+  params: Joi.object().keys({
+    formKey: Joi.string().required(),
+  }),
+};
+
 const updateForm = {
   params: Joi.object().keys({
     formId: Joi.required().custom(objectId),
@@ -35,6 +46,10 @@ const updateForm = {
       display: Joi.string(),
       key: Joi.string(),
       components: Joi.array().items(Joi.object()),
+      permissions: Joi.array().items(Joi.object({
+        "options": Joi.string().valid("canEdit", "canDelete", "canView", "canSave", "canAdd").required(),
+        "user": Joi.required().custom(objectId),
+      }))
     })
     .min(1),
 };
@@ -49,6 +64,7 @@ module.exports = {
   createForm,
   getForms,
   getForm,
+  getFormSlug,
   updateForm,
   deleteForm,
 };

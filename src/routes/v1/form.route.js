@@ -12,6 +12,10 @@ router
     .get(auth(), validate(formValidation.getForms), formController.getForms);
 
 router
+    .route('/slug/:formKey')
+    .get(auth(), validate(formValidation.getFormSlug), formController.getFormSlug);
+
+router
     .route('/:formId')
     .get(auth(), validate(formValidation.getForm), formController.getForm)
     .patch(auth(), validate(formValidation.updateForm), formController.updateForm)

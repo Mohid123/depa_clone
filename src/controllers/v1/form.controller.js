@@ -5,8 +5,9 @@ const catchAsync = require('../../utils/catchAsync');
 const { formService } = require('../../services');
 
 const createForm = catchAsync(async (req, res) => {
-  const Form = await formService.createForm(req.body);
-  res.status(httpStatus.CREATED).send(Form);
+  req.body.createdBy = req.user.id;
+  const form = await formService.createForm(req.body);
+  res.status(httpStatus.CREATED).send(form);
 });
 
 const getForms = catchAsync(async (req, res) => {
@@ -17,16 +18,25 @@ const getForms = catchAsync(async (req, res) => {
 });
 
 const getForm = catchAsync(async (req, res) => {
-  const Form = await formService.getFormById(req.params.formId);
-  if (!Form) {
+  const form = await formService.getFormById(req.params.formId);
+  if (!form) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Form not found');
   }
-  res.send(Form);
+  res.send(form);
+});
+
+const getFormSlug = catchAsync(async (req, res) => {
+  const form = await formService.getFormBySlug(req.params.formKey);
+  if (!form) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Form not found');
+  }
+  res.send(form);
 });
 
 const updateForm = catchAsync(async (req, res) => {
-  const Form = await formService.updateFormById(req.params.formId, req.body);
-  res.send(Form);
+  req.body.updatedBy = req.user.id;
+  const form = await formService.updateFormById(req.params.formId, req.body);
+  res.send(form);
 });
 
 const deleteForm = catchAsync(async (req, res) => {
@@ -38,6 +48,7 @@ module.exports = {
   createForm,
   getForms,
   getForm,
+  getFormSlug,
   updateForm,
   deleteForm,
 };

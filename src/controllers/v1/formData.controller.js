@@ -5,8 +5,9 @@ const catchAsync = require('../../utils/catchAsync');
 const { formDataService } = require('../../services');
 
 const createFormData = catchAsync(async (req, res) => {
-  const FormData = await formDataService.createFormData(req.body);
-  res.status(httpStatus.CREATED).send(FormData);
+  req.body.createdBy = req.user.id;
+  const formData = await formDataService.createFormData(req.body);
+  res.status(httpStatus.CREATED).send(formData);
 });
 
 const getFormsData = catchAsync(async (req, res) => {
@@ -17,16 +18,17 @@ const getFormsData = catchAsync(async (req, res) => {
 });
 
 const getFormData = catchAsync(async (req, res) => {
-  const FormData = await formDataService.getFormDataById(req.params.formDataId);
-  if (!FormData) {
+  const formData = await formDataService.getFormDataById(req.params.formDataId);
+  if (!formData) {
     throw new ApiError(httpStatus.NOT_FOUND, 'FormData not found');
   }
-  res.send(FormData);
+  res.send(formData);
 });
 
 const updateFormData = catchAsync(async (req, res) => {
-  const FormData = await formDataService.updateFormDataById(req.params.formDataId, req.body);
-  res.send(FormData);
+  req.body.updatedBy = req.user.id;
+  const formData = await formDataService.updateFormDataById(req.params.formDataId, req.body);
+  res.send(formData);
 });
 
 const deleteFormData = catchAsync(async (req, res) => {

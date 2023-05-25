@@ -4,11 +4,11 @@ const ApiError = require('../utils/ApiError');
 
 /**
  * Create a WorkflowStep
- * @param {Object} WorkflowStepBody
+ * @param {Object} workflowStepBody
  * @returns {Promise<WorkflowStep>}
  */
-const createWorkflowStep = async (WorkflowStepBody) => {
-  return WorkflowStep.create(WorkflowStepBody);
+const createWorkflowStep = async (workflowStepBody) => {
+  return WorkflowStep.create(workflowStepBody);
 };
 
 /**
@@ -21,8 +21,8 @@ const createWorkflowStep = async (WorkflowStepBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryWorkflowSteps = async (filter, options) => {
-  const WorkflowSteps = await WorkflowStep.paginate(filter, options);
-  return WorkflowSteps;
+  const workflowSteps = await WorkflowStep.paginate(filter, options);
+  return workflowSteps;
 };
 
 /**
@@ -35,29 +35,20 @@ const getWorkflowStepById = async (id) => {
 };
 
 /**
- * Get WorkflowStep by email
- * @param {string} email
- * @returns {Promise<WorkflowStep>}
- */
-const getWorkflowStepByEmail = async (email) => {
-  return WorkflowStep.findOne({ email });
-};
-
-/**
  * Update WorkflowStep by id
  * @param {ObjectId} workflowStepId
  * @param {Object} updateBody
  * @returns {Promise<WorkflowStep>}
  */
 const updateWorkflowStepById = async (workflowStepId, updateBody) => {
-  const WorkflowStep = await getWorkflowStepById(workflowStepId);
-  if (!WorkflowStep) {
+  const workflowStep = await getWorkflowStepById(workflowStepId);
+  if (!workflowStep) {
     throw new ApiError(httpStatus.NOT_FOUND, 'WorkflowStep not found');
   }
 
-  Object.assign(WorkflowStep, updateBody);
-  await WorkflowStep.save();
-  return WorkflowStep;
+  Object.assign(workflowStep, updateBody);
+  await workflowStep.save();
+  return workflowStep;
 };
 
 /**
@@ -66,19 +57,18 @@ const updateWorkflowStepById = async (workflowStepId, updateBody) => {
  * @returns {Promise<WorkflowStep>}
  */
 const deleteWorkflowStepById = async (workflowStepId) => {
-  const WorkflowStep = await getWorkflowStepById(workflowStepId);
-  if (!WorkflowStep) {
+  const workflowStep = await getWorkflowStepById(workflowStepId);
+  if (!workflowStep) {
     throw new ApiError(httpStatus.NOT_FOUND, 'WorkflowStep not found');
   }
-  await WorkflowStep.remove();
-  return WorkflowStep;
+  await workflowStep.remove();
+  return workflowStep;
 };
 
 module.exports = {
   createWorkflowStep,
   queryWorkflowSteps,
   getWorkflowStepById,
-  getWorkflowStepByEmail,
   updateWorkflowStepById,
   deleteWorkflowStepById,
 };

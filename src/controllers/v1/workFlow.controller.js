@@ -5,8 +5,9 @@ const catchAsync = require('../../utils/catchAsync');
 const { workFlowService } = require('../../services');
 
 const createWorkFlow = catchAsync(async (req, res) => {
-  const WorkFlow = await workFlowService.createWorkFlow(req.body);
-  res.status(httpStatus.CREATED).send(WorkFlow);
+  req.body.createdBy = req.user.id;
+  const workFlow = await workFlowService.createWorkFlow(req.body);
+  res.status(httpStatus.CREATED).send(workFlow);
 });
 
 const getWorkFlows = catchAsync(async (req, res) => {
@@ -17,20 +18,21 @@ const getWorkFlows = catchAsync(async (req, res) => {
 });
 
 const getWorkFlow = catchAsync(async (req, res) => {
-  const WorkFlow = await workFlowService.getWorkFlowById(req.params.workFlowId);
-  if (!WorkFlow) {
+  const workFlow = await workFlowService.getWorkFlowById(req.params.workFlowId);
+  if (!workFlow) {
     throw new ApiError(httpStatus.NOT_FOUND, 'WorkFlow not found');
   }
-  res.send(WorkFlow);
+  res.send(workFlow);
 });
 
 const updateWorkFlow = catchAsync(async (req, res) => {
-  const WorkFlow = await workFlowService.updateWorkFlowById(req.params.workFlowId, req.body);
-  res.send(WorkFlow);
+  req.body.updatedBy = req.user.id;
+  const workFlow = await workFlowService.updateWorkFlowById(req.params.workFlowId, req.body);
+  res.send(workFlow);
 });
 
 const deleteWorkFlow = catchAsync(async (req, res) => {
-  await workFlowService.deleteWorkFlowById(req.params.WorkFlowId);
+  await workFlowService.deleteWorkFlowById(req.params.workFlowId);
   res.status(httpStatus.NO_CONTENT).send();
 });
 

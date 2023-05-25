@@ -5,11 +5,11 @@ const workFlowStepService = require('./workFlowStep.service');
 
 /**
  * Create a WorkFlow
- * @param {Object} WorkFlowBody
+ * @param {Object} workFlowBody
  * @returns {Promise<WorkFlow>}
  */
-const createWorkFlow = async (WorkFlowBody) => {
-  const steps = await WorkflowStep.insertMany(WorkFlowBody.steps);
+const createWorkFlow = async (workFlowBody) => {
+  const steps = await WorkflowStep.insertMany(workFlowBody.steps);
 
   return WorkFlow.create({
     "stepIds": steps.map(({ _id }) => _id)
@@ -45,28 +45,19 @@ const getWorkFlowById = async (id) => {
 };
 
 /**
- * Get WorkFlow by email
- * @param {string} email
- * @returns {Promise<WorkFlow>}
- */
-const getWorkFlowByEmail = async (email) => {
-  return WorkFlow.findOne({ email });
-};
-
-/**
  * Update WorkFlow by id
  * @param {ObjectId} workFlowId
  * @param {Object} updateBody
  * @returns {Promise<WorkFlow>}
  */
 const updateWorkFlowById = async (workFlowId, updateBody) => {
-  const WorkFlow = await getWorkFlowById(workFlowId);
-  if (!WorkFlow) {
+  const workFlow = await getWorkFlowById(workFlowId);
+  if (!workFlow) {
     throw new ApiError(httpStatus.NOT_FOUND, 'WorkFlow not found');
   }
 
-  const WorkFlowStepIdsArr = WorkFlow.stepIds.map(({ _id }) => _id);
-  const updateBodyStepIdsArr = updateBody.steps.map(({ id }) => id).filter((val) => val != null);
+  // const workFlowStepIdsArr = workFlow.stepIds.map(({ _id }) => _id);
+  // const updateBodyStepIdsArr = updateBody.steps.map(({ id }) => id).filter((val) => val != null);
 
   let workflowStep = null; // initialize here
   for (const step of updateBody.steps) {
@@ -78,9 +69,9 @@ const updateWorkFlowById = async (workFlowId, updateBody) => {
 
     } else {
       const { _id } = await workFlowStepService.createWorkflowStep(step);
-      const stepIds = [...WorkFlow.stepIds, _id];
-      Object.assign(WorkFlow, { 'stepIds': stepIds });
-      await WorkFlow.save();
+      const stepIds = [...workFlow.stepIds, _id];
+      Object.assign(workFlow, { 'stepIds': stepIds });
+      await workFlow.save();
     }
   }
 
@@ -93,19 +84,18 @@ const updateWorkFlowById = async (workFlowId, updateBody) => {
  * @returns {Promise<WorkFlow>}
  */
 const deleteWorkFlowById = async (workFlowId) => {
-  const WorkFlow = await getWorkFlowById(workFlowId);
-  if (!WorkFlow) {
+  const workFlow = await getWorkFlowById(workFlowId);
+  if (!workFlow) {
     throw new ApiError(httpStatus.NOT_FOUND, 'WorkFlow not found');
   }
-  await WorkFlow.remove();
-  return WorkFlow;
+  await workFlow.remove();
+  return workFlow;
 };
 
 module.exports = {
   createWorkFlow,
   queryWorkFlows,
   getWorkFlowById,
-  getWorkFlowByEmail,
   updateWorkFlowById,
   deleteWorkFlowById,
 };

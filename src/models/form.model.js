@@ -12,6 +12,16 @@ const formSchema = mongoose.Schema(
       display: { type: String, required: true },
       key: { type: String, required: true },
       components: [{ type: Object, required: true }],
+      permissions: [{
+        "options": {
+          type: [{
+            type: String,
+            enum: ["canEdit", "canDelete", "canView", "canSave", "canAdd"]
+          }],
+          required: true
+        },
+        "user": { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }
+      }]
     }
   )
 );

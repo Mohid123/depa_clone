@@ -4,11 +4,11 @@ const ApiError = require('../utils/ApiError');
 
 /**
  * Create a FormData
- * @param {Object} FormDataBody
+ * @param {Object} formDataBody
  * @returns {Promise<FormData>}
  */
-const createFormData = async (FormDataBody) => {
-  return FormData.create(FormDataBody);
+const createFormData = async (formDataBody) => {
+  return FormData.create(formDataBody);
 };
 
 /**
@@ -31,8 +31,8 @@ const createManyFormsData = async (FormsDataBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryFormsData = async (filter, options) => {
-  const FormsData = await FormData.paginate(filter, options);
-  return FormsData;
+  const formsData = await FormData.paginate(filter, options);
+  return formsData;
 };
 
 /**
@@ -45,28 +45,19 @@ const getFormDataById = async (id) => {
 };
 
 /**
- * Get FormData by email
- * @param {string} email
- * @returns {Promise<FormData>}
- */
-const getFormDataByEmail = async (email) => {
-  return FormData.findOne({ email });
-};
-
-/**
  * Update FormData by id
  * @param {ObjectId} formDataId
  * @param {Object} updateBody
  * @returns {Promise<FormData>}
  */
 const updateFormDataById = async (formDataId, updateBody) => {
-  const FormData = await getFormDataById(formDataId);
-  if (!FormData) {
+  const formData = await getFormDataById(formDataId);
+  if (!formData) {
     throw new ApiError(httpStatus.NOT_FOUND, 'FormData not found');
   }
-  Object.assign(FormData, updateBody);
-  await FormData.save();
-  return FormData;
+  Object.assign(formData, updateBody);
+  await formData.save();
+  return formData;
 };
 
 /**
@@ -75,12 +66,12 @@ const updateFormDataById = async (formDataId, updateBody) => {
  * @returns {Promise<FormData>}
  */
 const deleteFormDataById = async (formDataId) => {
-  const FormData = await getFormDataById(formDataId);
-  if (!FormData) {
+  const formData = await getFormDataById(formDataId);
+  if (!formData) {
     throw new ApiError(httpStatus.NOT_FOUND, 'FormData not found');
   }
-  await FormData.remove();
-  return FormData;
+  await formData.remove();
+  return formData;
 };
 
 module.exports = {
@@ -88,7 +79,6 @@ module.exports = {
   createManyFormsData,
   queryFormsData,
   getFormDataById,
-  getFormDataByEmail,
   updateFormDataById,
   deleteFormDataById,
 };

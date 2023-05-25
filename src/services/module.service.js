@@ -5,18 +5,18 @@ const workFlowService = require('./workFlow.service');
 
 /**
  * Create a Module
- * @param {Object} ModuleBody
+ * @param {Object} moduleBody
  * @returns {Promise<Module>}
  */
-const createModule = async (ModuleBody) => {
-  if (await Module.isCodeTaken(ModuleBody.code)) {
+const createModule = async (moduleBody) => {
+  if (await Module.isCodeTaken(moduleBody.code)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Code already taken');
   }
 
-  const createdWorkflow = await workFlowService.createWorkFlow(ModuleBody);
-  ModuleBody.workFlowId = createdWorkflow._id;
+  const createdWorkflow = await workFlowService.createWorkFlow(moduleBody);
+  moduleBody.workFlowId = createdWorkflow._id;
 
-  return Module.create(ModuleBody);
+  return Module.create(moduleBody);
 
 };
 
@@ -30,8 +30,8 @@ const createModule = async (ModuleBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryModules = async (filter, options) => {
-  const Modules = await Module.paginate(filter, options);
-  return Modules;
+  const modules = await Module.paginate(filter, options);
+  return modules;
 };
 
 /**
@@ -70,38 +70,37 @@ const getModuleBySlug = async (slug) => {
 
 /**
  * Update Module by id
- * @param {ObjectId} ModuleId
+ * @param {ObjectId} moduleId
  * @param {Object} updateBody
  * @returns {Promise<Module>}
  */
-const updateModuleById = async (ModuleId, updateBody) => {
-  const Module = await getModuleById(ModuleId);
-  if (!Module) {
+const updateModuleById = async (moduleId, updateBody) => {
+  const module = await getModuleById(moduleId);
+  if (!module) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
   }
 
   if (updateBody.steps) {
-    const updatedWorkFlow = await workFlowService.updateWorkFlowById(Module.workFlowId.id, updateBody);
-    return updatedWorkFlow;
+    await workFlowService.updateWorkFlowById(module.workFlowId.id, updateBody);
   }
 
-  Object.assign(Module, updateBody);
-  await Module.save();
-  return await getModuleById(ModuleId);
+  Object.assign(module, updateBody);
+  await module.save();
+  return await getModuleById(moduleId);
 };
 
 /**
  * Delete Module by id
- * @param {ObjectId} ModuleId
+ * @param {ObjectId} moduleId
  * @returns {Promise<Module>}
  */
-const deleteModuleById = async (ModuleId) => {
-  const Module = await getModuleById(ModuleId);
-  if (!Module) {
+const deleteModuleById = async (moduleId) => {
+  const module = await getModuleById(moduleId);
+  if (!module) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
   }
-  await Module.remove();
-  return Module;
+  await module.remove();
+  return module;
 };
 
 module.exports = {

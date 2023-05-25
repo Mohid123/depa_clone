@@ -44,6 +44,7 @@ const createSubmission = async (submissionBody) => {
   // Add default progress 0 in summary object
   submissionBody.summaryData = {
     progress: 0,
+    lastActivityPerformedBy: null
   }
 
   // Assign workflowStatus to submissionBody
@@ -111,15 +112,6 @@ const getSubmissionById = async (id) => {
 };
 
 /**
- * Get Submission by email
- * @param {string} email
- * @returns {Promise<Submission>}
- */
-const getSubmissionByEmail = async (email) => {
-  return Submission.findOne({ email });
-};
-
-/**
  * Find next workflow step
  * @param {Object} workFlowStatus workFlowStatus
  * @param {Object} workFlowStatusStep workFlowStatus
@@ -152,20 +144,7 @@ const approveStep = async (workFlowStatus, workFlowStatusStep, approvingUser) =>
     if (nextStep) {
       nextStep.status = "inProgress";
     }
-  }
-  // else if (step.condition === "or") {
-  //   // or condition step
-  //   if (step.approvedUsers.length === 0) {
-  //     // First approval in the step
-  //     step.approvedUsers.push(approvingUser);
-  //     step.status = "approved";
-  //     const nextStep = await nextWorkFlowStep(workFlowStatus, workFlowStatusStep);
-  //     if (nextStep) {
-  //       nextStep.status = "inProgress";
-  //     }
-  //   }
-  // }
-  else if (step.condition === "and") {
+  } else {
     // and condition step
     if (step.activeUsers.includes(approvingUser)) {
       // User is part of the current step
@@ -226,31 +205,7 @@ const rejectStep = async (workFlowStatus, workFlowStatusStep, rejectingUser) => 
         previousStep.activeUsers.push(index);
       }
     }
-  }
-  // else if (step.condition === "or") {
-  //   // or condition step
-  //   if (step.approvedUsers.length === 0) {
-  //     // First rejection in the step
-  //     step.status = "pending";
-  //     const previousStep = await previousWorkFlowStep(workFlowStatus, workFlowStatusStep)
-  //     if (previousStep) {
-  //       previousStep.status = "inProgress";
-  //     }
-  //   } else {
-  //     // Rollback to the same hierarchy
-  //     const index = step.approvedUsers.indexOf(rejectingUser);
-  //     if (index !== -1) {
-  //       step.approvedUsers.splice(index);
-  //       step.status = "pending";
-  //       const previousStep = await previousWorkFlowStep(workFlowStatus, workFlowStatusStep)
-  //       if (previousStep) {
-  //         previousStep.status = "inProgress";
-  //         previousStep.approvedUsers.push(rejectingUser);
-  //       }
-  //     }
-  //   }
-  // }
-  else if (step.condition === "and") {
+  } else {
     // and condition step
     if (step.activeUsers.includes(rejectingUser)) {
       // User is part of the current step
@@ -269,25 +224,6 @@ const rejectStep = async (workFlowStatus, workFlowStatusStep, rejectingUser) => 
         // Rollback to the same hierarchy or previous step
         const index = step.approvedUsers.pop();
         step.activeUsers.push(index);
-        // if (index !== -1) {
-        //   step.approvedUsers.splice(index);
-        //   if (step.approvedUsers.length === 0) {
-        //     // Rollback to the previous step
-        //     const previousStep = await previousWorkFlowStep(workFlowStatus, workFlowStatusStep)
-        //     if (previousStep) {
-        //       step.status = "pending";
-        //       previousStep.status = "inProgress";
-        //       previousStep.approvedUsers.push(rejectingUser);
-        //     }
-        //   } else {
-        //     // Rollback to the same step
-        //     step.status = "approved";
-        //     const nextStep = workflow.find(step => step.stepId > stepId);
-        //     if (nextStep) {
-        //       nextStep.status = "inProgress";
-        //     }
-        //   }
-        // }
       }
     }
   }
@@ -302,7 +238,6 @@ const rejectStep = async (workFlowStatus, workFlowStatusStep, rejectingUser) => 
  * @returns {Promise<Submission>}
  */
 const updateSubmissionById = async (submissionId, updateBody) => {
-  // return submissionId;
   const submission = await Submission.findById(submissionId);
   if (!submission) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Submission not found');
@@ -335,8 +270,11 @@ const updateSubmissionById = async (submissionId, updateBody) => {
 
   const totalLength = workFlowStatus.length;
   const approvedCount = workFlowStatus.filter(step => step.status === "approved").length;
+  const user = await User.findOne({ _id: updateBody.userId });
   submission.summaryData = {
-    progress: (approvedCount / totalLength) * 100
+    progress: (approvedCount / totalLength) * 100,
+    lastActivityPerformedBy: updateBody.userId,
+    userName: user.fullName
   };
 
   await approvalLogService.createApprovalLog({
@@ -373,7 +311,6 @@ module.exports = {
   createSubmission,
   querySubmissions,
   getSubmissionById,
-  getSubmissionByEmail,
   updateSubmissionById,
   deleteSubmissionById,
 };

@@ -4,15 +4,15 @@ const ApiError = require('../utils/ApiError');
 
 /**
  * Create a Category
- * @param {Object} CategoryBody
+ * @param {Object} categoryBody
  * @returns {Promise<Category>}
  */
-const createCategory = async (CategoryBody) => {
-  if (await Category.isNameTaken(CategoryBody.name)) {
+const createCategory = async (categoryBody) => {
+  if (await Category.isNameTaken(categoryBody.name)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Name already taken');
   }
 
-  return Category.create(CategoryBody);
+  return Category.create(categoryBody);
 };
 
 /**
@@ -25,8 +25,8 @@ const createCategory = async (CategoryBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryCategories = async (filter, options) => {
-  const Categories = await Category.paginate(filter, options);
-  return Categories;
+  const categories = await Category.paginate(filter, options);
+  return categories;
 };
 
 /**
@@ -39,49 +39,44 @@ const getCategoryById = async (id) => {
 };
 
 /**
- * Get Category by email
- * @param {string} email
- * @returns {Promise<Category>}
- */
-const getCategoryByEmail = async (email) => {
-  return Category.findOne({ email });
-};
-
-/**
  * Update Category by id
- * @param {ObjectId} CategoryId
+ * @param {ObjectId} categoryId
  * @param {Object} updateBody
  * @returns {Promise<Category>}
  */
-const updateCategoryById = async (CategoryId, updateBody) => {
-  const Category = await getCategoryById(CategoryId);
-  if (!Category) {
+const updateCategoryById = async (categoryId, updateBody) => {
+  const category = await getCategoryById(categoryId);
+  if (!category) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Category not found');
   }
-  Object.assign(Category, updateBody);
-  await Category.save();
-  return Category;
+
+  if (await Category.isNameTaken(updateBody.name, category.id)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Name already taken');
+  }
+
+  Object.assign(category, updateBody);
+  await category.save();
+  return category;
 };
 
 /**
  * Delete Category by id
- * @param {ObjectId} CategoryId
+ * @param {ObjectId} categoryId
  * @returns {Promise<Category>}
  */
-const deleteCategoryById = async (CategoryId) => {
-  const Category = await getCategoryById(CategoryId);
-  if (!Category) {
+const deleteCategoryById = async (categoryId) => {
+  const category = await getCategoryById(categoryId);
+  if (!category) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Category not found');
   }
-  await Category.remove();
-  return Category;
+  await category.remove();
+  return category;
 };
 
 module.exports = {
   createCategory,
   queryCategories,
   getCategoryById,
-  getCategoryByEmail,
   updateCategoryById,
   deleteCategoryById,
 };

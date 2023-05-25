@@ -5,8 +5,9 @@ const catchAsync = require('../../utils/catchAsync');
 const { workFlowStepService } = require('../../services');
 
 const createWorkFlowStep = catchAsync(async (req, res) => {
-  const WorkFlowStep = await workFlowStepService.createWorkflowStep(req.body);
-  res.status(httpStatus.CREATED).send(WorkFlowStep);
+  req.body.createdBy = req.user.id;
+  const workFlowStep = await workFlowStepService.createWorkflowStep(req.body);
+  res.status(httpStatus.CREATED).send(workFlowStep);
 });
 
 const getWorkFlowSteps = catchAsync(async (req, res) => {
@@ -17,16 +18,17 @@ const getWorkFlowSteps = catchAsync(async (req, res) => {
 });
 
 const getWorkFlowStep = catchAsync(async (req, res) => {
-  const WorkFlowStep = await workFlowStepService.getWorkflowStepById(req.params.workFlowStepId);
-  if (!WorkFlowStep) {
+  const workFlowStep = await workFlowStepService.getWorkflowStepById(req.params.workFlowStepId);
+  if (!workFlowStep) {
     throw new ApiError(httpStatus.NOT_FOUND, 'WorkFlowStep not found');
   }
-  res.send(WorkFlowStep);
+  res.send(workFlowStep);
 });
 
 const updateWorkFlowStep = catchAsync(async (req, res) => {
-  const WorkFlowStep = await workFlowStepService.updateWorkflowStepById(req.params.workFlowStepId, req.body);
-  res.send(WorkFlowStep);
+  req.body.updatedBy = req.user.id;
+  const workFlowStep = await workFlowStepService.updateWorkflowStepById(req.params.workFlowStepId, req.body);
+  res.send(workFlowStep);
 });
 
 const deleteWorkFlowStep = catchAsync(async (req, res) => {

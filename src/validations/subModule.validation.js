@@ -53,7 +53,6 @@ const updateSubModule = {
       viewOnlyUsers: Joi.array().items(Joi.string().custom(objectId)),
       summarySchema: Joi.array().items(Joi.object()),
       viewSchema: Joi.array().items(Joi.object()),
-      // formIds: Joi.array().items(Joi.object().required()),
       steps: Joi.array().items(Joi.object({
         "id": Joi.string().custom(objectId),
         "condition": Joi.string().valid("none", "and", "or").required(),

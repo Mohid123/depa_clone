@@ -4,11 +4,11 @@ const ApiError = require('../utils/ApiError');
 
 /**
  * Create a ApprovalLog
- * @param {Object} ApprovalLogBody
+ * @param {Object} approvalLogBody
  * @returns {Promise<ApprovalLog>}
  */
-const createApprovalLog = async (ApprovalLogBody) => {
-  return ApprovalLog.create(ApprovalLogBody);
+const createApprovalLog = async (approvalLogBody) => {
+  return ApprovalLog.create(approvalLogBody);
 };
 
 /**
@@ -21,8 +21,8 @@ const createApprovalLog = async (ApprovalLogBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryApprovalLogs = async (filter, options) => {
-  const ApprovalLogs = await ApprovalLog.paginate(filter, options);
-  return ApprovalLogs;
+  const approvalLogs = await ApprovalLog.paginate(filter, options);
+  return approvalLogs;
 };
 
 /**
@@ -41,14 +41,14 @@ const getApprovalLogById = async (id) => {
  * @returns {Promise<ApprovalLog>}
  */
 const updateApprovalLogById = async (approvalLogId, updateBody) => {
-  const ApprovalLog = await getApprovalLogById(approvalLogId);
-  if (!ApprovalLog) {
+  const approvalLog = await getApprovalLogById(approvalLogId);
+  if (!approvalLog) {
     throw new ApiError(httpStatus.NOT_FOUND, 'ApprovalLog not found');
   }
 
-  Object.assign(ApprovalLog, updateBody);
-  await ApprovalLog.save();
-  return ApprovalLog;
+  Object.assign(approvalLog, updateBody);
+  await approvalLog.save();
+  return approvalLog;
 };
 
 /**
@@ -57,12 +57,12 @@ const updateApprovalLogById = async (approvalLogId, updateBody) => {
  * @returns {Promise<ApprovalLog>}
  */
 const deleteApprovalLogById = async (approvalLogId) => {
-  const ApprovalLog = await getApprovalLogById(approvalLogId);
-  if (!ApprovalLog) {
+  const approvalLog = await getApprovalLogById(approvalLogId);
+  if (!approvalLog) {
     throw new ApiError(httpStatus.NOT_FOUND, 'ApprovalLog not found');
   }
-  await ApprovalLog.remove();
-  return ApprovalLog;
+  await approvalLog.remove();
+  return approvalLog;
 };
 
 module.exports = {

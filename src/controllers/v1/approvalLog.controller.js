@@ -5,8 +5,9 @@ const catchAsync = require('../../utils/catchAsync');
 const { approvalLogService } = require('../../services');
 
 const createApprovalLog = catchAsync(async (req, res) => {
-  const ApprovalLog = await approvalLogService.createApprovalLog(req.body);
-  res.status(httpStatus.CREATED).send(ApprovalLog);
+  req.body.createdBy = req.user.id;
+  const approvalLog = await approvalLogService.createApprovalLog(req.body);
+  res.status(httpStatus.CREATED).send(approvalLog);
 });
 
 const getApprovalLogs = catchAsync(async (req, res) => {
@@ -17,20 +18,21 @@ const getApprovalLogs = catchAsync(async (req, res) => {
 });
 
 const getApprovalLog = catchAsync(async (req, res) => {
-  const ApprovalLog = await approvalLogService.getApprovalLogById(req.params.ApprovalLogId);
-  if (!ApprovalLog) {
+  const approvalLog = await approvalLogService.getApprovalLogById(req.params.approvalLogId);
+  if (!approvalLog) {
     throw new ApiError(httpStatus.NOT_FOUND, 'ApprovalLog not found');
   }
-  res.send(ApprovalLog);
+  res.send(approvalLog);
 });
 
 const updateApprovalLog = catchAsync(async (req, res) => {
-  const ApprovalLog = await approvalLogService.updateApprovalLogById(req.params.ApprovalLogId, req.body);
-  res.send(ApprovalLog);
+  req.body.updatedBy = req.user.id;
+  const approvalLog = await approvalLogService.updateApprovalLogById(req.paramsaApprovalLogId, req.body);
+  res.send(approvalLog);
 });
 
 const deleteApprovalLog = catchAsync(async (req, res) => {
-  await approvalLogService.deleteApprovalLogById(req.params.ApprovalLogId);
+  await approvalLogService.deleteApprovalLogById(req.params.approvalLogId);
   res.status(httpStatus.NO_CONTENT).send();
 });
 

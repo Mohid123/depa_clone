@@ -4,15 +4,15 @@ const ApiError = require('../utils/ApiError');
 
 /**
  * Create a Company
- * @param {Object} CompanyBody
+ * @param {Object} companyBody
  * @returns {Promise<Company>}
  */
-const createCompany = async (CompanyBody) => {
-  if (await Company.isTitleTaken(CompanyBody.title)) {
+const createCompany = async (companyBody) => {
+  if (await Company.isTitleTaken(companyBody.title)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Title already taken');
   }
 
-  return Company.create(CompanyBody);
+  return Company.create(companyBody);
 };
 
 /**
@@ -39,37 +39,33 @@ const getCompanyById = async (id) => {
 };
 
 /**
- * Get Company by email
- * @param {string} email
- * @returns {Promise<Company>}
- */
-const getCompanyByEmail = async (email) => {
-  return Company.findOne({ email });
-};
-
-/**
  * Update Company by id
- * @param {ObjectId} CompanyId
+ * @param {ObjectId} companyId
  * @param {Object} updateBody
  * @returns {Promise<Company>}
  */
-const updateCompanyById = async (CompanyId, updateBody) => {
-  const Company = await getCompanyById(CompanyId);
-  if (!Company) {
+const updateCompanyById = async (companyId, updateBody) => {
+  const company = await getCompanyById(companyId);
+  if (!company) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Company not found');
   }
-  Object.assign(Company, updateBody);
-  await Company.save();
-  return Company;
+
+  if (await Company.isTitleTaken(updateBody.title, company.id)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Title already taken');
+  }
+
+  Object.assign(company, updateBody);
+  await company.save();
+  return company;
 };
 
 /**
  * Delete Company by id
- * @param {ObjectId} CompanyId
+ * @param {ObjectId} companyId
  * @returns {Promise<Company>}
  */
-const deleteCompanyById = async (CompanyId) => {
-  const Company = await getCompanyById(CompanyId);
+const deleteCompanyById = async (companyId) => {
+  const Company = await getCompanyById(companyId);
   if (!Company) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Company not found');
   }
@@ -81,7 +77,6 @@ module.exports = {
   createCompany,
   queryCompanies,
   getCompanyById,
-  getCompanyByEmail,
   updateCompanyById,
   deleteCompanyById,
 };

@@ -5,18 +5,18 @@ const mongoose = require('mongoose');
 
 /**
  * Create a Form
- * @param {Object} FormBody
+ * @param {Object} formBody
  * @returns {Promise<Form>}
  */
-const createForm = async (FormBody) => {
-  if (await Form.isKeyTaken(FormBody.key)) {
+const createForm = async (formBody) => {
+  if (await Form.isKeyTaken(formBody.key)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Form Key already taken');
   }
 
-  const form = await Form.create(FormBody);
+  const form = await Form.create(formBody);
 
-  if (FormBody.subModuleId) {
-    const subModule = await SubModule.findById(FormBody.subModuleId);
+  if (formBody.subModuleId) {
+    const subModule = await SubModule.findById(formBody.subModuleId);
     if (!subModule) {
       throw new ApiError(httpStatus.NOT_FOUND, 'SubModule not found');
     }
@@ -36,17 +36,17 @@ const createForm = async (FormBody) => {
 
 /**
  * Create a Form
- * @param {Object} FormBody
+ * @param {Object} formBody
  * @returns {Promise<Form>}
  */
-const createManyForms = async (FormBody) => {
-  for (const form of FormBody) {
+const createManyForms = async (formBody) => {
+  for (const form of formBody) {
     if (await Form.isKeyTaken(form.key)) {
       throw new ApiError(httpStatus.BAD_REQUEST, 'Form Key already taken');
     }
   }
 
-  const forms = await Form.insertMany(FormBody);
+  const forms = await Form.insertMany(formBody);
   return forms;
 };
 
@@ -60,8 +60,8 @@ const createManyForms = async (FormBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryForms = async (filter, options) => {
-  const Forms = await Form.paginate(filter, options);
-  return Forms;
+  const forms = await Form.paginate(filter, options);
+  return forms;
 };
 
 /**
@@ -74,19 +74,33 @@ const getFormById = async (id) => {
 };
 
 /**
+ * Get Form by id
+ * @param {ObjectId} id
+ * @returns {Promise<Form>}
+ */
+const getFormBySlug = async (key) => {
+  return Form.findOne({ key: key });
+};
+
+/**
  * Update Form by id
  * @param {ObjectId} formId
  * @param {Object} updateBody
  * @returns {Promise<Form>}
  */
 const updateFormById = async (formId, updateBody) => {
-  const Form = await getFormById(formId);
-  if (!Form) {
+  const form = await getFormById(formId);
+  if (!form) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Form not found');
   }
-  Object.assign(Form, updateBody);
-  await Form.save();
-  return Form;
+
+  if (await Form.isKeyTaken(updateBody.key, form.id)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Form Key already taken');
+  }
+
+  Object.assign(form, updateBody);
+  await form.save();
+  return form;
 };
 
 /**
@@ -108,6 +122,7 @@ module.exports = {
   createManyForms,
   queryForms,
   getFormById,
+  getFormBySlug,
   updateFormById,
   deleteFormById,
 };

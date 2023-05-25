@@ -2,26 +2,25 @@ const httpStatus = require('http-status');
 const { SubModule } = require('../models');
 const ApiError = require('../utils/ApiError');
 const formService = require('./form.service');
-const submissionService = require('./submission.service');
 const workFlowService = require('./workFlow.service');
 
 /**
  * Create a SubModule
- * @param {Object} SubModuleBody
+ * @param {Object} subModuleBody
  * @returns {Promise<SubModule>}
  */
-const createSubModule = async (SubModuleBody) => {
-  if (await SubModule.isCodeTaken(SubModuleBody.code)) {
+const createSubModule = async (subModuleBody) => {
+  if (await SubModule.isCodeTaken(subModuleBody.code)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Code already taken');
   }
 
-  const forms = await formService.createManyForms(SubModuleBody.formIds)
-  SubModuleBody.formIds = forms.map(({ _id }) => _id);
+  const forms = await formService.createManyForms(subModuleBody.formIds)
+  subModuleBody.formIds = forms.map(({ _id }) => _id);
 
-  const workFlow = await workFlowService.createWorkFlow(SubModuleBody);
-  SubModuleBody.workFlowId = workFlow;
+  const workFlow = await workFlowService.createWorkFlow(subModuleBody);
+  subModuleBody.workFlowId = workFlow;
 
-  const subModule = await SubModule.create(SubModuleBody)
+  const subModule = await SubModule.create(subModuleBody)
 
   return getSubModuleById(subModule._id);
 };
@@ -36,8 +35,8 @@ const createSubModule = async (SubModuleBody) => {
  * @returns {Promise<QueryResult>}
  */
 const querySubModules = async (filter, options) => {
-  const SubModules = await SubModule.paginate(filter, options);
-  return SubModules;
+  const subModules = await SubModule.paginate(filter, options);
+  return subModules;
 };
 
 /**
@@ -76,28 +75,33 @@ const getSubModuleBySlug = async (slug) => {
 
 /**
  * Update SubModule by id
- * @param {ObjectId} SubModuleId
+ * @param {ObjectId} subModuleId
  * @param {Object} updateBody
  * @returns {Promise<SubModule>}
  */
-const updateSubModuleById = async (SubModuleId, updateBody) => {
-  const SubModule = await getSubModuleById(SubModuleId);
-  if (!SubModule) {
+const updateSubModuleById = async (subModuleId, updateBody) => {
+  const subModule = await getSubModuleById(subModuleId);
+  if (!subModule) {
     throw new ApiError(httpStatus.NOT_FOUND, 'SubModule not found');
   }
-  Object.assign(SubModule, updateBody);
-  await SubModule.save();
-  return SubModule;
+
+  if (updateBody.steps) {
+    await workFlowService.updateWorkFlowById(subModule.workFlowId.id, updateBody);
+  }
+
+  Object.assign(subModule, updateBody);
+  await subModule.save();
+  return subModule;
 };
 
 /**
  * Delete SubModule by id
- * @param {ObjectId} SubModuleId
+ * @param {ObjectId} subModuleId
  * @returns {Promise<SubModule>}
  */
-const deleteSubModuleById = async (SubModuleId) => {
-  const SubModule = await getSubModuleById(SubModuleId);
-  if (!SubModule) {
+const deleteSubModuleById = async (subModuleId) => {
+  const subModule = await getSubModuleById(subModuleId);
+  if (!subModule) {
     throw new ApiError(httpStatus.NOT_FOUND, 'SubModule not found');
   }
   await SubModule.remove();

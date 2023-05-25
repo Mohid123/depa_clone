@@ -19,7 +19,6 @@ const getSubmissions = {
     formIds: Joi.array().items(Joi.string().custom(objectId)),
     formDataIds: Joi.array().items(Joi.string().custom(objectId)),
     submissionStatus: Joi.number().min(1).max(4),
-    subModuleId: Joi.string().custom(objectId),
   }),
 };
 

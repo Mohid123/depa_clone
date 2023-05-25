@@ -5,6 +5,7 @@ const catchAsync = require('../../utils/catchAsync');
 const { moduleService } = require('../../services');
 
 const createModule = catchAsync(async (req, res) => {
+  req.body.createdBy = req.user.id;
   const module = await moduleService.createModule(req.body);
   res.status(httpStatus.CREATED).send(module);
 });
@@ -33,6 +34,7 @@ const getModuleBySlug = catchAsync(async (req, res) => {
 });
 
 const updateModule = catchAsync(async (req, res) => {
+  req.body.updatedBy = req.user.id;
   const module = await moduleService.updateModuleById(req.params.moduleId, req.body);
   res.send(module);
 });
