@@ -10,6 +10,7 @@ const createCategory = {
 const getCategories = {
   query: Joi.object().keys({
     name: Joi.string(),
+    withTrash: Joi.string().allow('', null),
   }),
 };
 
