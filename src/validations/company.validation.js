@@ -12,6 +12,7 @@ const getCompanies = {
   query: Joi.object().keys({
     groupCode: Joi.string(),
     title: Joi.string(),
+    withTrash: Joi.string().allow('', null),
   }),
 };
 
@@ -29,6 +30,7 @@ const updateCompany = {
     .keys({
       groupCode: Joi.string(),
       title: Joi.string(),
+      isDeleted: Joi.valid(false),
     })
     .min(1),
 };

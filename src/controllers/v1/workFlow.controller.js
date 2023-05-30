@@ -11,7 +11,10 @@ const createWorkFlow = catchAsync(async (req, res) => {
 });
 
 const getWorkFlows = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['workFlowName', 'role']);
+  const filter = pick(req.query, []);
+  if (req.query.withTrash !== "") {
+    filter.isDeleted = false;
+  }
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await workFlowService.queryWorkFlows(filter, options);
   res.send(result);

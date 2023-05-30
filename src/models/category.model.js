@@ -43,17 +43,9 @@ categorySchema.methods.softDelete = function () {
  * 
  * @returns {Promise<boolean>}
  */
-categorySchema.statics.removeFromTrash = function () {
-  return this.deleteMany({ isDeleted: true });
-};
-
-/**
- * Static method to retrieve only non-Deleted documents
- * 
- * @returns {Promise<boolean>}
- */
-categorySchema.statics.findWithoutTrashed = function () {
-  return this.find({ isDeleted: false });
+categorySchema.methods.removeFromTrash = function () {
+  this.isDeleted = false;
+  return this.save();
 };
 
 /**

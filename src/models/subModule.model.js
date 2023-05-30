@@ -39,6 +39,26 @@ subModuleSchema.statics.isCodeTaken = async function (code, excludeSubModuleId) 
 };
 
 /**
+ * Custom method to perform soft delete
+ * 
+ * @returns {Promise<boolean>}
+ */
+subModuleSchema.methods.softDelete = function () {
+  this.isDeleted = true;
+  return this.save();
+};
+
+/**
+ * Method to remove documents from the trash
+ * 
+ * @returns {Promise<boolean>}
+ */
+subModuleSchema.methods.removeFromTrash = function () {
+  this.isDeleted = false;
+  return this.save();
+};
+
+/**
  * @typedef SubModule
  */
 const SubModule = mongoose.model('SubModule', subModuleSchema);

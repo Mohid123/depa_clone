@@ -42,6 +42,26 @@ formSchema.statics.isKeyTaken = async function (key, excludeFormId) {
 };
 
 /**
+ * Custom method to perform soft delete
+ * 
+ * @returns {Promise<boolean>}
+ */
+formSchema.methods.softDelete = function () {
+  this.isDeleted = true;
+  return this.save();
+};
+
+/**
+ * Method to remove documents from the trash
+ * 
+ * @returns {Promise<boolean>}
+ */
+formSchema.methods.removeFromTrash = function () {
+  this.isDeleted = false;
+  return this.save();
+};
+
+/**
  * @typedef Form
  */
 const Form = mongoose.model('Form', formSchema);

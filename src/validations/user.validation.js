@@ -17,6 +17,7 @@ const getUsers = {
     sortBy: Joi.string(),
     limit: Joi.number().integer(),
     page: Joi.number().integer(),
+    withTrash: Joi.string().allow('', null),
   }),
 };
 
@@ -36,6 +37,7 @@ const updateUser = {
       password: Joi.string().custom(password),
       fullName: Joi.string(),
       role: Joi.string().valid('user', 'admin'),
+      isDeleted: Joi.valid(false),
     })
     .min(1),
 };

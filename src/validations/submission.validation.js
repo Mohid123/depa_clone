@@ -19,6 +19,7 @@ const getSubmissions = {
     formIds: Joi.array().items(Joi.string().custom(objectId)),
     formDataIds: Joi.array().items(Joi.string().custom(objectId)),
     submissionStatus: Joi.number().min(1).max(4),
+    withTrash: Joi.string().allow('', null),
   }),
 };
 
@@ -41,7 +42,8 @@ const updateSubmission = {
       stepId: Joi.required().custom(objectId),
       userId: Joi.required().custom(objectId),
       remarks: Joi.string().required(),
-      isApproved: Joi.boolean().required()
+      isApproved: Joi.boolean().required(),
+      isDeleted: Joi.valid(false),
     })
     .min(1),
 };

@@ -11,7 +11,10 @@ const createApprovalLog = catchAsync(async (req, res) => {
 });
 
 const getApprovalLogs = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['approvalLogName', 'role']);
+  const filter = pick(req.query, []);
+  if (req.query.withTrash !== "") {
+    filter.isDeleted = false;
+  }
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await approvalLogService.queryApprovalLogs(filter, options);
   res.send(result);

@@ -13,6 +13,7 @@ const createModule = {
       "condition": Joi.string().valid("none", "and", "or").required(),
       "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
     }).required()).required(),
+    isDeleted: Joi.valid(false),
   }),
 };
 
@@ -21,6 +22,7 @@ const getModules = {
     categoryId: Joi.custom(objectId),
     code: Joi.string(),
     title: Joi.string(),
+    withTrash: Joi.string().allow('', null),
   }),
 };
 

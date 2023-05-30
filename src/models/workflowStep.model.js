@@ -19,6 +19,26 @@ workflowStepSchema.plugin(toJSON);
 workflowStepSchema.plugin(paginate);
 
 /**
+ * Custom method to perform soft delete
+ * 
+ * @returns {Promise<boolean>}
+ */
+workflowStepSchema.methods.softDelete = function () {
+  this.isDeleted = true;
+  return this.save();
+};
+
+/**
+ * Method to remove documents from the trash
+ * 
+ * @returns {Promise<boolean>}
+ */
+workflowStepSchema.methods.removeFromTrash = function () {
+  this.isDeleted = false;
+  return this.save();
+};
+
+/**
  * @typedef WorkflowStep
  */
 const WorkflowStep = mongoose.model('WorkflowStep', workflowStepSchema);

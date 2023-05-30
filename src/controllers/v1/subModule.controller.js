@@ -11,7 +11,10 @@ const createSubModule = catchAsync(async (req, res) => {
 });
 
 const getSubModules = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['subModulename', 'role']);
+  const filter = pick(req.query, []);
+  if (req.query.withTrash !== "") {
+    filter.isDeleted = false;
+  }
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await subModuleService.querySubModules(filter, options);
   res.send(result);

@@ -61,7 +61,7 @@ const deleteWorkflowStepById = async (workflowStepId) => {
   if (!workflowStep) {
     throw new ApiError(httpStatus.NOT_FOUND, 'WorkflowStep not found');
   }
-  await workflowStep.remove();
+  await workflowStep.softDelete();
   return workflowStep;
 };
 

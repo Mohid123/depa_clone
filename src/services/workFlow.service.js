@@ -97,7 +97,7 @@ const deleteWorkFlowById = async (workFlowId) => {
   if (!workFlow) {
     throw new ApiError(httpStatus.NOT_FOUND, 'WorkFlow not found');
   }
-  await workFlow.remove();
+  await workFlow.softDelete();
   return workFlow;
 };
 

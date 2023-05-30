@@ -9,7 +9,7 @@ const userSchema = mongoose.Schema(
     {},
     defaultFields,
     {
-      userName: { type: String, required: true, trim: true },
+      userName: { type: String, trim: true },
       fullName: { type: String, required: true, trim: true },
       email: {
         type: String, required: true, unique: true, trim: true, lowercase: true,
@@ -72,6 +72,26 @@ userSchema.pre('save', async function (next) {
   }
   next();
 });
+
+/**
+ * Custom method to perform soft delete
+ * 
+ * @returns {Promise<boolean>}
+ */
+userSchema.methods.softDelete = function () {
+  this.isDeleted = true;
+  return this.save();
+};
+
+/**
+ * Method to remove documents from the trash
+ * 
+ * @returns {Promise<boolean>}
+ */
+userSchema.methods.removeFromTrash = function () {
+  this.isDeleted = false;
+  return this.save();
+};
 
 /**
  * @typedef User

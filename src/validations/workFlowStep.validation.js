@@ -3,14 +3,15 @@ const { objectId } = require('./custom.validation');
 
 const createWorkFlowStep = {
   body: Joi.object().keys({
-    "condition": Joi.string().valid("none", "and", "or").required(),
-    "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
+    condition: Joi.string().valid("none", "and", "or").required(),
+    approverIds: Joi.array().items(Joi.string().custom(objectId)).required(),
   }),
 };
 
 const getWorkFlowSteps = {
   query: Joi.object().keys({
     name: Joi.string(),
+    withTrash: Joi.string().allow('', null),
   }),
 };
 
@@ -26,8 +27,9 @@ const updateWorkFlowStep = {
   }),
   body: Joi.object()
     .keys({
-      "condition": Joi.string().valid("none", "and", "or"),
-      "approverIds": Joi.array().items(Joi.string().custom(objectId)),
+      condition: Joi.string().valid("none", "and", "or"),
+      approverIds: Joi.array().items(Joi.string().custom(objectId)),
+      isDeleted: Joi.valid(false),
     })
     .min(1),
 };

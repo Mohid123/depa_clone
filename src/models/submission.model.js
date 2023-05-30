@@ -32,6 +32,26 @@ submissionSchema.plugin(toJSON);
 submissionSchema.plugin(paginate);
 
 /**
+ * Custom method to perform soft delete
+ * 
+ * @returns {Promise<boolean>}
+ */
+submissionSchema.methods.softDelete = function () {
+  this.isDeleted = true;
+  return this.save();
+};
+
+/**
+ * Method to remove documents from the trash
+ * 
+ * @returns {Promise<boolean>}
+ */
+submissionSchema.methods.removeFromTrash = function () {
+  this.isDeleted = false;
+  return this.save();
+};
+
+/**
  * @typedef Submission
  */
 const Submission = mongoose.model('Submission', submissionSchema);

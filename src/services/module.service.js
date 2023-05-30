@@ -57,7 +57,7 @@ const getModuleById = async (id) => {
  * @returns {Promise<Module>}
  */
 const getModuleBySlug = async (slug) => {
-  return Module.findOne({ 'code': slug }).populate(['categoryId', {
+  return Module.findOne({ 'code': slug, 'isDeleted': false }).populate(['categoryId', {
     path: 'workFlowId',
     populate: {
       path: 'stepIds',
@@ -99,7 +99,7 @@ const deleteModuleById = async (moduleId) => {
   if (!module) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
   }
-  await module.remove();
+  await module.softDelete();
   return module;
 };
 

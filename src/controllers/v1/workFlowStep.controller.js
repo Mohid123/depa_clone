@@ -11,7 +11,10 @@ const createWorkFlowStep = catchAsync(async (req, res) => {
 });
 
 const getWorkFlowSteps = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['workFlowStepName', 'role']);
+  const filter = pick(req.query, []);
+  if (req.query.withTrash !== "") {
+    filter.isDeleted = false;
+  }
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await workFlowStepService.queryWorkflowSteps(filter, options);
   res.send(result);

@@ -61,7 +61,7 @@ const deleteApprovalLogById = async (approvalLogId) => {
   if (!approvalLog) {
     throw new ApiError(httpStatus.NOT_FOUND, 'ApprovalLog not found');
   }
-  await approvalLog.remove();
+  await approvalLog.softDelete();
   return approvalLog;
 };
 

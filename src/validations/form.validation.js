@@ -20,6 +20,7 @@ const getForms = {
     name: Joi.string(),
     title: Joi.string(),
     key: Joi.string(),
+    withTrash: Joi.string().allow('', null),
   }),
 };
 
@@ -49,7 +50,8 @@ const updateForm = {
       permissions: Joi.array().items(Joi.object({
         "options": Joi.string().valid("canEdit", "canDelete", "canView", "canSave", "canAdd").required(),
         "user": Joi.required().custom(objectId),
-      }))
+      })),
+      isDeleted: Joi.valid(false),
     })
     .min(1),
 };

@@ -30,6 +30,26 @@ companySchema.statics.isTitleTaken = async function (title, excludeCompanyId) {
 };
 
 /**
+ * Custom method to perform soft delete
+ * 
+ * @returns {Promise<boolean>}
+ */
+companySchema.methods.softDelete = function () {
+  this.isDeleted = true;
+  return this.save();
+};
+
+/**
+ * Method to remove documents from the trash
+ * 
+ * @returns {Promise<boolean>}
+ */
+companySchema.methods.removeFromTrash = function () {
+  this.isDeleted = false;
+  return this.save();
+};
+
+/**
  * @typedef Company
  */
 const Company = mongoose.model('Company', companySchema);

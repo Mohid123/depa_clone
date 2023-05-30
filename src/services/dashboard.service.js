@@ -19,6 +19,9 @@ const queryModulesByCategory = async (filter, options) => {
 
   const Categories = await Category.aggregate([
     {
+      $match: { isDeleted: false }
+    },
+    {
       $lookup: {
         from: "modules",
         localField: "_id",

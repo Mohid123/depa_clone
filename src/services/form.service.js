@@ -113,7 +113,7 @@ const deleteFormById = async (formId) => {
   if (!form) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Form not found');
   }
-  await form.remove();
+  await form.softDelete();
   return form;
 };
 

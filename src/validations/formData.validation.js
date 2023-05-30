@@ -10,7 +10,8 @@ const createFormData = {
 
 const getFormsData = {
   query: Joi.object().keys({
-    formId: Joi.custom(objectId)
+    formId: Joi.custom(objectId),
+    withTrash: Joi.string().allow('', null),
   }),
 };
 
@@ -27,7 +28,8 @@ const updateFormData = {
   body: Joi.object()
     .keys({
       formId: Joi.custom(objectId),
-      data: Joi.object()
+      data: Joi.object(),
+      isDeleted: Joi.valid(false),
     })
     .min(1),
 };

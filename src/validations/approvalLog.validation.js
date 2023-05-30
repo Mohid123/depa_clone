@@ -17,6 +17,7 @@ const createApprovalLog = {
 const getApprovalLogs = {
   query: Joi.object().keys({
     name: Joi.string(),
+    withTrash: Joi.string().allow('', null),
   }),
 };
 
@@ -32,6 +33,7 @@ const updateApprovalLog = {
   }),
   body: Joi.object()
     .keys({
+      isDeleted: Joi.valid(false),
     })
     .min(1),
 };

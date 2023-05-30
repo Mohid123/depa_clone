@@ -319,7 +319,7 @@ const deleteSubmissionById = async (submissionId) => {
   if (!Submission) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Submission not found');
   }
-  await Submission.remove();
+  await Submission.softDelete();
   return Submission;
 };
 

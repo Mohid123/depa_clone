@@ -27,6 +27,7 @@ const updateCategory = {
   body: Joi.object()
     .keys({
       name: Joi.string(),
+      isDeleted: Joi.valid(false),
     })
     .min(1),
 };

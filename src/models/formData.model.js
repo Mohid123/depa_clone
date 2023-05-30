@@ -19,6 +19,26 @@ formDataSchema.plugin(toJSON);
 formDataSchema.plugin(paginate);
 
 /**
+ * Custom method to perform soft delete
+ * 
+ * @returns {Promise<boolean>}
+ */
+formDataSchema.methods.softDelete = function () {
+  this.isDeleted = true;
+  return this.save();
+};
+
+/**
+ * Method to remove documents from the trash
+ * 
+ * @returns {Promise<boolean>}
+ */
+formDataSchema.methods.removeFromTrash = function () {
+  this.isDeleted = false;
+  return this.save();
+};
+
+/**
  * @typedef FormData
  */
 const FormData = mongoose.model('FormData', formDataSchema);

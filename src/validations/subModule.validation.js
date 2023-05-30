@@ -23,6 +23,7 @@ const getSubModules = {
     moduleSlug: Joi.string(),
     companyId: Joi.string().custom(objectId),
     code: Joi.string(),
+    withTrash: Joi.string().allow('', null),
   }),
 };
 
@@ -59,6 +60,7 @@ const updateSubModule = {
         "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
       }).required()),
       workFlowId: Joi.custom(objectId),
+      isDeleted: Joi.valid(false),
     })
     .min(1),
 };

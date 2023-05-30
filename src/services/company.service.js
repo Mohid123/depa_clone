@@ -69,7 +69,7 @@ const deleteCompanyById = async (companyId) => {
   if (!Company) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Company not found');
   }
-  await Company.remove();
+  await Company.softDelete();
   return Company;
 };
 

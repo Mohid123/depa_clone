@@ -13,6 +13,7 @@ const createWorkFlow = {
 const getWorkFlows = {
   query: Joi.object().keys({
     name: Joi.string(),
+    withTrash: Joi.string().allow('', null),
   }),
 };
 
@@ -33,6 +34,7 @@ const updateWorkFlow = {
         "condition": Joi.string().valid("none", "and", "or").required(),
         "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
       }).required()).required(),
+      isDeleted: Joi.valid(false),
     })
     .min(1),
 };

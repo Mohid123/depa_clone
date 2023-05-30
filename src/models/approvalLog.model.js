@@ -25,6 +25,26 @@ approvalLogSchema.plugin(toJSON);
 approvalLogSchema.plugin(paginate);
 
 /**
+ * Custom method to perform soft delete
+ * 
+ * @returns {Promise<boolean>}
+ */
+approvalLogSchema.methods.softDelete = function () {
+  this.isDeleted = true;
+  return this.save();
+};
+
+/**
+ * Method to remove documents from the trash
+ * 
+ * @returns {Promise<boolean>}
+ */
+approvalLogSchema.methods.removeFromTrash = function () {
+  this.isDeleted = false;
+  return this.save();
+};
+
+/**
  * @typedef ApprovalLog
  */
 const ApprovalLog = mongoose.model('ApprovalLog', approvalLogSchema);

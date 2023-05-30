@@ -11,7 +11,10 @@ const createFormData = catchAsync(async (req, res) => {
 });
 
 const getFormsData = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['formDataName', 'role']);
+  const filter = pick(req.query, []);
+  if (req.query.withTrash !== "") {
+    filter.isDeleted = false;
+  }
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await formDataService.queryFormsData(filter, options);
   res.send(result);

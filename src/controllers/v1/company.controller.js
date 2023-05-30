@@ -11,7 +11,10 @@ const createCompany = catchAsync(async (req, res) => {
 });
 
 const getCompanies = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['companyName', 'role']);
+  const filter = pick(req.query, []);
+  if (req.query.withTrash !== "") {
+    filter.isDeleted = false;
+  }
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await companyService.queryCompanies(filter, options);
   res.send(result);

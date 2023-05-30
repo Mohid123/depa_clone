@@ -11,7 +11,10 @@ const createModule = catchAsync(async (req, res) => {
 });
 
 const getModules = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['moduleName', 'role']);
+  const filter = pick(req.query, []);
+  if (req.query.withTrash !== "") {
+    filter.isDeleted = false;
+  }
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await moduleService.queryModules(filter, options);
   res.send(result);
