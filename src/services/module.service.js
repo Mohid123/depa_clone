@@ -80,6 +80,10 @@ const updateModuleById = async (moduleId, updateBody) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
   }
 
+  if (await Module.isCodeTaken(updateBody.code, module.id)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Module Key already taken');
+  }
+
   if (updateBody.steps) {
     await workFlowService.updateWorkFlowById(module.workFlowId.id, updateBody);
   }

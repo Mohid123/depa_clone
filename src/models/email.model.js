@@ -28,6 +28,8 @@ const emailSchema = mongoose.Schema(
       companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
       moduleId: { type: mongoose.Schema.Types.ObjectId, ref: 'Module', required: true },
       subModuleId: { type: mongoose.Schema.Types.ObjectId, ref: 'SubModule', required: true },
+      stepId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkFlowStep', required: true },
+      submissionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Submission', required: true },
       moduleName: { type: String, required: true },
       emailResponseId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkFlowSetp', required: true },
       emailResponseBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -40,6 +42,26 @@ const emailSchema = mongoose.Schema(
 // add plugin that converts mongoose to json
 emailSchema.plugin(toJSON);
 emailSchema.plugin(paginate);
+
+/**
+ * Custom method to perform soft delete
+ * 
+ * @returns {Promise<boolean>}
+ */
+emailSchema.methods.softDelete = function () {
+  this.isDeleted = true;
+  return this.save();
+};
+
+/**
+ * Method to remove documents from the trash
+ * 
+ * @returns {Promise<boolean>}
+ */
+emailSchema.methods.removeFromTrash = function () {
+  this.isDeleted = false;
+  return this.save();
+};
 
 /**
  * @typedef Email

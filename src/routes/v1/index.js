@@ -10,8 +10,9 @@ const subModuleRoute = require('./subModule.route');
 const dashboardRoute = require('./dashboard.route');
 const formDataRoute = require('./formData.route');
 const submissionRoute = require('./submission.route');
-const workFlowStep = require('./workFlowStep.route');
-const approvalLog = require('./approvalLog.route');
+const workFlowStepRoute = require('./workFlowStep.route');
+const approvalLogRoute = require('./approvalLog.route');
+const emailRoute = require('./email.route');
 const docsRoute = require('./docs.route');
 const config = require('../../config/config');
 
@@ -64,11 +65,15 @@ const defaultRoutes = [
   },
   {
     path: '/workFlowSteps',
-    route: workFlowStep,
+    route: workFlowStepRoute,
   },
   {
     path: '/approvalLogs',
-    route: approvalLog,
+    route: approvalLogRoute,
+  },
+  {
+    path: '/emails',
+    route: emailRoute,
   }
 ];
 

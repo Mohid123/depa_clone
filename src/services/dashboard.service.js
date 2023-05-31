@@ -30,6 +30,9 @@ const queryModulesByCategory = async (filter, options) => {
       },
     },
     {
+      $match: { "modules.isDeleted": false }
+    },
+    {
       $sort: {
         ['name']: sortBy === "asc" ? 1 : -1, // sort ascending by the specified field
       },
@@ -60,12 +63,12 @@ const querySubModulesByModule = async (id) => {
  * @returns {Promise<Module>}
  */
 const querySubModulesByModuleSlug = async (slug) => {
-  const module = await Module.findOne({ 'code': slug });
+  const module = await Module.findOne({ 'code': slug, 'isDeleted': false });
   if (!module) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
   }
 
-  const subModules = await SubModule.find({ 'moduleId': module.id }).populate(['moduleId', 'companyId']);
+  const subModules = await SubModule.find({ 'moduleId': module.id, 'isDeleted': false }).populate(['moduleId', 'companyId']);
 
   return subModules;
 };

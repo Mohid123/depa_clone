@@ -85,6 +85,10 @@ const updateSubModuleById = async (subModuleId, updateBody) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'SubModule not found');
   }
 
+  if (await SubModule.isCodeTaken(updateBody.code, subModule.id)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Sub Module Key already taken');
+  }
+
   if (updateBody.steps) {
     await workFlowService.updateWorkFlowById(subModule.workFlowId.id, updateBody);
   }

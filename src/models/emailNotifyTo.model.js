@@ -8,10 +8,13 @@ const emailNotifyToSchema = mongoose.Schema(
     {},
     defaultFields,
     {
+      emailId: { type: mongoose.Schema.Types.ObjectId, ref: 'Email', required: true },
       moduleId: { type: mongoose.Schema.Types.ObjectId, ref: 'Module', required: true },
       subModuleId: { type: mongoose.Schema.Types.ObjectId, ref: 'SubModule', required: true },
       workFlowId: { type: mongoose.Schema.Types.ObjectId, ref: 'Workflow', required: true },
       stepId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkflowStep', required: true },
+      submissionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Submission', required: true },
+      stepId: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }],
     }
   )
 );
@@ -19,6 +22,26 @@ const emailNotifyToSchema = mongoose.Schema(
 // add plugin that converts mongoose to json
 emailNotifyToSchema.plugin(toJSON);
 emailNotifyToSchema.plugin(paginate);
+
+/**
+ * Custom method to perform soft delete
+ * 
+ * @returns {Promise<boolean>}
+ */
+emailNotifyToSchema.methods.softDelete = function () {
+  this.isDeleted = true;
+  return this.save();
+};
+
+/**
+ * Method to remove documents from the trash
+ * 
+ * @returns {Promise<boolean>}
+ */
+emailNotifyToSchema.methods.removeFromTrash = function () {
+  this.isDeleted = false;
+  return this.save();
+};
 
 /**
  * @typedef EmailNotifyTo

@@ -29,7 +29,7 @@ const getSubmission = catchAsync(async (req, res) => {
 });
 
 const updateSubmission = catchAsync(async (req, res) => {
-  req.body.updatedBy = req.user.id;
+  req.body.updatedBy = req.body.userId;
   const submission = await submissionService.updateSubmissionById(req.params.submissionId, req.body);
   res.send(submission);
 });

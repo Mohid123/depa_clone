@@ -41,7 +41,7 @@ const updateSubmission = {
       submissionStatus: Joi.number().min(1).max(4),
       stepId: Joi.required().custom(objectId),
       userId: Joi.required().custom(objectId),
-      remarks: Joi.string().required(),
+      remarks: Joi.string(),
       isApproved: Joi.boolean().required(),
       isDeleted: Joi.valid(false),
     })

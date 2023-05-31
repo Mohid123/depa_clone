@@ -56,6 +56,7 @@ const updateModule = {
         "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
       }).required()),
       workFlowId: Joi.custom(objectId),
+      isDeleted: Joi.valid(false),
     })
     .min(1),
 };

@@ -14,7 +14,7 @@ router
 router
     .route('/:submissionId')
     .get(auth(), validate(submissionValidation.getSubmission), submissionController.getSubmission)
-    .patch(auth(), validate(submissionValidation.updateSubmission), submissionController.updateSubmission)
+    .patch(validate(submissionValidation.updateSubmission), submissionController.updateSubmission)
     .delete(auth(), validate(submissionValidation.deleteSubmission), submissionController.deleteSubmission);
 
 module.exports = router;
