@@ -24,7 +24,13 @@ const createUser = async (userBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryUsers = async (filter, options) => {
+  // Adjust the filter to include regex search on fullName if provided
+  if (filter.fullName) {
+    filter.fullName = { $regex: filter.fullName, $options: 'i' };
+  }
+
   const users = await User.paginate(filter, options);
+
   return users;
 };
 

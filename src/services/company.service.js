@@ -25,6 +25,11 @@ const createCompany = async (companyBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryCompanies = async (filter, options) => {
+  // Adjust the filter to include regex search on title if provided
+  if (filter.title) {
+    filter.title = { $regex: filter.title, $options: 'i' };
+  }
+
   const Companies = await Company.paginate(filter, options);
   return Companies;
 };

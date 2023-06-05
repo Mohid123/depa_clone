@@ -25,6 +25,11 @@ const createCategory = async (categoryBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryCategories = async (filter, options) => {
+  // Adjust the filter to include regex search on name if provided
+  if (filter.name) {
+    filter.name = { $regex: filter.name, $options: 'i' };
+  }
+
   const categories = await Category.paginate(filter, options);
   return categories;
 };

@@ -4,6 +4,8 @@ const ApiError = require('../utils/ApiError');
 const workFlowService = require('./workFlow.service');
 const formDataService = require('./formData.service');
 const approvalLogService = require('./approvalLog.service');
+const emailService = require('./email.service');
+const userService = require('./user.service');
 
 /**
  * Create a Submission
@@ -36,7 +38,24 @@ const createSubmission = async (submissionBody) => {
       condition: step.condition,
     };
 
-    stepStatusData.status = (index === 0) ? "inProgress" : "pending";
+    if (!index) {
+      stepStatusData.status = "inProgress";
+      // step.approverIds.forEach(async userId => {
+      //   let user = await userService.getUserById(userId)
+      //   emailService.sendEmailWithTemplate(
+      //     user.email,
+      //     "Workflow Active User Notify",
+      //     "src/emails/workflow/active-user.template.html",
+      //     {
+      //       "submissionId": submission.id,
+      //       "stepId": previousStep.stepId,
+      //       "userId": userId,
+      //     }
+      //   );
+      // });
+    } else {
+      stepStatusData.status = "pending";
+    }
 
     workflowStatusArray.push(stepStatusData);
   }
@@ -145,18 +164,20 @@ const nextWorkFlowStep = async (workFlowStatus, workFlowStatusStep) => {
 
 /**
  * Function to perform approval action
- * @param {Object} workFlowStatus workFlowStatus
+ * @param {Object} submission submission
  * @param {Object} workFlowStatusStep workFlowStatus
  * @param {Object} approvingUser
  */
-const approveStep = async (workFlowStatus, workFlowStatusStep, approvingUser) => {
+const approveStep = async (submission, workFlowStatusStep, approvingUser) => {
+  const workFlowStatus = submission.workflowStatus;
   const step = workFlowStatusStep;
+  let nextStep = false;
 
   if (step.condition === "none" || step.condition === "or") {
     // none condition step
     step.status = "approved";
     step.approvedUsers.push(approvingUser);
-    const nextStep = await nextWorkFlowStep(workFlowStatus, workFlowStatusStep);
+    nextStep = await nextWorkFlowStep(workFlowStatus, workFlowStatusStep);
     if (nextStep) {
       nextStep.status = "inProgress";
     }
@@ -173,12 +194,28 @@ const approveStep = async (workFlowStatus, workFlowStatusStep, approvingUser) =>
         // Last user performing approval in the step
         step.approvedUsers.push(approvingUser);
         step.status = "approved";
-        const nextStep = await nextWorkFlowStep(workFlowStatus, workFlowStatusStep);
+        nextStep = await nextWorkFlowStep(workFlowStatus, workFlowStatusStep);
         if (nextStep) {
           nextStep.status = "inProgress";
         }
       }
     }
+  }
+
+  if (nextStep) {
+    nextStep.activeUsers.forEach(async userId => {
+      let user = await userService.getUserById(userId)
+      emailService.sendEmailWithTemplate(
+        user.email,
+        "Workflow Active User Notify",
+        "src/emails/workflow/active-user.template.html",
+        {
+          "submissionId": submission.id,
+          "stepId": nextStep.stepId,
+          "userId": userId
+        }
+      );
+    });
   }
 
   return workFlowStatus;
@@ -203,16 +240,18 @@ const previousWorkFlowStep = async (workFlowStatus, workFlowStatusStep) => {
 
 /**
  * Function to perform rejection action
- * @param {Object} workFlowStatus workFlowStatus
+ * @param {Object} submission submission
  * @param {Object} workFlowStatusStep workFlowStatus
  * @param {Object} rejectingUser
  */
-const rejectStep = async (workFlowStatus, workFlowStatusStep, rejectingUser) => {
+const rejectStep = async (submission, workFlowStatusStep, rejectingUser) => {
+  const workFlowStatus = submission.workflowStatus;
   const step = workFlowStatusStep;
+  let previousStep = false;
 
   if (step.condition === "none" || step.condition === "or") {
     // none condition step
-    const previousStep = await previousWorkFlowStep(workFlowStatus, workFlowStatusStep);
+    previousStep = await previousWorkFlowStep(workFlowStatus, workFlowStatusStep);
     if (previousStep) {
       step.status = "pending";
       previousStep.status = "inProgress";
@@ -227,7 +266,7 @@ const rejectStep = async (workFlowStatus, workFlowStatusStep, rejectingUser) => 
       // User is part of the current step
       if (step.approvedUsers.length === 0) {
         // No approved user in the step, set as pending
-        const previousStep = await previousWorkFlowStep(workFlowStatus, workFlowStatusStep)
+        previousStep = await previousWorkFlowStep(workFlowStatus, workFlowStatusStep)
         if (previousStep) {
           step.status = "pending";
           previousStep.status = "inProgress";
@@ -242,6 +281,22 @@ const rejectStep = async (workFlowStatus, workFlowStatusStep, rejectingUser) => 
         step.activeUsers.push(index);
       }
     }
+  }
+
+  if (previousStep) {
+    previousStep.activeUsers.forEach(async userId => {
+      let user = await userService.getUserById(userId)
+      emailService.sendEmailWithTemplate(
+        user.email,
+        "Workflow Active User Notify",
+        "src/emails/workflow/active-user.template.html",
+        {
+          "submissionId": submission.id,
+          "stepId": previousStep.stepId,
+          "userId": userId,
+        }
+      );
+    });
   }
 
   return workFlowStatus;
@@ -272,14 +327,15 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'Invalid User!');
   }
 
-  if (updateBody.isApproved) {
-    const updatedworkFlowStatus = await approveStep(workFlowStatus, approvalStep, stepActiveUserId);
+  // return updateBody.isApproved;
+  if (Boolean(updateBody.isApproved)) {
+    const updatedworkFlowStatus = await approveStep(submission, approvalStep, stepActiveUserId);
 
     // Update submission status when all steps are approved
     const allStepsApproved = updatedworkFlowStatus.every(step => step.status === "approved");
     updateBody.submissionStatus = allStepsApproved ? 3 : 2;
   } else {
-    await rejectStep(workFlowStatus, approvalStep, stepActiveUserId);
+    await rejectStep(submission, approvalStep, stepActiveUserId);
     updateBody.submissionStatus = 2;
   }
   // res.status(httpStatus.OK).send(approvalStep.pendingUserIds);

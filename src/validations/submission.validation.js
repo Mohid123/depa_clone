@@ -10,6 +10,7 @@ const createSubmission = {
       "data": Joi.object().required(),
     }).required()).required(),
     steps: Joi.array().items(Joi.object().required()),
+    submissionStatus: Joi.valid(4)
   }),
 };
 

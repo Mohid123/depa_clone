@@ -11,7 +11,7 @@ const createCompany = catchAsync(async (req, res) => {
 });
 
 const getCompanies = catchAsync(async (req, res) => {
-  const filter = pick(req.query, []);
+  const filter = pick(req.query, ['title']);
   if (req.query.withTrash !== "") {
     filter.isDeleted = false;
   }

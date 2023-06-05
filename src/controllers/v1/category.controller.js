@@ -11,7 +11,7 @@ const createCategory = catchAsync(async (req, res) => {
 });
 
 const getCategories = catchAsync(async (req, res) => {
-  const filter = pick(req.query, []);
+  const filter = pick(req.query, ['name']);
   if (req.query.withTrash !== "") {
     filter.isDeleted = false;
   }

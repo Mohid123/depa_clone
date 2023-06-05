@@ -88,20 +88,26 @@ module.exports = router;
  *       - bearerAuth: []
  *     parameters:
  *       - in: query
- *         name: name
+ *         name: fullName
  *         schema:
  *           type: string
- *         description: User name
+ *         description: User full name
  *       - in: query
  *         name: role
  *         schema:
  *           type: string
  *         description: User role
  *       - in: query
+ *         name: withTrash
+ *         schema:
+ *           type: bool
+ *           allowEmptyValue: true
+ *         description: User is deleted check
+ *       - in: query
  *         name: sortBy
  *         schema:
  *           type: string
- *         description: sort by query in the form of field:desc/asc (ex. name:asc)
+ *         description: sort by query in the form of field:desc/asc (ex. fullName:asc|desc)
  *       - in: query
  *         name: limit
  *         schema:
