@@ -55,7 +55,7 @@ const updateModule = {
         "condition": Joi.string().valid("none", "and", "or").required(),
         "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
         "emailNotifyToId": Joi.string().custom(objectId),
-        "emailNotifyTo": Joi.array().items(Joi.string().email()),
+        "emailNotifyTo": Joi.array().items(Joi.string().email()).required(),
       }).required()),
       workFlowId: Joi.custom(objectId),
       emailNotifyTo: Joi.array().items(Joi.string().email()),

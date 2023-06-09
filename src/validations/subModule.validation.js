@@ -62,6 +62,8 @@ const updateSubModule = {
         "id": Joi.string().custom(objectId),
         "condition": Joi.string().valid("none", "and", "or").required(),
         "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
+        "emailNotifyToId": Joi.string().custom(objectId),
+        "emailNotifyTo": Joi.array().items(Joi.string().email()).required(),
       }).required()),
       workFlowId: Joi.custom(objectId),
       isDeleted: Joi.valid(false),

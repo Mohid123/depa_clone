@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { WorkflowStep } = require('../models');
 const ApiError = require('../utils/ApiError');
+const emailNotifyToService = require('./emailNotifyTo.service');
 
 /**
  * Create a WorkflowStep
@@ -8,6 +9,10 @@ const ApiError = require('../utils/ApiError');
  * @returns {Promise<WorkflowStep>}
  */
 const createWorkflowStep = async (workflowStepBody) => {
+  if (workflowStepBody.emailNotifyTo && workflowStepBody.emailNotifyTo.length > 0) {
+    const { _id } = await emailNotifyToService.createEmailNotifyTo(workflowStepBody);
+    workflowStepBody.emailNotifyToId = _id;
+  }
   return WorkflowStep.create(workflowStepBody);
 };
 
@@ -44,6 +49,17 @@ const updateWorkflowStepById = async (workflowStepId, updateBody) => {
   const workflowStep = await getWorkflowStepById(workflowStepId);
   if (!workflowStep) {
     throw new ApiError(httpStatus.NOT_FOUND, 'WorkflowStep not found');
+  }
+
+  if (updateBody.emailNotifyTo.length > 0) {
+    if (updateBody.emailNotifyToId) {
+      await emailNotifyToService.updateEmailNotifyToById(updateBody.emailNotifyToId, updateBody);
+    } else {
+      const { _id } = await emailNotifyToService.createEmailNotifyTo(updateBody);
+      updateBody.emailNotifyToId = _id;
+    }
+  } else {
+    updateBody.emailNotifyToId = null;
   }
 
   Object.assign(workflowStep, updateBody);

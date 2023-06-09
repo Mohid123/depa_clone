@@ -31,10 +31,11 @@ const updateWorkFlow = {
   body: Joi.object()
     .keys({
       steps: Joi.array().items(Joi.object({
-        "id": Joi.required().custom(objectId),
+        "id": Joi.string().custom(objectId),
         "condition": Joi.string().valid("none", "and", "or").required(),
         "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
         "emailNotifyToId": Joi.string().custom(objectId),
+        "emailNotifyTo": Joi.array().items(Joi.string().email()),
       }).required()).required(),
       isDeleted: Joi.valid(false),
     })

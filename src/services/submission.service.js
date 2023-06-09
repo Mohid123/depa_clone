@@ -144,9 +144,14 @@ const getSubmissionById = async (id) => {
     path: "workFlowId",
     populate: {
       path: "stepIds",
-      populate: {
-        path: "approverIds"
-      }
+      populate: [
+        {
+          path: 'approverIds'
+        },
+        {
+          path: 'emailNotifyToId'
+        }
+      ]
     }
   }]);
 

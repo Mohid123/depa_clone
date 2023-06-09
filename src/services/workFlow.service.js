@@ -38,9 +38,14 @@ const queryWorkFlows = async (filter, options) => {
 const getWorkFlowById = async (id) => {
   return WorkFlow.findById(id).populate({
     path: 'stepIds',
-    populate: {
-      path: 'approverIds'
-    }
+    populate: [
+      {
+        path: 'approverIds'
+      },
+      {
+        path: 'emailNotifyToId'
+      }
+    ]
   });
 };
 
@@ -61,15 +66,17 @@ const updateWorkFlowById = async (workFlowId, updateBody) => {
   const workFlowStepIdsArr = workFlow.stepIds.map(({ _id }) => String(_id));
   const updateBodyStepIdsArr = updateBody.steps.map(({ id }) => id);
   workFlowStepIdsArr.forEach(async element => {
-    if (!updateBodyStepIdsArr.includes(element)) {
+    if (!updateBodyStepIdsArr.includes(element) && element != null) {
       await workFlowStepService.deleteWorkflowStepById(element);
     }
   });
+  updateBody.stepIds = updateBodyStepIdsArr;
 
   // check of the steps edit 
   // also add new steps
   let workflowStep = null;
   for (const step of updateBody.steps) {
+    step.notifyUsers = step.emailNotifyTo;
     if (step.id) {
       const stepId = step.id;
       delete step.id;
@@ -78,11 +85,12 @@ const updateWorkFlowById = async (workFlowId, updateBody) => {
 
     } else {
       const { _id } = await workFlowStepService.createWorkflowStep(step);
-      const stepIds = [...workFlow.stepIds, _id];
-      Object.assign(workFlow, { 'stepIds': stepIds });
-      await workFlow.save();
+      updateBody.stepIds.push(_id);
     }
   }
+
+  Object.assign(workFlow, updateBody);
+  await workFlow.save();
 
   return await getWorkFlowById(workFlowId);
 };
