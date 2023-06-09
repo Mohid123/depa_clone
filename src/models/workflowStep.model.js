@@ -10,6 +10,7 @@ const workflowStepSchema = mongoose.Schema(
     {
       condition: { type: String, enum: ["none", "and", "or"] },
       approverIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+      emailNotifyToId: { type: mongoose.Schema.Types.ObjectId, ref: 'EmailNotifyTo' },
     }
   )
 );

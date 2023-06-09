@@ -13,6 +13,7 @@ const submissionRoute = require('./submission.route');
 const workFlowStepRoute = require('./workFlowStep.route');
 const approvalLogRoute = require('./approvalLog.route');
 const emailRoute = require('./email.route');
+const emailNotifyToRoute = require('./emailNotifyTo.route');
 const docsRoute = require('./docs.route');
 const config = require('../../config/config');
 
@@ -74,6 +75,10 @@ const defaultRoutes = [
   {
     path: '/emails',
     route: emailRoute,
+  },
+  {
+    path: '/emailNotifyToRoutes',
+    route: emailNotifyToRoute,
   }
 ];
 

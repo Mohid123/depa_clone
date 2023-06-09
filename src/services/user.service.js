@@ -29,6 +29,14 @@ const queryUsers = async (filter, options) => {
     filter.fullName = { $regex: filter.fullName, $options: 'i' };
   }
 
+  // Add logic for latest and oldest records
+  if (filter.latest) {
+    filter.createdAt = { $lte: new Date() };
+  }
+  if (filter.oldest) {
+    filter.createdAt = { $gte: new Date() };
+  }
+
   const users = await User.paginate(filter, options);
 
   return users;

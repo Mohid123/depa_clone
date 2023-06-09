@@ -12,8 +12,8 @@ const createModule = {
     steps: Joi.array().items(Joi.object({
       "condition": Joi.string().valid("none", "and", "or").required(),
       "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
+      "emailNotifyTo": Joi.array().items(Joi.string().email()).required(),
     }).required()).required(),
-    isDeleted: Joi.valid(false),
   }),
 };
 
@@ -54,8 +54,11 @@ const updateModule = {
         "id": Joi.string().custom(objectId),
         "condition": Joi.string().valid("none", "and", "or").required(),
         "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
+        "emailNotifyToId": Joi.string().custom(objectId),
+        "emailNotifyTo": Joi.array().items(Joi.string().email()),
       }).required()),
       workFlowId: Joi.custom(objectId),
+      emailNotifyTo: Joi.array().items(Joi.string().email()),
       isDeleted: Joi.valid(false),
     })
     .min(1),

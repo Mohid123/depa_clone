@@ -8,7 +8,11 @@ const createSubModule = {
     adminUsers: Joi.array().items(Joi.string().custom(objectId)),
     viewOnlyUsers: Joi.array().items(Joi.string().custom(objectId)),
     formIds: Joi.array().items(Joi.object().required()),
-    steps: Joi.array().items(Joi.object().required()),
+    steps: Joi.array().items(Joi.object({
+      "condition": Joi.string().valid("none", "and", "or").required(),
+      "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
+      "emailNotifyTo": Joi.array().items(Joi.string().email()).required(),
+    }).required()).required(),
 
     summarySchema: Joi.array().items(Joi.object()),
     viewSchema: Joi.array().items(Joi.object()),

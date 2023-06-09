@@ -15,7 +15,8 @@ const getUsers = catchAsync(async (req, res) => {
   if (req.query.withTrash !== "" && req.query.withTrash !== "true") {
     filter.isDeleted = false;
   }
-  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+
+  const options = pick(req.query, ['latest', 'oldest', 'sortBy', 'limit', 'page']);
   const result = await userService.queryUsers(filter, options);
   res.send(result);
 });

@@ -11,3 +11,5 @@ module.exports.formDataValidation = require('./formData.validation');
 module.exports.submissionValidation = require('./submission.validation');
 module.exports.workFlowStepValidation = require('./workFlowStep.validation');
 module.exports.approvalLogValidation = require('./approvalLog.validation');
+module.exports.emailValidation = require('./email.validation');
+module.exports.emailNotifyToValidation = require('./emailNotifyTo.validation');

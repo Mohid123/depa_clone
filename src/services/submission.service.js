@@ -6,6 +6,7 @@ const formDataService = require('./formData.service');
 const approvalLogService = require('./approvalLog.service');
 const emailService = require('./email.service');
 const userService = require('./user.service');
+const emailNotifyToService = require('./emailNotifyTo.service');
 
 /**
  * Create a Submission
@@ -20,6 +21,22 @@ const createSubmission = async (submissionBody) => {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Forms Data is Invalid');
   }
   submissionBody.formDataIds = formsData.map(({ _id }) => _id);
+
+  // Replace the email addresses in the data with the created EmailNotifyTo document IDs
+  const emailNotifyToIds = [];
+  for (const step of submissionBody.steps) {
+    if (step.emailNotifyTo.length > 0) {
+      submissionBody.notifyUsers = step.emailNotifyTo;
+
+      const emailNotifyTo = await emailNotifyToService.createEmailNotifyTo(submissionBody);
+      if (!emailNotifyTo) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Email Notify To not found');
+      }
+
+      step.emailNotifyToId = emailNotifyTo.id;
+      emailNotifyToIds.push(emailNotifyTo.id);
+    }
+  };
 
   const workFlow = await workFlowService.createWorkFlow(submissionBody);
   submissionBody.workFlowId = workFlow._id;
@@ -69,8 +86,18 @@ const createSubmission = async (submissionBody) => {
   // Assign workflowStatus to submissionBody
   submissionBody.workflowStatus = workflowStatusArray;
 
-  const submission = await Submission.create(submissionBody);
-  return getSubmissionById(submission._id);
+  let submission = await Submission.create(submissionBody);
+  submission = await getSubmissionById(submission._id);
+
+  emailNotifyToIds.forEach(emailNotifyToId => {
+    emailNotifyToService.updateEmailNotifyToById(emailNotifyToId, {
+      "moduleId": submission.subModuleId.moduleId,
+      "subModuleId": submission.subModuleId._id,
+      "submissionId": submission._id
+    })
+  });
+
+  return submission;
 };
 
 /**

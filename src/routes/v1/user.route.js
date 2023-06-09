@@ -104,6 +104,18 @@ module.exports = router;
  *           allowEmptyValue: true
  *         description: User is deleted check
  *       - in: query
+ *         name: latest
+ *         schema:
+ *           type: bool
+ *           allowEmptyValue: true
+ *         description: Get latest data
+ *       - in: query
+ *         name: oldest
+ *         schema:
+ *           type: bool
+ *           allowEmptyValue: true
+ *         description: Get Oldest data
+ *       - in: query
  *         name: sortBy
  *         schema:
  *           type: string

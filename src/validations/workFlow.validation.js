@@ -6,6 +6,7 @@ const createWorkFlow = {
     steps: Joi.array().items(Joi.object({
       "condition": Joi.string().valid("none", "and", "or").required(),
       "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
+      "emailNotifyToId": Joi.string().custom(objectId),
     }).required()).required(),
   }),
 };
@@ -33,6 +34,7 @@ const updateWorkFlow = {
         "id": Joi.required().custom(objectId),
         "condition": Joi.string().valid("none", "and", "or").required(),
         "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
+        "emailNotifyToId": Joi.string().custom(objectId),
       }).required()).required(),
       isDeleted: Joi.valid(false),
     })

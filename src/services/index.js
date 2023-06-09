@@ -13,3 +13,4 @@ module.exports.formDataService = require('./formData.service');
 module.exports.submissionService = require('./submission.service');
 module.exports.workFlowStepService = require('./workFlowStep.service');
 module.exports.approvalLogService = require('./approvalLog.service');
+module.exports.emailNotifyToService = require('./emailNotifyTo.service');

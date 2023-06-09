@@ -12,3 +12,4 @@ module.exports.submissionController = require('./v1/submission.controller');
 module.exports.workFlowStepController = require('./v1/workFlowStep.controller');
 module.exports.approvalLogController = require('./v1/approvalLog.controller');
 module.exports.emailController = require('./v1/email.controller');
+module.exports.emailNotifyToController = require('./v1/emailNotifyTo.controller');

@@ -3,6 +3,7 @@ const { SubModule } = require('../models');
 const ApiError = require('../utils/ApiError');
 const formService = require('./form.service');
 const workFlowService = require('./workFlow.service');
+const emailNotifyToService = require('./emailNotifyTo.service');
 
 /**
  * Create a SubModule
@@ -17,10 +18,33 @@ const createSubModule = async (subModuleBody) => {
   const forms = await formService.createManyForms(subModuleBody.formIds)
   subModuleBody.formIds = forms.map(({ _id }) => _id);
 
+  // Replace the email addresses in the data with the created EmailNotifyTo document IDs
+  const emailNotifyToIds = [];
+  for (const step of subModuleBody.steps) {
+    if (step.emailNotifyTo.length > 0) {
+      subModuleBody.notifyUsers = step.emailNotifyTo;
+
+      const emailNotifyTo = await emailNotifyToService.createEmailNotifyTo(subModuleBody);
+      if (!emailNotifyTo) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Email Notify To not found');
+      }
+
+      step.emailNotifyToId = emailNotifyTo.id;
+      emailNotifyToIds.push(emailNotifyTo.id);
+    }
+  };
+
   const workFlow = await workFlowService.createWorkFlow(subModuleBody);
   subModuleBody.workFlowId = workFlow;
 
   const subModule = await SubModule.create(subModuleBody)
+
+  emailNotifyToIds.forEach(emailNotifyToId => {
+    emailNotifyToService.updateEmailNotifyToById(emailNotifyToId, {
+      "moduleId": subModule.moduleId,
+      "subModuleId": subModule._id
+    })
+  });
 
   return getSubModuleById(subModule._id);
 };

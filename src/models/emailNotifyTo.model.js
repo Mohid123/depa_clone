@@ -8,13 +8,18 @@ const emailNotifyToSchema = mongoose.Schema(
     {},
     defaultFields,
     {
-      emailId: { type: mongoose.Schema.Types.ObjectId, ref: 'Email', required: true },
-      moduleId: { type: mongoose.Schema.Types.ObjectId, ref: 'Module', required: true },
-      subModuleId: { type: mongoose.Schema.Types.ObjectId, ref: 'SubModule', required: true },
-      workFlowId: { type: mongoose.Schema.Types.ObjectId, ref: 'Workflow', required: true },
-      stepId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkflowStep', required: true },
-      submissionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Submission', required: true },
-      stepId: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }],
+      moduleId: { type: mongoose.Schema.Types.ObjectId, ref: 'Module' },
+      subModuleId: { type: mongoose.Schema.Types.ObjectId, ref: 'SubModule' },
+      submissionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Submission' },
+      emailId: { type: mongoose.Schema.Types.ObjectId, ref: 'Email' },
+      notifyUsers: [{
+        type: String, required: true, trim: true, lowercase: true,
+        validate(value) {
+          if (!validator.isEmail(value)) {
+            throw new Error('Invalid email');
+          }
+        }
+      }],
     }
   )
 );

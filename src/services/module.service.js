@@ -2,6 +2,7 @@ const httpStatus = require('http-status');
 const { Module } = require('../models');
 const ApiError = require('../utils/ApiError');
 const workFlowService = require('./workFlow.service');
+const emailNotifyToService = require('./emailNotifyTo.service');
 
 /**
  * Create a Module
@@ -13,11 +14,40 @@ const createModule = async (moduleBody) => {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Code already taken');
   }
 
+  // Replace the email addresses in the data with the created EmailNotifyTo document IDs
+  const emailNotifyToIds = [];
+  for (const step of moduleBody.steps) {
+    if (step.emailNotifyTo.length > 0) {
+      moduleBody.notifyUsers = step.emailNotifyTo;
+
+      const emailNotifyTo = await emailNotifyToService.createEmailNotifyTo(moduleBody);
+      if (!emailNotifyTo) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Email Notify To not found');
+      }
+
+      step.emailNotifyToId = emailNotifyTo.id;
+      emailNotifyToIds.push(emailNotifyTo.id);
+    }
+  };
+
   const createdWorkflow = await workFlowService.createWorkFlow(moduleBody);
+  if (!createdWorkflow) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Workflow not found');
+  }
   moduleBody.workFlowId = createdWorkflow._id;
 
-  return Module.create(moduleBody);
+  const module = await Module.create(moduleBody);
+  if (!module) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
+  }
 
+  emailNotifyToIds.forEach(emailNotifyToId => {
+    emailNotifyToService.updateEmailNotifyToById(emailNotifyToId, {
+      "moduleId": module._id
+    })
+  });
+
+  return module;
 };
 
 /**

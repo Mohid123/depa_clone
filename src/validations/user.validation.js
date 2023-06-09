@@ -17,6 +17,8 @@ const getUsers = {
     sortBy: Joi.string(),
     limit: Joi.number().integer(),
     page: Joi.number().integer(),
+    latest: Joi.valid("true"),
+    oldest: Joi.valid("true"),
     withTrash: Joi.string().allow('', null),
   }),
 };

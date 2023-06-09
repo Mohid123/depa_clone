@@ -9,7 +9,11 @@ const createSubmission = {
       "formId": Joi.required().custom(objectId),
       "data": Joi.object().required(),
     }).required()).required(),
-    steps: Joi.array().items(Joi.object().required()),
+    steps: Joi.array().items(Joi.object({
+      "condition": Joi.string().valid("none", "and", "or").required(),
+      "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
+      "emailNotifyTo": Joi.array().items(Joi.string().email()).required(),
+    }).required()).required(),
     submissionStatus: Joi.valid(4)
   }),
 };
@@ -39,7 +43,7 @@ const updateSubmission = {
       summaryData: Joi.object(),
       // formIds: Joi.array().items(Joi.string().custom(objectId)),
       // formDataIds: Joi.array().items(Joi.string().custom(objectId)),
-      submissionStatus: Joi.number().min(1).max(4),
+      submissionStatus: Joi.valid(2, 3, 4),
       stepId: Joi.required().custom(objectId),
       userId: Joi.required().custom(objectId),
       remarks: Joi.string(),
