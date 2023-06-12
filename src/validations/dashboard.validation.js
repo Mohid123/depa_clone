@@ -23,9 +23,10 @@ const getSubModulesByModuleSlug = {
     withTrash: Joi.string().allow('', null),
   }),
   query: Joi.object().keys({
+    field: Joi.valid('companyName', 'subModuleCode'),
     search: Joi.string(),
     sortBy: Joi.string(),
-    sortByTime: Joi.string(),
+    sortByTime: Joi.valid('latest', 'oldest'),
     limit: Joi.number(),
     page: Joi.number(),
     withTrash: Joi.string().allow('', null),

@@ -72,15 +72,55 @@ const querySubModulesByModuleSlug = async (filter, options) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
   }
 
-  const page = options.page ? parseInt(options.page) : 1; // Page number
-  const limit = options.limit ? parseInt(options.limit) : 10; // Number of items per page
+  const page = options.page ?? 1;
+  const limit = options.limit ?? 10;
+  let sortBy = null;
 
-  const results = await SubModule.find({ 'moduleId': module.id, 'isDeleted': filter.isDeleted })
-    .populate(['moduleId', 'companyId'])
+  const subModuleFilter = {};
+  subModuleFilter.moduleId = module.id;
+  subModuleFilter.isDeleted = filter.isDeleted;
+
+  if (options.field === "subModuleCode") {
+    if (options.search) {
+      subModuleFilter.code = { $regex: options.search, $options: 'i' };
+    }
+
+    if (options.sortBy === "asc") {
+      sortBy = 'code';
+    } else if (options.sortBy === "desc") {
+      sortBy = '-code';
+    }
+  } else {
+    if (options.sortBy === "asc") {
+      sortBy = { 'companyId.title': 1 };
+    } else if (options.sortBy === "desc") {
+      sortBy = { 'companyId.title': -1 };
+    }
+  }
+
+  // return {
+  //   subModuleFilter: subModuleFilter,
+  //   page: page,
+  //   limit: limit,
+  //   sortBy: sortBy
+  // };
+  const query = SubModule.find(subModuleFilter)
+    .populate(['moduleId', {
+      path: 'companyId',
+      // options: { sort: sortBy }
+    }])
     .skip((page - 1) * limit)
     .limit(limit);
 
-  const totalResults = await SubModule.countDocuments({ 'moduleId': module.id, 'isDeleted': filter.isDeleted });
+  if (options.sortBy) {
+    query.sort(sortBy);
+  } else {
+    query.sort(options.sortByTime == "oldest" ? { createdAt: 1 } : { createdAt: -1 }); // Sort by createdAt date in descending order
+  }
+
+  const results = await query;
+
+  const totalResults = await SubModule.countDocuments(subModuleFilter);
   const totalPages = Math.ceil(totalResults / limit);
 
   return {

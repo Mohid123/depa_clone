@@ -30,7 +30,7 @@ const getSubModulesByModuleSlug = catchAsync(async (req, res) => {
   }
   filter.code = req.params.moduleSlug;
 
-  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const options = pick(req.query, ['field', 'search', 'sortBy', 'sortByTime', 'limit', 'page']);
 
   const module = await dashboardService.querySubModulesByModuleSlug(filter, options);
   if (!module) {
