@@ -59,18 +59,37 @@ const querySubModulesByModule = async (id) => {
 
 /**
  * Get Category by Slug
- * @param {string} slug
+ * @param {Object} filter - Mongo filter
+ * @param {Object} options - Query options
+ * @param {string} [options.sortBy] - Sort option in the format: sortField:(desc|asc)
+ * @param {number} [options.limit] - Maximum number of results per page (default = 10)
+ * @param {number} [options.page] - Current page (default = 1)
  * @returns {Promise<Module>}
  */
-const querySubModulesByModuleSlug = async (slug) => {
-  const module = await Module.findOne({ 'code': slug, 'isDeleted': false });
+const querySubModulesByModuleSlug = async (filter, options) => {
+  const module = await Module.findOne(filter);
   if (!module) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
   }
 
-  const subModules = await SubModule.find({ 'moduleId': module.id, 'isDeleted': false }).populate(['moduleId', 'companyId']);
+  const page = options.page ? parseInt(options.page) : 1; // Page number
+  const limit = options.limit ? parseInt(options.limit) : 10; // Number of items per page
 
-  return subModules;
+  const results = await SubModule.find({ 'moduleId': module.id, 'isDeleted': filter.isDeleted })
+    .populate(['moduleId', 'companyId'])
+    .skip((page - 1) * limit)
+    .limit(limit);
+
+  const totalResults = await SubModule.countDocuments({ 'moduleId': module.id, 'isDeleted': filter.isDeleted });
+  const totalPages = Math.ceil(totalResults / limit);
+
+  return {
+    results,
+    page: page,
+    limit: limit,
+    totalPages,
+    totalResults,
+  };
 };
 
 

@@ -24,7 +24,15 @@ const getSubModulesByModule = catchAsync(async (req, res) => {
 });
 
 const getSubModulesByModuleSlug = catchAsync(async (req, res) => {
-  const module = await dashboardService.querySubModulesByModuleSlug(req.params.moduleSlug);
+  const filter = pick(req.query, ['moduleSlug']);
+  if (req.query.withTrash !== "") {
+    filter.isDeleted = false;
+  }
+  filter.code = req.params.moduleSlug;
+
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+
+  const module = await dashboardService.querySubModulesByModuleSlug(filter, options);
   if (!module) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
   }

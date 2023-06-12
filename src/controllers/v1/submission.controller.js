@@ -11,7 +11,7 @@ const createSubmission = catchAsync(async (req, res) => {
 });
 
 const getSubmissions = catchAsync(async (req, res) => {
-  const filter = pick(req.query, []);
+  const filter = pick(req.query, ["subModuleId"]);
   if (req.query.withTrash !== "") {
     filter.isDeleted = false;
   }
