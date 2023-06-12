@@ -9,6 +9,7 @@ const createApprovalLog = {
     workFlowId: Joi.required().custom(objectId),
     stepId: Joi.required().custom(objectId),
     performedById: Joi.required().custom(objectId),
+    approvedOn: Joi.date().required(),
     remarks: Joi.string().required(),
     approvalStatus: Joi.string().valid('inProgress', 'pending', 'approved', 'rejected').required(),
   }),

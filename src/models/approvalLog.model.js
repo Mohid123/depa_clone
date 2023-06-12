@@ -14,6 +14,7 @@ const approvalLogSchema = mongoose.Schema(
       performedById: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
       approvalStatus: { type: String, enum: ['pending', 'approved', 'rejected'], required: true, default: 'pending' },
       remarks: { type: String },
+      approvedOn: { type: Date },
       companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
       moduleId: { type: mongoose.Schema.Types.ObjectId, ref: 'Module' },
     }

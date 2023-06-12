@@ -370,7 +370,6 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     await rejectStep(submission, approvalStep, stepActiveUserId);
     updateBody.submissionStatus = 2;
   }
-  // res.status(httpStatus.OK).send(approvalStep.pendingUserIds);
 
   const totalLength = workFlowStatus.length;
   const approvedCount = workFlowStatus.filter(step => step.status === "approved").length;
@@ -380,6 +379,15 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     lastActivityPerformedBy: updateBody.userId,
     userName: user.fullName
   };
+
+  // Object in progress
+  const objectInProgress = submission.workflowStatus.find(obj => obj.status === "inProgress");
+  if (objectInProgress) {
+    const activeUserIds = objectInProgress.activeUsers;
+
+    const activeUsersId = await User.find({ _id: { $in: activeUserIds } }).select('id fullName');
+    submission.summaryData.pendingOnUsers = activeUsersId;
+  }
 
   await approvalLogService.createApprovalLog({
     subModuleId: submission.subModuleId,

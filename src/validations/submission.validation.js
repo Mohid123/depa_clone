@@ -14,7 +14,7 @@ const createSubmission = {
       "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
       "emailNotifyTo": Joi.array().items(Joi.string().email()).required(),
     }).required()).required(),
-    submissionStatus: Joi.valid(4)
+    submissionStatus: Joi.valid(4),
   }),
 };
 
