@@ -17,7 +17,7 @@ const queryModulesByCategory = async (filter, options) => {
   limit = limit ?? 6;
   page = page ?? 1;
 
-  const Categories = await Category.aggregate([
+  const categories = await Category.aggregate([
     {
       $match: { isDeleted: false }
     },
@@ -30,22 +30,32 @@ const queryModulesByCategory = async (filter, options) => {
       },
     },
     {
-      $match: { "modules.isDeleted": false }
+      $unwind: "$modules" // Unwind the "modules" array
+    },
+    {
+      $match: { "modules.isDeleted": false } // Filter modules where isDeleted: false
+    },
+    {
+      $group: {
+        _id: "$_id",
+        name: { $first: "$name" },
+        modules: { $push: "$modules" }
+      }
     },
     {
       $sort: {
-        ['name']: sortBy === "asc" ? 1 : -1, // sort ascending by the specified field
-      },
+        name: sortBy === "asc" ? 1 : -1 // Sort ascending by the name field
+      }
     },
     {
-      $skip: limit * (page - 1),
+      $skip: limit * (page - 1)
     },
     {
-      $limit: limit,
+      $limit: limit
     }
   ]);
 
-  return Categories;
+  return categories;
 };
 
 /**
