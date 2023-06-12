@@ -92,12 +92,11 @@ const querySubModulesByModuleSlug = async (filter, options) => {
     }
   } else {
     if (options.sortBy === "asc") {
-      sortBy = { 'companyId.title': 1 };
+      sortBy = '1companyId.title';
     } else if (options.sortBy === "desc") {
-      sortBy = { 'companyId.title': -1 };
+      sortBy = '-1companyId.title';
     }
   }
-
   // return {
   //   subModuleFilter: subModuleFilter,
   //   page: page,

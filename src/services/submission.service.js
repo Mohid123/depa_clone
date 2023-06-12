@@ -109,29 +109,50 @@ const createSubmission = async (submissionBody) => {
  * @param {number} [options.page] - Current page (default = 1)
  * @returns {Promise<QueryResult>}
  */
-const querySubmissions = async (filter, options, getBody) => {
+const querySubmissions = async (filter, options) => {
+  const page = options.page ?? 1;
+  const limit = options.limit ?? 10;
+
+  const submissionFilter = {};
   if (filter.subModuleId) {
-    return await Submission.find(filter).populate(["subModuleId", "formIds", "formDataIds", {
-      path: "workFlowId",
-      populate: {
-        path: "stepIds",
-        populate: {
-          path: "approverIds"
-        }
-      }
-    }]);
+    submissionFilter.subModuleId = filter.subModuleId;
+  }
+  if (filter.submissionStatus) {
+    submissionFilter.submissionStatus = filter.submissionStatus;
   }
 
-  const submissions = await Submission.find().populate(["subModuleId", "formIds", "formDataIds", {
+  submissionFilter.isDeleted = filter.isDeleted;
+
+  const query = Submission.find(submissionFilter).populate(["subModuleId", "formIds", "formDataIds", {
     path: "workFlowId",
     populate: {
       path: "stepIds",
-      populate: {
-        path: "approverIds"
-      }
+      populate: [
+        {
+          path: 'approverIds'
+        },
+        {
+          path: 'emailNotifyToId'
+        }
+      ]
     }
-  }]);
-  return submissions;
+  }])
+    .skip((page - 1) * limit)
+    .limit(limit);
+
+  query.sort(options.sortBy == "asc" ? 'createdAt' : '-createdAt');
+  const results = await query;
+
+  const totalResults = await Submission.countDocuments(submissionFilter);
+  const totalPages = Math.ceil(totalResults / limit);
+
+  return {
+    results,
+    page: page,
+    limit: limit,
+    totalPages,
+    totalResults,
+  };
 };
 
 /**

@@ -24,6 +24,9 @@ const getSubmissions = {
     formIds: Joi.array().items(Joi.string().custom(objectId)),
     formDataIds: Joi.array().items(Joi.string().custom(objectId)),
     submissionStatus: Joi.number().min(1).max(4),
+    sortBy: Joi.string(),
+    limit: Joi.number(),
+    page: Joi.number(),
     withTrash: Joi.string().allow('', null),
   }),
 };

@@ -96,9 +96,14 @@ const getModuleBySlug = async (slug) => {
     path: 'workFlowId',
     populate: {
       path: 'stepIds',
-      populate: {
-        path: 'emailNotifyToId'
-      }
+      populate: [
+        {
+          path: 'approverIds'
+        },
+        {
+          path: 'emailNotifyToId'
+        }
+      ]
     }
   }]);
 };
