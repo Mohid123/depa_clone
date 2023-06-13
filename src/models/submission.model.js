@@ -22,7 +22,8 @@ const submissionSchema = mongoose.Schema(
         activeUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
         approvedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
         status: { type: String, enum: ["inProgress", "pending", "approved", "rejected"], default: "pending" },
-      }]
+      }],
+      workflowAllUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
     }
   )
 );

@@ -142,6 +142,11 @@ const querySubmissions = async (filter, options) => {
 
   query.sort(options.sortBy == "asc" ? 'createdAt' : '-createdAt');
   const results = await query;
+  results?.map(submission => {
+    const uniqueUserIds = [...new Set(submission.workflowStatus.flatMap(step => step.allUsers))];
+    submission.workflowAllUsers = uniqueUserIds
+    return submission
+  });
 
   const totalResults = await Submission.countDocuments(submissionFilter);
   const totalPages = Math.ceil(totalResults / limit);
