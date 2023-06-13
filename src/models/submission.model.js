@@ -23,7 +23,17 @@ const submissionSchema = mongoose.Schema(
         approvedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
         status: { type: String, enum: ["inProgress", "pending", "approved", "rejected"], default: "pending" },
       }],
-      workflowAllUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+      workflowAllUsers: [{
+        email: {
+          type: String, required: true, trim: true, lowercase: true,
+          validate(value) {
+            if (!validator.isEmail(value)) {
+              throw new Error('Invalid email');
+            }
+          },
+        },
+        id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+      }]
     }
   )
 );

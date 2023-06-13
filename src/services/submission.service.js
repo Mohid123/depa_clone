@@ -24,16 +24,22 @@ const createSubmission = async (submissionBody) => {
 
   // Replace the email addresses in the data with the created EmailNotifyTo document IDs
   const emailNotifyToIds = [];
-  for (const step of submissionBody.steps) {
-    if (step.emailNotifyTo.length > 0) {
-      submissionBody.notifyUsers = step.emailNotifyTo;
+  let activeStepNotifyUsers = [];
+  let index = 0; index < submissionBody.steps.length; index++
+  for (let index = 0; index < submissionBody.steps.length; index++) {
+    if (submissionBody.steps[index].emailNotifyTo.length > 0) {
+      submissionBody.notifyUsers = submissionBody.steps[index].emailNotifyTo;
 
       const emailNotifyTo = await emailNotifyToService.createEmailNotifyTo(submissionBody);
       if (!emailNotifyTo) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Email Notify To not found');
       }
 
-      step.emailNotifyToId = emailNotifyTo.id;
+      if (!index) {
+        activeStepNotifyUsers = submissionBody.steps[index].emailNotifyTo;
+      }
+
+      submissionBody.steps[index].emailNotifyToId = emailNotifyTo.id;
       emailNotifyToIds.push(emailNotifyTo.id);
     }
   };
@@ -43,7 +49,9 @@ const createSubmission = async (submissionBody) => {
   delete submissionBody.steps;
 
   // Create workflow execution setup
+  let activeStepUsers = null;
   const workflowStatusArray = [];
+  let activeStepId = null;
   for (let index = 0; index < workFlow.stepIds.length; index++) {
     const element = workFlow.stepIds[index];
     let step = await WorkflowStep.findById(element);
@@ -57,34 +65,41 @@ const createSubmission = async (submissionBody) => {
 
     if (!index) {
       stepStatusData.status = "inProgress";
-      // step.approverIds.forEach(async userId => {
-      //   let user = await userService.getUserById(userId)
-      //   emailService.sendEmailWithTemplate(
-      //     user.email,
-      //     "Workflow Active User Notify",
-      //     "src/emails/workflow/active-user.template.html",
-      //     {
-      //       "submissionId": submission.id,
-      //       "stepId": previousStep.stepId,
-      //       "userId": userId,
-      //     }
-      //   );
-      // });
+      activeStepUsers = step.approverIds;
+      activeStepId = element;
     } else {
       stepStatusData.status = "pending";
     }
 
     workflowStatusArray.push(stepStatusData);
   }
+  // Assign workflowStatus to submissionBody
+  submissionBody.workflowStatus = workflowStatusArray;
+
+  let workflowUsers = [...new Set(workflowStatusArray.flatMap(step => step.allUsers))];
+  workflowUsers = await User.find({ _id: { $in: workflowUsers } }).select('email');
+  submissionBody.workflowAllUsers = workflowUsers
+
+  const matchedUsers = [];
+  const unmatchedUsers = [];
+
+  workflowUsers.forEach(user => {
+    if (activeStepUsers.includes(user.id)) {
+      matchedUsers.push(user);
+    } else {
+      unmatchedUsers.push(user);
+    }
+  });
+
+  activeStepUsers = matchedUsers;
+  const unmatchedEmails = unmatchedUsers.map(user => user.email);
+  const allNotifyToUsers = unmatchedEmails.concat(activeStepNotifyUsers);
 
   // Add default progress 0 in summary object
   submissionBody.summaryData = {
     progress: 0,
     lastActivityPerformedBy: null
   }
-
-  // Assign workflowStatus to submissionBody
-  submissionBody.workflowStatus = workflowStatusArray;
 
   let submission = await Submission.create(submissionBody);
   submission = await getSubmissionById(submission._id);
@@ -95,6 +110,27 @@ const createSubmission = async (submissionBody) => {
       "subModuleId": submission.subModuleId._id,
       "submissionId": submission._id
     })
+  });
+
+  activeStepUsers.forEach(async user => {
+    emailService.sendEmailWithTemplate(
+      user.email,
+      "Workflow Active User Notify",
+      "src/emails/workflow/active-user.template.html",
+      {
+        "submissionId": submission._id,
+        "stepId": activeStepId,
+        "userId": user.id,
+      }
+    );
+  });
+
+  allNotifyToUsers.forEach(async user => {
+    emailService.sendEmailWithTemplate(
+      user,
+      "Workflow User Notify",
+      "src/emails/workflow/notify-user.template.html",
+    );
   });
 
   return submission;
