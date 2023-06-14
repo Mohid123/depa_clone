@@ -59,16 +59,16 @@ const createModule = async (moduleBody) => {
  * @param {number} [options.page] - Current page (default = 1)
  * @returns {Promise<QueryResult>}
  */
-const queryModules = async (filter, options, domainUrl) => {
+const queryModules = async (filter, options) => {
   const modules = await Module.paginate(filter, options);
 
   // Iterate through the array and update the 'image' property
   const updatedData = modules.results.map(item => {
-    item.image = domainUrl + item.image;
+    item.image = item.image;
     return item;
   });
 
-  return modules;
+  return updatedData;
 };
 
 /**
@@ -76,7 +76,7 @@ const queryModules = async (filter, options, domainUrl) => {
  * @param {ObjectId} id
  * @returns {Promise<Module>}
  */
-const getModuleById = async (id, domainUrl) => {
+const getModuleById = async (id) => {
   const module = await Module.findById(id).populate(['categoryId', {
     path: 'workFlowId',
     populate: {
@@ -92,7 +92,7 @@ const getModuleById = async (id, domainUrl) => {
     }
   }]);
 
-  const urlImage = domainUrl + module.image;
+  const urlImage = module.image;
   let updatedModule = Object.assign(module, {
     image: urlImage
   });
@@ -105,7 +105,7 @@ const getModuleById = async (id, domainUrl) => {
  * @param {String} slug
  * @returns {Promise<Module>}
  */
-const getModuleBySlug = async (slug, domainUrl) => {
+const getModuleBySlug = async (slug) => {
   const module = await Module.findOne({ 'code': slug, 'isDeleted': false }).populate(['categoryId', {
     path: 'workFlowId',
     populate: {
@@ -121,7 +121,7 @@ const getModuleBySlug = async (slug, domainUrl) => {
     }
   }]);
 
-  const urlImage = domainUrl + module.image;
+  const urlImage = module.image;
   let updatedModule = Object.assign(module, {
     image: urlImage
   });
@@ -135,8 +135,8 @@ const getModuleBySlug = async (slug, domainUrl) => {
  * @param {Object} updateBody
  * @returns {Promise<Module>}
  */
-const updateModuleById = async (moduleId, updateBody, domainUrl) => {
-  const module = await getModuleById(moduleId, domainUrl);
+const updateModuleById = async (moduleId, updateBody) => {
+  const module = await getModuleById(moduleId);
   if (!module) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
   }
@@ -151,7 +151,7 @@ const updateModuleById = async (moduleId, updateBody, domainUrl) => {
 
   Object.assign(module, updateBody);
   await module.save();
-  return await getModuleById(moduleId, domainUrl);
+  return await getModuleById(moduleId);
 };
 
 /**
@@ -159,8 +159,8 @@ const updateModuleById = async (moduleId, updateBody, domainUrl) => {
  * @param {ObjectId} moduleId
  * @returns {Promise<Module>}
  */
-const deleteModuleById = async (moduleId, domainUrl) => {
-  const module = await getModuleById(moduleId, domainUrl);
+const deleteModuleById = async (moduleId) => {
+  const module = await getModuleById(moduleId);
   if (!module) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
   }

@@ -36,6 +36,16 @@ const queryModulesByCategory = async (filter, options) => {
       $match: { "modules.isDeleted": false } // Filter modules where isDeleted: false
     },
     {
+      $addFields: {
+        "modules.image": {
+          $concat: [
+            process.env.IMAGE_SERVER_DOMAIN,
+            "$modules.image",
+          ],
+        },
+      },
+    },
+    {
       $group: {
         _id: "$_id",
         name: { $first: "$name" },
@@ -54,6 +64,8 @@ const queryModulesByCategory = async (filter, options) => {
       $limit: limit
     }
   ]);
+
+
 
   return categories;
 };

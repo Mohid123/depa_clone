@@ -26,17 +26,15 @@ const getModules = catchAsync(async (req, res) => {
   if (req.query.withTrash !== "") {
     filter.isDeleted = false;
   }
-  const domainUrl = `${req.protocol}://${req.get('host')}/`;
 
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const result = await moduleService.queryModules(filter, options, domainUrl);
+  const result = await moduleService.queryModules(filter, options);
   res.send(result);
 });
 
 const getModule = catchAsync(async (req, res) => {
-  const domainUrl = `${req.protocol}://${req.get('host')}/`;
 
-  const module = await moduleService.getModuleById(req.params.moduleId, domainUrl);
+  const module = await moduleService.getModuleById(req.params.moduleId);
   if (!module) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
   }
@@ -45,8 +43,7 @@ const getModule = catchAsync(async (req, res) => {
 });
 
 const getModuleBySlug = catchAsync(async (req, res) => {
-  const domainUrl = `${req.protocol}://${req.get('host')}/`;
-  const module = await moduleService.getModuleBySlug(req.params.moduleSlug, domainUrl);
+  const module = await moduleService.getModuleBySlug(req.params.moduleSlug);
   if (!module) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
   }
@@ -55,15 +52,13 @@ const getModuleBySlug = catchAsync(async (req, res) => {
 });
 
 const updateModule = catchAsync(async (req, res) => {
-  const domainUrl = `${req.protocol}://${req.get('host')}/`;
   req.body.updatedBy = req.user.id;
-  const module = await moduleService.updateModuleById(req.params.moduleId, req.body, domainUrl);
+  const module = await moduleService.updateModuleById(req.params.moduleId, req.body);
   res.send(module);
 });
 
 const deleteModule = catchAsync(async (req, res) => {
-  const domainUrl = `${req.protocol}://${req.get('host')}/`;
-  await moduleService.deleteModuleById(req.params.moduleId, domainUrl);
+  await moduleService.deleteModuleById(req.params.moduleId);
   res.status(httpStatus.NO_CONTENT).send();
 });
 

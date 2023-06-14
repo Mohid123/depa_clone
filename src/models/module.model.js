@@ -14,7 +14,7 @@ const moduleSchema = mongoose.Schema(
       title: { type: String, required: true },
       description: { type: String, required: true },
       url: { type: String, required: true },
-      image: { type: String, required: true },
+      image: { type: String, required: true, get: attachDomainWithImageUrl },
     }
   )
 );
@@ -53,6 +53,13 @@ moduleSchema.methods.removeFromTrash = function () {
   this.isDeleted = false;
   return this.save();
 };
+
+
+// Accessor (getter) function
+function attachDomainWithImageUrl(value) {
+  // Capitalize the value and return
+  return process.env.IMAGE_SERVER_DOMAIN + value;
+}
 
 /**
  * @typedef Module
