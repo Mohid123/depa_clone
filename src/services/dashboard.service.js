@@ -2,6 +2,7 @@ const httpStatus = require('http-status');
 const { Category, Module } = require('../models');
 const ApiError = require('../utils/ApiError');
 const SubModule = require('../models/subModule.model');
+const config = require('../config/config.js');
 
 /**
  * Query for Categories
@@ -39,7 +40,7 @@ const queryModulesByCategory = async (filter, options) => {
       $addFields: {
         "modules.image": {
           $concat: [
-            process.env.IMAGE_SERVER_DOMAIN,
+            config.imageServer,
             "$modules.image",
           ],
         },
