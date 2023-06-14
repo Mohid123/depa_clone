@@ -22,6 +22,9 @@ if (config.env !== 'test') {
   app.use(morgan.errorHandler);
 }
 
+// public files
+app.use('/uploads', express.static('uploads'));
+
 // set security HTTP headers
 app.use(helmet());
 

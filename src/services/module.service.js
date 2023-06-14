@@ -59,8 +59,15 @@ const createModule = async (moduleBody) => {
  * @param {number} [options.page] - Current page (default = 1)
  * @returns {Promise<QueryResult>}
  */
-const queryModules = async (filter, options) => {
+const queryModules = async (filter, options, domainUrl) => {
   const modules = await Module.paginate(filter, options);
+
+  // Iterate through the array and update the 'image' property
+  const updatedData = modules.results.map(item => {
+    item.image = domainUrl + item.image;
+    return item;
+  });
+
   return modules;
 };
 
