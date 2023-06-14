@@ -76,8 +76,8 @@ const queryModules = async (filter, options, domainUrl) => {
  * @param {ObjectId} id
  * @returns {Promise<Module>}
  */
-const getModuleById = async (id) => {
-  return Module.findById(id).populate(['categoryId', {
+const getModuleById = async (id, domainUrl) => {
+  const module = await Module.findById(id).populate(['categoryId', {
     path: 'workFlowId',
     populate: {
       path: 'stepIds',
@@ -91,6 +91,13 @@ const getModuleById = async (id) => {
       ]
     }
   }]);
+
+  const urlImage = domainUrl + module.image;
+  let updatedModule = Object.assign(module, {
+    image: urlImage
+  });
+
+  return updatedModule;
 };
 
 /**
@@ -98,8 +105,8 @@ const getModuleById = async (id) => {
  * @param {String} slug
  * @returns {Promise<Module>}
  */
-const getModuleBySlug = async (slug) => {
-  return Module.findOne({ 'code': slug, 'isDeleted': false }).populate(['categoryId', {
+const getModuleBySlug = async (slug, domainUrl) => {
+  const module = await Module.findOne({ 'code': slug, 'isDeleted': false }).populate(['categoryId', {
     path: 'workFlowId',
     populate: {
       path: 'stepIds',
@@ -113,6 +120,13 @@ const getModuleBySlug = async (slug) => {
       ]
     }
   }]);
+
+  const urlImage = domainUrl + module.image;
+  let updatedModule = Object.assign(module, {
+    image: urlImage
+  });
+
+  return updatedModule;
 };
 
 /**
@@ -121,8 +135,8 @@ const getModuleBySlug = async (slug) => {
  * @param {Object} updateBody
  * @returns {Promise<Module>}
  */
-const updateModuleById = async (moduleId, updateBody) => {
-  const module = await getModuleById(moduleId);
+const updateModuleById = async (moduleId, updateBody, domainUrl) => {
+  const module = await getModuleById(moduleId, domainUrl);
   if (!module) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
   }
@@ -137,7 +151,7 @@ const updateModuleById = async (moduleId, updateBody) => {
 
   Object.assign(module, updateBody);
   await module.save();
-  return await getModuleById(moduleId);
+  return await getModuleById(moduleId, domainUrl);
 };
 
 /**
@@ -145,8 +159,8 @@ const updateModuleById = async (moduleId, updateBody) => {
  * @param {ObjectId} moduleId
  * @returns {Promise<Module>}
  */
-const deleteModuleById = async (moduleId) => {
-  const module = await getModuleById(moduleId);
+const deleteModuleById = async (moduleId, domainUrl) => {
+  const module = await getModuleById(moduleId, domainUrl);
   if (!module) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
   }

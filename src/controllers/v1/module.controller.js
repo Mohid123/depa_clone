@@ -6,10 +6,6 @@ const { moduleService } = require('../../services');
 const storage = require('./../../config/storage.js');
 
 const uploadImage = async (req, res, next) => {
-  if (!req.file) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Image file is required');
-  }
-
   // Access the uploaded image file via req.file and perform necessary storage logic
   // For example, you can use a storage provider like AWS S3 or local disk storage
 
@@ -38,29 +34,36 @@ const getModules = catchAsync(async (req, res) => {
 });
 
 const getModule = catchAsync(async (req, res) => {
-  const module = await moduleService.getModuleById(req.params.moduleId);
+  const domainUrl = `${req.protocol}://${req.get('host')}/`;
+
+  const module = await moduleService.getModuleById(req.params.moduleId, domainUrl);
   if (!module) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
   }
+
   res.send(module);
 });
 
 const getModuleBySlug = catchAsync(async (req, res) => {
-  const module = await moduleService.getModuleBySlug(req.params.moduleSlug);
+  const domainUrl = `${req.protocol}://${req.get('host')}/`;
+  const module = await moduleService.getModuleBySlug(req.params.moduleSlug, domainUrl);
   if (!module) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
   }
+
   res.send(module);
 });
 
 const updateModule = catchAsync(async (req, res) => {
+  const domainUrl = `${req.protocol}://${req.get('host')}/`;
   req.body.updatedBy = req.user.id;
-  const module = await moduleService.updateModuleById(req.params.moduleId, req.body);
+  const module = await moduleService.updateModuleById(req.params.moduleId, req.body, domainUrl);
   res.send(module);
 });
 
 const deleteModule = catchAsync(async (req, res) => {
-  await moduleService.deleteModuleById(req.params.moduleId);
+  const domainUrl = `${req.protocol}://${req.get('host')}/`;
+  await moduleService.deleteModuleById(req.params.moduleId, domainUrl);
   res.status(httpStatus.NO_CONTENT).send();
 });
 
