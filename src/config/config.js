@@ -61,4 +61,5 @@ module.exports = {
     },
     from: envVars.EMAIL_FROM,
   },
+  ImageServer: envVars.IMAGE_SERVER_DOMAIN ?? "http://127.0.0.1:3000/"
 };

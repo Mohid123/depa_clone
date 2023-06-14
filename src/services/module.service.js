@@ -63,12 +63,12 @@ const queryModules = async (filter, options) => {
   const modules = await Module.paginate(filter, options);
 
   // Iterate through the array and update the 'image' property
-  const updatedData = modules.results.map(item => {
+  modules.results.map(item => {
     item.image = item.image;
     return item;
   });
 
-  return updatedData;
+  return modules;
 };
 
 /**
