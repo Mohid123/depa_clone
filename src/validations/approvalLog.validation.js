@@ -6,6 +6,7 @@ const createApprovalLog = {
     companyId: Joi.string().custom(objectId),
     moduleId: Joi.string().custom(objectId),
     subModuleId: Joi.required().custom(objectId),
+    submissionId: Joi.required().custom(objectId),
     workFlowId: Joi.required().custom(objectId),
     stepId: Joi.required().custom(objectId),
     performedById: Joi.required().custom(objectId),

@@ -40,11 +40,11 @@ const createForm = async (formBody) => {
  * @returns {Promise<Form>}
  */
 const createManyForms = async (formBody) => {
-  for (const form of formBody) {
-    if (await Form.isKeyTaken(form.key)) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Form Key already taken');
-    }
-  }
+  // for (const form of formBody) {
+  //   if (await Form.isKeyTaken(form.key)) {
+  //     throw new ApiError(httpStatus.BAD_REQUEST, 'Form Key already taken');
+  //   }
+  // }
 
   const forms = await Form.insertMany(formBody);
   return forms;

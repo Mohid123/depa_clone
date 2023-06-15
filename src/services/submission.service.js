@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-const { Submission, WorkflowStep, User, ApprovalLog } = require('../models');
+const { Submission, WorkflowStep, User, ApprovalLog, FormData, EmailNotifyTo } = require('../models');
 const ApiError = require('../utils/ApiError');
 const workFlowService = require('./workFlow.service');
 const formDataService = require('./formData.service');
@@ -8,6 +8,86 @@ const emailService = require('./email.service');
 const userService = require('./user.service');
 const emailNotifyToService = require('./emailNotifyTo.service');
 
+/**
+ * Find next workflow step
+ * @param {Object} workFlowStatus workFlowStatus
+ * @param {Object} workFlowStatusStep workFlowStatus
+ */
+const getFormDataForEmail = async (formDataIdsArray) => {
+  const emailFormData = await FormData.find({ _id: { $in: formDataIdsArray } })
+    .select('formId data')
+    .populate({
+      path: 'formId',
+      select: '-_id title',
+      options: { lean: true },
+      populate: { path: 'data', select: '-submit -_id' }
+    });
+
+  const transformedResponse = emailFormData.map((item) => {
+    const newData = [];
+    for (const key in item.data) {
+      if (item.data.hasOwnProperty(key) && key !== 'submit') {
+        newData.push({ key, value: item.data[key] });
+      }
+    }
+    return { formId: item.formId, data: newData, id: item.id };
+  });
+
+  return transformedResponse;
+};
+
+/**
+ * Find next workflow step
+ * @param {Object} workFlowStatus workFlowStatus
+ * @param {Object} workFlowStatusStep workFlowStatus
+ */
+const emailDataWithTemplate = async (data, isNotify) => {
+  const formDataEmail = await getFormDataForEmail(data.formDataIds);
+  console.log(data.allUsers);
+  // const approvalLogs = await ApprovalLog.find({ submissionId: data.submissionId }).select("approvalStatus remarks").populate('performedById', 'fullName');
+  if (!isNotify) {
+    for (const user of data.allUsers) {
+      let emailUser = user;
+      if (!emailUser.email) {
+        emailUser = await userService.getUserById(user);
+      }
+
+      setTimeout(async () => {
+        await emailService.sendEmailWithTemplate(
+          emailUser.email,
+          "Workflow Active User Notify",
+          "src/emails/workflow/active-user.template.hbs",
+          {
+            submissionId: data.submissionId,
+            stepId: data.stepId,
+            userId: emailUser.id,
+            formData: formDataEmail,
+            // approvalLogs: approvalLogs
+          }
+        );
+      }, 500);
+
+    }
+  } else {
+    data.allUsers.forEach(async user => {
+      // if (!user.email) {
+      //   user = await userService.getUserById(user);
+      // }
+      setTimeout(async () => {
+        await emailService.sendEmailWithTemplate(
+          user,
+          "Workflow User Notify",
+          "src/emails/workflow/notify-user.template.hbs",
+          {
+            "formData": formDataEmail,
+            // "approvalLogs": approvalLogs
+          }
+        );
+      }, 500);
+
+    });
+  }
+}
 /**
  * Create a Submission
  * @param {Object} submissionBody
@@ -112,26 +192,20 @@ const createSubmission = async (submissionBody) => {
     })
   });
 
-  activeStepUsers.forEach(async user => {
-    emailService.sendEmailWithTemplate(
-      user.email,
-      "Workflow Active User Notify",
-      "src/emails/workflow/active-user.template.html",
-      {
-        "submissionId": submission._id,
-        "stepId": activeStepId,
-        "userId": user.id,
-      }
-    );
-  });
-
-  allNotifyToUsers.forEach(async user => {
-    emailService.sendEmailWithTemplate(
-      user,
-      "Workflow User Notify",
-      "src/emails/workflow/notify-user.template.html",
-    );
-  });
+  // return {
+  //   allNotifyToUsers: allNotifyToUsers,
+  //   activeStepUsers: activeStepUsers
+  // }
+  emailDataWithTemplate({
+    formDataIds: submissionBody.formDataIds,
+    allUsers: allNotifyToUsers,
+  }, true);
+  emailDataWithTemplate({
+    formDataIds: submissionBody.formDataIds,
+    allUsers: activeStepUsers,
+    submissionId: submission._id,
+    stepId: activeStepId,
+  }, false);
 
   return submission;
 };
@@ -292,19 +366,12 @@ const approveStep = async (submission, workFlowStatusStep, approvingUser) => {
   }
 
   if (nextStep) {
-    nextStep.activeUsers.forEach(async userId => {
-      let user = await userService.getUserById(userId)
-      emailService.sendEmailWithTemplate(
-        user.email,
-        "Workflow Active User Notify",
-        "src/emails/workflow/active-user.template.html",
-        {
-          "submissionId": submission.id,
-          "stepId": nextStep.stepId,
-          "userId": userId
-        }
-      );
-    });
+    emailDataWithTemplate({
+      formDataIds: submission.formDataIds,
+      allUsers: nextStep.activeUsers,
+      submissionId: submission.id,
+      stepId: nextStep.stepId,
+    }, false);
   }
 
   return workFlowStatus;
@@ -373,19 +440,12 @@ const rejectStep = async (submission, workFlowStatusStep, rejectingUser) => {
   }
 
   if (previousStep) {
-    previousStep.activeUsers.forEach(async userId => {
-      let user = await userService.getUserById(userId)
-      emailService.sendEmailWithTemplate(
-        user.email,
-        "Workflow Active User Notify",
-        "src/emails/workflow/active-user.template.html",
-        {
-          "submissionId": submission.id,
-          "stepId": previousStep.stepId,
-          "userId": userId,
-        }
-      );
-    });
+    emailDataWithTemplate({
+      formDataIds: submission.formDataIds,
+      allUsers: previousStep.activeUsers,
+      submissionId: submission.id,
+      stepId: previousStep.stepId,
+    }, false);
   }
 
   return workFlowStatus;
@@ -416,7 +476,18 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'Invalid User!');
   }
 
-  // return updateBody.isApproved;
+  await approvalLogService.createApprovalLog({
+    subModuleId: submission.subModuleId,
+    submissionId: submission.id,
+    workFlowId: submission.workFlowId,
+    stepId: approvalStep._id,
+    approvedOn: new Date().getTime(),
+    remarks: updateBody.remarks,
+    approvalStatus: updateBody.isApproved ? 'approved' : 'rejected',
+    performedById: stepActiveUserId,
+    isApproved: updateBody.isApproved
+  });
+
   if (Boolean(updateBody.isApproved)) {
     const updatedworkFlowStatus = await approveStep(submission, approvalStep, stepActiveUserId);
 
@@ -446,16 +517,24 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     submission.summaryData.pendingOnUsers = activeUsersId;
   }
 
-  await approvalLogService.createApprovalLog({
-    subModuleId: submission.subModuleId,
-    workFlowId: submission.workFlowId,
-    stepId: approvalStep._id,
-    approvedOn: new Date().getTime(),
-    remarks: updateBody.remarks,
-    approvalStatus: updateBody.isApproved ? 'approved' : 'rejected',
-    performedById: stepActiveUserId,
-    isApproved: updateBody.isApproved
-  });
+  // let workflowUsers = [...new Set(workFlowStatus.flatMap(step => step.allUsers))];
+  // workflowUsers = await User.find({ _id: { $in: workflowUsers } }).select('email');
+
+  // const unmatchedUsers = [];
+  // workflowUsers.forEach(user => {
+  //   if (!approvalStep.activeUsers.includes(user.id)) {
+  //     unmatchedUsers.push(user);
+  //   }
+  // });
+  // const activeStepNotifyUsers = emailNotifyToService.getEmailNotifyToById(approvalStep.emailNotifyToId);
+  // const unmatchedEmails = unmatchedUsers.map(user => user.email);
+  // let allNotifyToUsers = unmatchedEmails.concat(activeStepNotifyUsers.notifyUsers);
+  // allNotifyToUsers = allNotifyToUsers.filter(notify => { notify != stepActiveUserId })
+
+  // emailDataWithTemplate({
+  //   formDataIds: submission.formDataIds,
+  //   allUsers: allNotifyToUsers,
+  // }, true);
 
   Object.assign(submission, updateBody);
   await submission.save();

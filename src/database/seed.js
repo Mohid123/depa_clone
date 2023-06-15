@@ -4,8 +4,8 @@ const config = require('./../config/config');
 const logger = require('./../config/logger');
 const bcrypt = require('bcryptjs');
 
-const { User } = require('./../models/index');
-const { formService } = require('../services');
+const { User, Company, Category } = require('./../models/index');
+const { formService, moduleService, subModuleService, submissionService } = require('../services');
 
 async function password(password) {
     const pass = await bcrypt.hash(password, 8);
@@ -35,51 +35,69 @@ mongoose.connect(config.mongoose.url, config.mongoose.options)
                 role: "admin"
             },
             {
+                userName: "H",
+                fullName: "HOD",
+                email: "hod@depa.com",
+                password: passH
+            },
+            {
+                userName: "H",
+                fullName: "HR",
+                email: "hr@depa.com",
+                password: passH
+            },
+            {
+                userName: "S",
+                fullName: "Service Desk",
+                email: "srdesk@depa.com",
+                password: passH
+            },
+            {
                 userName: "A",
-                fullName: "User A",
-                email: "user.a@depa.com",
+                fullName: "Mr. ALi Katkhada",
+                email: "mali@depa.com",
                 password: passA
             },
             {
                 userName: "B",
-                fullName: "User B",
-                email: "user.b@depa.com",
+                fullName: "Mohammad Kamran",
+                email: "kamran@depa.com",
                 password: passB
             },
             {
                 userName: "C",
-                fullName: "User C",
-                email: "user.c@depa.com",
+                fullName: "Adeel Hashmi",
+                email: "adeel@depa.com",
                 password: passC
             },
             {
                 userName: "D",
-                fullName: "User D",
-                email: "user.d@depa.com",
+                fullName: "Ishtiaq Ahmed",
+                email: "ishtiaq@depa.com",
                 password: passD
             },
             {
                 userName: "E",
-                fullName: "User E",
-                email: "user.e@depa.com",
+                fullName: "Mohammad Jahanzeb",
+                email: "jahanzeb@depa.com",
                 password: passE
             },
             {
                 userName: "F",
-                fullName: "User F",
+                fullName: "Moin Ul Haq",
                 email: "user.f@depa.com",
                 password: passF
             },
             {
                 userName: "G",
-                fullName: "User G",
+                fullName: "Usaid Qazi",
                 email: "user.g@depa.com",
                 password: passG
             },
             {
                 userName: "H",
-                fullName: "User H",
-                email: "user.h@depa.com",
+                fullName: "Hassan Khan",
+                email: "hassan@depa.com",
                 password: passH
             }
         ];
@@ -419,11 +437,150 @@ mongoose.connect(config.mongoose.url, config.mongoose.options)
                 ],
                 "display": "default",
                 "key": "user_form"
+            },
+            {
+                "title": "Email Creation Form",
+                "key": "email_creation_form",
+                "display": "form",
+                "components": [
+                    {
+                        "label": "Full Name",
+                        "tableView": true,
+                        "key": "fullName",
+                        "type": "textfield",
+                        "input": true
+                    },
+                    {
+                        "label": "Phone Number",
+                        "tableView": true,
+                        "key": "phoneNumber",
+                        "type": "phoneNumber",
+                        "input": true
+                    },
+                    {
+                        "label": "Email",
+                        "tableView": true,
+                        "key": "email",
+                        "type": "email",
+                        "input": true
+                    },
+                    {
+                        "label": "Date of Birth",
+                        "hideInputLabels": false,
+                        "inputsLabelPosition": "top",
+                        "useLocaleSettings": false,
+                        "tableView": false,
+                        "fields": {
+                            "day": {
+                                "hide": false
+                            },
+                            "month": {
+                                "hide": false
+                            },
+                            "year": {
+                                "hide": false
+                            }
+                        },
+                        "key": "dateOfBirth",
+                        "type": "day",
+                        "input": true,
+                        "defaultValue": "00/00/0000"
+                    },
+                    {
+                        "type": "button",
+                        "label": "Submit",
+                        "key": "submit",
+                        "disableOnInvalid": true,
+                        "input": true,
+                        "tableView": false
+                    }
+                ]
             }
         ];
 
         // Function call
         const forms = await formService.createManyForms(formsData);
+
+        const companiesData = [
+            {
+                groupCode: 'depa-group',
+                title: 'DEPA Groups',
+            },
+            {
+                groupCode: 'quaid-tech',
+                title: 'Quaid Tech',
+            }
+        ];
+        const companies = await Company.insertMany(companiesData);
+
+        const categoriesData = [
+            {
+                name: "Management"
+            },
+            {
+                name: "Accounts & Finance"
+            }
+        ]
+        const categories = await Category.insertMany(categoriesData);
+
+        const moduleData = {
+            categoryId: categories[0].id,
+            code: "it-department",
+            title: "IT Department",
+            description: "The IT department oversees the installation and maintenance of computer network systems within a company. This may only require a single IT employee, or in the case of larger organizations, a team of people working to ensure that the network runs smoothly.",
+            url: "/submodule/submodules-list/it-department",
+            image: "uploads/images/1686820628632.jpg",
+            steps: [
+                {
+                    "condition": "none",
+                    "approverIds": [users[1]],
+                    "emailNotifyTo": [],
+                },
+                {
+                    "condition": "none",
+                    "approverIds": [users[2]],
+                    "emailNotifyTo": [],
+                },
+                {
+                    "condition": "none",
+                    "approverIds": [users[3]],
+                    "emailNotifyTo": [],
+                }
+            ],
+            createdBy: users[0]
+        };
+
+        const module = await moduleService.createModule(moduleData);
+
+        const subModuleData = {
+            moduleId: module.id,
+            companyId: companies[0],
+            adminUsers: [users[5]],
+            viewOnlyUsers: [users[7]],
+            formIds: [formsData[6]],
+            code: "digital-transformation",
+            url: "/submodule/submodule-details/digital-transformation",
+            steps: [
+                {
+                    "condition": "none",
+                    "approverIds": [users[1]],
+                    "emailNotifyTo": [],
+                },
+                {
+                    "condition": "none",
+                    "approverIds": [users[2]],
+                    "emailNotifyTo": [],
+                },
+                {
+                    "condition": "none",
+                    "approverIds": [users[3]],
+                    "emailNotifyTo": [],
+                }
+            ],
+            createdBy: users[0]
+        };
+
+        const subModule = await subModuleService.createSubModule(subModuleData);
 
         // Check if all documents were inserted successfully
         if (users.length === userData.length

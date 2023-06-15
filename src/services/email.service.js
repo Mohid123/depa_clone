@@ -4,6 +4,7 @@ const util = require('util');
 const config = require('../config/config');
 const logger = require('../config/logger');
 const { Email } = require('../models');
+const handlebars = require('handlebars');
 
 const readFile = util.promisify(fs.readFile);
 
@@ -66,12 +67,11 @@ const sendEmailWithTemplate = async (to, subject, templatePath, replacements) =>
     // Read the email template file
     const template = await readFile(templatePath, 'utf8');
 
-    // Replace placeholders in the template with actual values
-    let emailContent = template;
-    for (const key in replacements) {
-      const value = replacements[key];
-      emailContent = emailContent.replace(new RegExp(`{{${key}}}`, 'g'), value);
-    }
+    // Compile the template
+    const compiledTemplate = handlebars.compile(template);
+
+    // Render the template with the replacement data
+    const emailContent = compiledTemplate(replacements);
 
     // Send the email
     const mailOptions = {
@@ -85,7 +85,7 @@ const sendEmailWithTemplate = async (to, subject, templatePath, replacements) =>
   } catch (error) {
     console.error('Error sending email:', error);
   }
-}
+};
 
 /**
  * Query for emails

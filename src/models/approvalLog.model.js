@@ -9,6 +9,7 @@ const approvalLogSchema = mongoose.Schema(
     defaultFields,
     {
       subModuleId: { type: mongoose.Schema.Types.ObjectId, ref: 'SubModule', required: true },
+      submissionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Submission', required: true },
       workFlowId: { type: mongoose.Schema.Types.ObjectId, ref: 'Workflow', required: true },
       stepId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkflowStep', required: true },
       performedById: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
