@@ -23,7 +23,8 @@
     "docker:prod": "docker-compose -f docker-compose.yml -f docker-compose.prod.yml up",
     "docker:dev": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml up",
     "docker:test": "docker-compose -f docker-compose.yml -f docker-compose.test.yml up",
-    "seeder": "cross-env NODE_ENV=development node src/database/seed.js"
+    "seeder": "cross-env NODE_ENV=development node src/database/seed.js",
+    "list-tasks": "node src/scheduler/list-tasks.scheduler.js"
   },
   "keywords": [
     "node",
@@ -68,6 +69,7 @@
     "mongoose": "^5.7.7",
     "morgan": "^1.9.1",
     "multer": "^1.4.5-lts.1",
+    "node-cron": "^3.0.2",
     "nodemailer": "^6.3.1",
     "passport": "^0.4.0",
     "passport-jwt": "^4.0.0",

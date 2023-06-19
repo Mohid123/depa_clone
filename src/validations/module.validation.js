@@ -14,7 +14,7 @@ const createModule = {
       "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
       "emailNotifyTo": Joi.array().items(Joi.string().email()).required(),
     }).required()).required(),
-    createdBy: Joi.required().custom(objectId),
+    createdBy: Joi.custom(objectId),
   }),
 };
 

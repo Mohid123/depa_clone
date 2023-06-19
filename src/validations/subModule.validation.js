@@ -18,7 +18,7 @@ const createSubModule = {
     viewSchema: Joi.array().items(Joi.object()),
     code: Joi.string().required(),
     url: Joi.string().required(),
-    createdBy: Joi.required().custom(objectId),
+    createdBy: Joi.custom(objectId),
   }),
 };
 
