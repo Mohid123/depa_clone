@@ -4,6 +4,11 @@ const ApiError = require('../../utils/ApiError');
 const catchAsync = require('../../utils/catchAsync');
 const { subModuleService } = require('../../services');
 
+const validateCreateSubModule = catchAsync(async (req, res) => {
+  const isCodeTaken = await subModuleService.validateCreateSubModule(req.body);
+  res.status(httpStatus.CREATED).send(isCodeTaken);
+});
+
 const createSubModule = catchAsync(async (req, res) => {
   req.body.createdBy = req.user.id;
   const subModule = await subModuleService.createSubModule(req.body);
@@ -49,6 +54,7 @@ const deleteSubModule = catchAsync(async (req, res) => {
 });
 
 module.exports = {
+  validateCreateSubModule,
   createSubModule,
   getSubModules,
   getSubModule,

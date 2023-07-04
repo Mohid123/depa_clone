@@ -6,11 +6,7 @@ const { moduleService } = require('../../services');
 const storage = require('./../../config/storage.js');
 
 const uploadImage = async (req, res, next) => {
-  // Access the uploaded image file via req.file and perform necessary storage logic
-  // For example, you can use a storage provider like AWS S3 or local disk storage
-
-  // Assuming you are using local disk storage
-  const imageUrl = `${storage.local.diskUrl}/${req.file.filename}`;
+  const imageUrl = `${storage.local.diskUrl}/${req.body.path}/${req.file.filename}`;
 
   res.status(httpStatus.OK).send({ imageUrl });
 };

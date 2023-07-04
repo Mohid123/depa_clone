@@ -10,6 +10,7 @@ const subModuleSchema = mongoose.Schema(
     {
       moduleId: { type: mongoose.Schema.Types.ObjectId, ref: 'Module' },
       companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
+      parentId: { type: mongoose.Schema.Types.ObjectId, ref: 'SubModule' },
       adminUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }],
       viewOnlyUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
       workFlowId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkFlow', required: true },
@@ -19,6 +20,9 @@ const subModuleSchema = mongoose.Schema(
       viewSchema: [{ type: Object, required: true }],
       code: { type: String, required: true },
       url: { type: String, required: true },
+      title: { type: String },
+      description: { type: String },
+      image: { type: String, get: attachDomainWithImageUrl },
     }
   )
 );
@@ -57,6 +61,12 @@ subModuleSchema.methods.removeFromTrash = function () {
   this.isDeleted = false;
   return this.save();
 };
+
+// Accessor (getter) function
+function attachDomainWithImageUrl(value) {
+  // Capitalize the value and return
+  return config.imageServer + value;
+}
 
 /**
  * @typedef SubModule

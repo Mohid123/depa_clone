@@ -1,8 +1,15 @@
 const multer = require('multer');
+const fs = require('fs');
 
 const localDiskStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/images'); // Adjust the destination folder as per your requirements
+        const destinationPath = `uploads/images/${req.body.path}`;
+        // Check if the destination directory exists, create it if it doesn't
+        if (!fs.existsSync(destinationPath)) {
+            fs.mkdirSync(destinationPath, { recursive: true });
+        }
+
+        cb(null, destinationPath);
     },
     filename: (req, file, cb) => {
         const timestamp = Date.now();

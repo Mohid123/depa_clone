@@ -175,10 +175,16 @@ const createSubmission = async (submissionBody) => {
   const unmatchedEmails = unmatchedUsers.map(user => user.email);
   const allNotifyToUsers = unmatchedEmails.concat(activeStepNotifyUsers);
 
+  // Find inprogress step active users
+  const activeStep = workflowStatusArray.find(step => step.status === "inProgress");
+  const activeUserIds = activeStep.activeUsers;
+  const activeUsersId = await User.find({ _id: { $in: activeUserIds } }).select('id fullName');
+
   // Add default progress 0 in summary object
   submissionBody.summaryData = {
     progress: 0,
-    lastActivityPerformedBy: null
+    lastActivityPerformedBy: null,
+    pendingOnUsers: activeUsersId
   }
 
   let submission = await Submission.create(submissionBody);
@@ -271,20 +277,25 @@ const querySubmissions = async (filter, options) => {
  * @returns {Promise<Submission>}
  */
 const getSubmissionById = async (id) => {
-  const submission = await Submission.findById(id).populate(["subModuleId", "formIds", "formDataIds", {
-    path: "workFlowId",
-    populate: {
-      path: "stepIds",
-      populate: [
-        {
-          path: 'approverIds'
-        },
-        {
-          path: 'emailNotifyToId'
-        }
-      ]
-    }
-  }]);
+  const submission = await Submission.findById(id).populate(["subModuleId", "formIds", "formDataIds",
+    {
+      path: "createdBy",
+      select: "id fullName"
+    },
+    {
+      path: "workFlowId",
+      populate: {
+        path: "stepIds",
+        populate: [
+          {
+            path: 'approverIds'
+          },
+          {
+            path: 'emailNotifyToId'
+          }
+        ]
+      }
+    }]);
 
   const statusArr = submission.workflowStatus;
 
@@ -509,9 +520,9 @@ const updateSubmissionById = async (submissionId, updateBody) => {
   };
 
   // Object in progress
-  const objectInProgress = submission.workflowStatus.find(obj => obj.status === "inProgress");
-  if (objectInProgress) {
-    const activeUserIds = objectInProgress.activeUsers;
+  const activeStep = submission.workflowStatus.find(step => step.status === "inProgress");
+  if (activeStep) {
+    const activeUserIds = activeStep.activeUsers;
 
     const activeUsersId = await User.find({ _id: { $in: activeUserIds } }).select('id fullName');
     submission.summaryData.pendingOnUsers = activeUsersId;

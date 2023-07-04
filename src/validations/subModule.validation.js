@@ -1,10 +1,17 @@
 const Joi = require('joi');
 const { password, objectId } = require('./custom.validation');
 
+const validatedCreateSubModule = {
+  body: Joi.object().keys({
+    code: Joi.string().required(),
+  }),
+};
+
 const createSubModule = {
   body: Joi.object().keys({
     moduleId: Joi.string().required().custom(objectId),
     companyId: Joi.string().required().custom(objectId),
+    parentId: Joi.string().custom(objectId),
     adminUsers: Joi.array().items(Joi.string().custom(objectId)),
     viewOnlyUsers: Joi.array().items(Joi.string().custom(objectId)),
     formIds: Joi.array().items(Joi.object().required()),
@@ -18,6 +25,9 @@ const createSubModule = {
     viewSchema: Joi.array().items(Joi.object()),
     code: Joi.string().required(),
     url: Joi.string().required(),
+    title: Joi.string(),
+    description: Joi.string(),
+    image: Joi.string(),
     createdBy: Joi.custom(objectId),
   }),
 };
@@ -52,9 +62,12 @@ const updateSubModule = {
     .keys({
       moduleId: Joi.string().custom(objectId),
       companyId: Joi.string().custom(objectId),
-
+      parentId: Joi.string().custom(objectId),
       code: Joi.string(),
       url: Joi.string(),
+      title: Joi.string(),
+      description: Joi.string(),
+      image: Joi.string(),
       adminUsers: Joi.array().items(Joi.string().custom(objectId)),
       viewOnlyUsers: Joi.array().items(Joi.string().custom(objectId)),
       summarySchema: Joi.array().items(Joi.object()),
@@ -79,6 +92,7 @@ const deleteSubModule = {
 };
 
 module.exports = {
+  validatedCreateSubModule,
   createSubModule,
   getSubModules,
   getSubModule,

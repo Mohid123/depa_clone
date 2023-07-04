@@ -6,6 +6,23 @@ const workFlowService = require('./workFlow.service');
 const emailNotifyToService = require('./emailNotifyTo.service');
 
 /**
+ * Validate submodule code is taken or not
+ * @param {Object} subModuleBody
+ * @returns {Promise<SubModule>}
+ */
+const validateCreateSubModule = async (subModuleBody) => {
+  if (!await SubModule.isCodeTaken(subModuleBody.code)) {
+    return {
+      isCodeTaken: false
+    };
+  }
+
+  return {
+    isCodeTaken: true
+  };
+}
+
+/**
  * Create a SubModule
  * @param {Object} subModuleBody
  * @returns {Promise<SubModule>}
@@ -142,6 +159,7 @@ const deleteSubModuleById = async (subModuleId) => {
 };
 
 module.exports = {
+  validateCreateSubModule,
   createSubModule,
   querySubModules,
   getSubModuleById,
