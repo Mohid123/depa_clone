@@ -239,20 +239,25 @@ const querySubmissions = async (filter, options) => {
 
   submissionFilter.isDeleted = filter.isDeleted;
 
-  const query = Submission.find(submissionFilter).populate(["subModuleId", "formIds", "formDataIds", {
-    path: "workFlowId",
-    populate: {
-      path: "stepIds",
-      populate: [
-        {
-          path: 'approverIds'
-        },
-        {
-          path: 'emailNotifyToId'
-        }
-      ]
-    }
-  }])
+  const query = Submission.find(submissionFilter).populate(["subModuleId", "formIds", "formDataIds",
+    {
+      path: "createdBy",
+      select: "id fullName"
+    },
+    {
+      path: "workFlowId",
+      populate: {
+        path: "stepIds",
+        populate: [
+          {
+            path: 'approverIds'
+          },
+          {
+            path: 'emailNotifyToId'
+          }
+        ]
+      }
+    }])
     .skip((page - 1) * limit)
     .limit(limit);
 
