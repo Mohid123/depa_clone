@@ -7,11 +7,11 @@ const emailNotifyToService = require('./emailNotifyTo.service');
 
 /**
  * Validate submodule code is taken or not
- * @param {Object} subModuleBody
+ * @param {Object} filter
  * @returns {Promise<SubModule>}
  */
-const validateCreateSubModule = async (subModuleBody) => {
-  if (!await SubModule.isCodeTaken(subModuleBody.code)) {
+const validateCreateSubModule = async (filter) => {
+  if (!await SubModule.isCodeTaken(filter.code)) {
     return {
       isCodeTaken: false
     };

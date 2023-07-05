@@ -2,7 +2,7 @@ const Joi = require('joi');
 const { password, objectId } = require('./custom.validation');
 
 const validatedCreateSubModule = {
-  body: Joi.object().keys({
+  query: Joi.object().keys({
     code: Joi.string().required(),
   }),
 };
