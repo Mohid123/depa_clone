@@ -8,7 +8,7 @@ const router = express.Router();
 
 router
     .route('/dashboard')
-    .get(auth(), validate(dashboardValidation.getModulesByCategory), dashboardController.getModulesByCategory);
+    .get(auth(), validate(dashboardValidation.getSubModulesWithModule), dashboardController.getSubModulesWithModule);
 
 router
     .route('/module/slug/:moduleSlug')

@@ -5,13 +5,13 @@ const catchAsync = require('../../utils/catchAsync');
 const { dashboardService } = require('../../services');
 const { Module } = require('../../models');
 
-const getModulesByCategory = catchAsync(async (req, res) => {
+const getSubModulesWithModule = catchAsync(async (req, res) => {
   const filter = pick(req.query, []);
   if (req.query.withTrash !== "") {
     filter.isDeleted = false;
   }
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const result = await dashboardService.queryModulesByCategory(filter, options);
+  const result = await dashboardService.querySubModulesWithModule(filter, options);
   res.send(result);
 });
 
@@ -24,10 +24,11 @@ const getSubModulesByModule = catchAsync(async (req, res) => {
 });
 
 const getSubModulesByModuleSlug = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['moduleSlug']);
+  const filter = pick(req.query, ['moduleSlug', 'parentId']);
   if (req.query.withTrash !== "") {
     filter.isDeleted = false;
   }
+
   filter.code = req.params.moduleSlug;
 
   const options = pick(req.query, ['field', 'search', 'sortBy', 'sortByTime', 'limit', 'page']);
@@ -42,7 +43,7 @@ const getSubModulesByModuleSlug = catchAsync(async (req, res) => {
 
 
 module.exports = {
-  getModulesByCategory,
+  getSubModulesWithModule,
   getSubModulesByModule,
   getSubModulesByModuleSlug
 };

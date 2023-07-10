@@ -10,7 +10,7 @@ const subModuleSchema = mongoose.Schema(
     {
       moduleId: { type: mongoose.Schema.Types.ObjectId, ref: 'Module' },
       companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
-      parentId: { type: mongoose.Schema.Types.ObjectId, ref: 'SubModule' },
+      parentId: { type: mongoose.Schema.Types.ObjectId, ref: 'SubModule', default: null },
       adminUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }],
       viewOnlyUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
       workFlowId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkFlow', required: true },

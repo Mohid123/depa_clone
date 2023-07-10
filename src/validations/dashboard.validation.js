@@ -1,7 +1,7 @@
 const Joi = require('joi');
 const { objectId } = require('./custom.validation');
 
-const getModulesByCategory = {
+const getSubModulesWithModule = {
   query: Joi.object().keys({
     sortBy: Joi.string(),
     limit: Joi.number(),
@@ -13,16 +13,18 @@ const getModulesByCategory = {
 const getSubModulesByModule = {
   params: Joi.object().keys({
     moduleId: Joi.string().required().custom(objectId),
-    withTrash: Joi.string().allow('', null),
   }),
+  query: Joi.object().keys({
+    withTrash: Joi.string().allow('', null),
+  })
 };
 
 const getSubModulesByModuleSlug = {
   params: Joi.object().keys({
     moduleSlug: Joi.string().required(),
-    withTrash: Joi.string().allow('', null),
   }),
   query: Joi.object().keys({
+    // parentId: Joi.string().custom(objectId),
     field: Joi.valid('companyName', 'subModuleCode'),
     search: Joi.string(),
     sortBy: Joi.string(),
@@ -34,7 +36,7 @@ const getSubModulesByModuleSlug = {
 };
 
 module.exports = {
-  getModulesByCategory,
+  getSubModulesWithModule,
   getSubModulesByModule,
   getSubModulesByModuleSlug
 };
