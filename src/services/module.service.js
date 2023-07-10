@@ -92,12 +92,14 @@ const getModuleById = async (id) => {
     }
   }]);
 
-  const urlImage = module.image;
-  let updatedModule = Object.assign(module, {
-    image: urlImage
-  });
+  if (module) {
+    const urlImage = module.image;
+    Object.assign(module, {
+      image: urlImage
+    });
+  }
 
-  return updatedModule;
+  return module;
 };
 
 /**
