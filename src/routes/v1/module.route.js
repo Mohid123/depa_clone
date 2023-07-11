@@ -12,14 +12,7 @@ router
     .post(auth(), validate(moduleValidation.createModule), moduleController.createModule)
     .get(auth(), validate(moduleValidation.getModules), moduleController.getModules);
 
-router.post('/upload-image', (req, res, next) => {
-    // if (req.body.image === undefined) {
-    //     return res.status(400).json({ error: 'Image parameter is missing' });
-    // }
-
-    // Continue to the file upload middleware
-    next();
-}, upload.single('image'), moduleController.uploadImage);
+router.post('/upload-image', upload.single('image'), moduleController.uploadImage);
 
 router
     .route('/slug/:moduleSlug')

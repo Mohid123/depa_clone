@@ -3,7 +3,7 @@ const fs = require('fs');
 
 const localDiskStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const destinationPath = `uploads/images/${req.body.path}`;
+        const destinationPath = `uploads/images`;
         // Check if the destination directory exists, create it if it doesn't
         if (!fs.existsSync(destinationPath)) {
             fs.mkdirSync(destinationPath, { recursive: true });

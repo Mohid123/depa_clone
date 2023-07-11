@@ -1,6 +1,13 @@
 const Joi = require('joi');
 const { objectId } = require('./custom.validation');
 
+const uploadImage = {
+  body: Joi.object().keys({
+    image: Joi.string().required(),
+    path: Joi.string().required(),
+  }),
+};
+
 const createModule = {
   body: Joi.object().keys({
     categoryId: Joi.custom(objectId),
@@ -72,6 +79,7 @@ const deleteModule = {
 };
 
 module.exports = {
+  uploadImage,
   createModule,
   getModules,
   getModule,
