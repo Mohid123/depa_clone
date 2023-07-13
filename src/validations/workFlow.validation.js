@@ -8,6 +8,7 @@ const createWorkFlow = {
       "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
       "emailNotifyToId": Joi.string().custom(objectId),
     }).required()).required(),
+    createdBy: Joi.required().custom(objectId),
   }),
 };
 

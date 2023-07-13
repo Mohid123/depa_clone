@@ -60,15 +60,15 @@ const createModule = async (moduleBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryModules = async (filter, options) => {
-  const modules = await Module.paginate(filter, options);
+  return Module.paginate(filter, options);
 
   // Iterate through the array and update the 'image' property
-  modules.results.map(item => {
-    item.image = item.image;
-    return item;
-  });
+  // modules.results.map(item => {
+  //   item.image = item.image;
+  //   return item;
+  // });
 
-  return modules;
+  // return modules;
 };
 
 /**
@@ -77,7 +77,7 @@ const queryModules = async (filter, options) => {
  * @returns {Promise<Module>}
  */
 const getModuleById = async (id) => {
-  const module = await Module.findById(id).populate(['categoryId', {
+  return Module.findById(id).populate([{
     path: 'workFlowId',
     populate: {
       path: 'stepIds',
@@ -92,14 +92,14 @@ const getModuleById = async (id) => {
     }
   }]);
 
-  if (module) {
-    const urlImage = module.image;
-    Object.assign(module, {
-      image: urlImage
-    });
-  }
+  // if (module) {
+  //   const urlImage = module.image;
+  //   Object.assign(module, {
+  //     image: urlImage
+  //   });
+  // }
 
-  return module;
+  // return module;
 };
 
 /**
@@ -108,7 +108,7 @@ const getModuleById = async (id) => {
  * @returns {Promise<Module>}
  */
 const getModuleBySlug = async (slug) => {
-  const module = await Module.findOne({ 'code': slug, 'isDeleted': false }).populate(['categoryId', {
+  return Module.findOne({ 'code': slug, 'isDeleted': false }).populate([{
     path: 'workFlowId',
     populate: {
       path: 'stepIds',
@@ -123,12 +123,12 @@ const getModuleBySlug = async (slug) => {
     }
   }]);
 
-  const urlImage = module.image;
-  let updatedModule = Object.assign(module, {
-    image: urlImage
-  });
+  // const urlImage = module.image;
+  // let updatedModule = Object.assign(module, {
+  //   image: urlImage
+  // });
 
-  return updatedModule;
+  // return updatedModule;
 };
 
 /**

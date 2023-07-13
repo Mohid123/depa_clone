@@ -4,7 +4,8 @@ const { objectId } = require('./custom.validation');
 const createFormData = {
   body: Joi.object().keys({
     formId: Joi.required().custom(objectId),
-    data: Joi.object().required()
+    data: Joi.object().required(),
+    createdBy: Joi.required().custom(objectId),
   }),
 };
 

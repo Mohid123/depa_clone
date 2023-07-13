@@ -11,7 +11,8 @@ const createForm = {
     permissions: Joi.array().items(Joi.object({
       "options": Joi.array().items(Joi.string().valid("canEdit", "canDelete", "canView", "canSave", "canAdd").required()),
       "user": Joi.required().custom(objectId),
-    }))
+    })),
+    createdBy: Joi.required().custom(objectId),
   }),
 };
 

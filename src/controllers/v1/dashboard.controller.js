@@ -4,6 +4,7 @@ const ApiError = require('../../utils/ApiError');
 const catchAsync = require('../../utils/catchAsync');
 const { dashboardService } = require('../../services');
 const { Module } = require('../../models');
+const storage = require('./../../config/storage.js');
 
 const getSubModulesWithModule = catchAsync(async (req, res) => {
   const filter = pick(req.query, []);
@@ -41,9 +42,15 @@ const getSubModulesByModuleSlug = catchAsync(async (req, res) => {
   res.send(module);
 });
 
+const uploadFile = async (req, res, next) => {
+  const fileUrl = `${storage.local.diskUrl}/${req.body.path}/${req.file.filename}`;
+
+  res.status(httpStatus.OK).send({ fileUrl });
+};
 
 module.exports = {
   getSubModulesWithModule,
   getSubModulesByModule,
-  getSubModulesByModuleSlug
+  getSubModulesByModuleSlug,
+  uploadFile
 };

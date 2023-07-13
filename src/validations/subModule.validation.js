@@ -28,7 +28,8 @@ const createSubModule = {
     title: Joi.string(),
     description: Joi.string(),
     image: Joi.string(),
-    createdBy: Joi.custom(objectId),
+    status: Joi.valid(1, 2, 3),
+    createdBy: Joi.required().custom(objectId),
   }),
 };
 
@@ -80,6 +81,7 @@ const updateSubModule = {
         "emailNotifyTo": Joi.array().items(Joi.string().email()).required(),
       }).required()),
       workFlowId: Joi.custom(objectId),
+      status: Joi.valid(1, 2, 3),
       isDeleted: Joi.valid(false),
     })
     .min(1),

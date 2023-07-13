@@ -186,32 +186,25 @@ const createSubmission = async (submissionBody) => {
     lastActivityPerformedBy: null,
     pendingOnUsers: activeUsersId
   }
-
   let submission = await Submission.create(submissionBody);
   submission = await getSubmissionById(submission._id);
-
   emailNotifyToIds.forEach(emailNotifyToId => {
     emailNotifyToService.updateEmailNotifyToById(emailNotifyToId, {
-      "moduleId": submission.subModuleId.moduleId,
+      // "moduleId": submission.subModuleId.moduleId,
       "subModuleId": submission.subModuleId._id,
       "submissionId": submission._id
     })
   });
-
-  // return {
-  //   allNotifyToUsers: allNotifyToUsers,
-  //   activeStepUsers: activeStepUsers
-  // }
-  emailDataWithTemplate({
-    formDataIds: submissionBody.formDataIds,
-    allUsers: allNotifyToUsers,
-  }, true);
-  emailDataWithTemplate({
-    formDataIds: submissionBody.formDataIds,
-    allUsers: activeStepUsers,
-    submissionId: submission._id,
-    stepId: activeStepId,
-  }, false);
+  // emailDataWithTemplate({
+  //   formDataIds: submissionBody.formDataIds,
+  //   allUsers: allNotifyToUsers,
+  // }, true);
+  // emailDataWithTemplate({
+  //   formDataIds: submissionBody.formDataIds,
+  //   allUsers: activeStepUsers,
+  //   submissionId: submission._id,
+  //   stepId: activeStepId,
+  // }, false);
 
   return submission;
 };

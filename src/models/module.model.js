@@ -10,13 +10,13 @@ const moduleSchema = mongoose.Schema(
     {},
     defaultFields,
     {
-      categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
+      // categoryId: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
       workFlowId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkFlow', required: true },
       code: { type: String, required: true },
       title: { type: String, required: true },
-      description: { type: String, required: true },
-      url: { type: String, required: true },
-      image: { type: String, required: true, get: attachDomainWithImageUrl },
+      // description: { type: String, required: true },
+      // url: { type: String, required: true },
+      // image: { type: String, required: true, get: attachDomainWithImageUrl },
     }
   )
 );

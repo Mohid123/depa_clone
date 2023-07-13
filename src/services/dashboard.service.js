@@ -21,7 +21,7 @@ const querySubModulesWithModule = async (filter, options) => {
 
   const modules = await Module.aggregate([
     {
-      $match: { isDeleted: false }
+      $match: { status: 1, isDeleted: false }
     },
     {
       $lookup: {

@@ -3,12 +3,15 @@ const { dashboardController } = require('../../controllers');
 const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
 const dashboardValidation = require('../../validations/dashboard.validation');
+const upload = require('../../middlewares/upload');
 
 const router = express.Router();
 
 router
     .route('/dashboard')
     .get(auth(), validate(dashboardValidation.getSubModulesWithModule), dashboardController.getSubModulesWithModule);
+
+router.post('/upload', upload.single('file'), dashboardController.uploadFile);
 
 router
     .route('/module/slug/:moduleSlug')

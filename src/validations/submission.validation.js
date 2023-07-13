@@ -15,6 +15,7 @@ const createSubmission = {
       "emailNotifyTo": Joi.array().items(Joi.string().email()).required(),
     }).required()).required(),
     submissionStatus: Joi.valid(4),
+    createdBy: Joi.required().custom(objectId),
   }),
 };
 

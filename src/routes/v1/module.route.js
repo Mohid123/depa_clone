@@ -3,7 +3,6 @@ const { moduleController } = require('../../controllers');
 const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
 const moduleValidation = require('../../validations/module.validation');
-const upload = require('../../middlewares/upload');
 
 const router = express.Router();
 
@@ -11,8 +10,6 @@ router
     .route('/')
     .post(auth(), validate(moduleValidation.createModule), moduleController.createModule)
     .get(auth(), validate(moduleValidation.getModules), moduleController.getModules);
-
-router.post('/upload-image', upload.single('image'), moduleController.uploadImage);
 
 router
     .route('/slug/:moduleSlug')
