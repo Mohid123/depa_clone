@@ -61,5 +61,5 @@ module.exports = {
     },
     from: envVars.EMAIL_FROM,
   },
-  imageServer: envVars.IMAGE_SERVER_URL ?? "http://127.0.0.1:3000/"
+  fileServer: envVars.File_SERVER_URL ?? "http://127.0.0.1:3000/"
 };

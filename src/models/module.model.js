@@ -60,7 +60,7 @@ moduleSchema.methods.removeFromTrash = function () {
 // Accessor (getter) function
 function attachDomainWithImageUrl(value) {
   // Capitalize the value and return
-  return config.imageServer + value;
+  return config.fileServer + value;
 }
 
 /**

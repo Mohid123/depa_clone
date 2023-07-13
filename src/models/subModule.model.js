@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const { toJSON, paginate } = require('./plugins');
 const { defaultFields } = require('./index');
+const config = require('../config/config.js');
 
 const subModuleSchema = mongoose.Schema(
   Object.assign(
@@ -65,7 +66,7 @@ subModuleSchema.methods.removeFromTrash = function () {
 // Accessor (getter) function
 function attachDomainWithImageUrl(value) {
   // Capitalize the value and return
-  return config.imageServer + value;
+  return config.fileServer + value;
 }
 
 /**
