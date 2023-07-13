@@ -168,11 +168,13 @@ const querySubModulesByModuleSlug = async (filter, options) => {
     totalResults,
   };
 
-  // Iterate through the array and update the 'image' property
-  const response = submodules.results.map(item => {
+  submodules.results.map(item => {
     item.image = item.image;
     return item;
-  });
+  })
+
+  // Iterate through the array and update the 'image' property
+  const response = submodules;
 
   const hierarchy = [];
   let currentId = subModule.id;
