@@ -43,7 +43,8 @@ const getSubModulesByModuleSlug = catchAsync(async (req, res) => {
 });
 
 const uploadFile = async (req, res, next) => {
-  const fileUrl = `${storage.local.diskUrl}/${req.body.path}/${req.file.filename}`;
+  // ${ req.body.path }
+  const fileUrl = `${storage.local.diskUrl}/${req.file.filename}`;
 
   res.status(httpStatus.OK).send({ fileUrl });
 };
