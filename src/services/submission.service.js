@@ -478,7 +478,7 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     }
 
     if (updateBody.formDataIds) {
-      updateBody.formDataIds.forEach(formData => {
+      updateBody.formDataIds.forEach(async formData => {
         await formDataService.updateFormDataById(formData.id, { data: formData.data });
       });
     }
