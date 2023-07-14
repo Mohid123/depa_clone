@@ -118,15 +118,15 @@ const querySubModulesByModuleSlug = async (filter, options) => {
   subModuleFilter.parentId = subModule.id;
   subModuleFilter.isDeleted = filter.isDeleted;
 
-  if (options.field === "subModuleCode") {
+  if (options.field === "subModuleTitle") {
     if (options.search) {
-      subModuleFilter.code = { $regex: options.search, $options: 'i' };
+      subModuleFilter.title = { $regex: options.search, $options: 'i' };
     }
 
     if (options.sortBy === "asc") {
-      sortBy = 'code';
+      sortBy = 'title';
     } else if (options.sortBy === "desc") {
-      sortBy = '-code';
+      sortBy = '-title';
     }
   } else {
     if (options.sortBy === "asc") {

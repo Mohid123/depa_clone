@@ -25,7 +25,7 @@ const getSubModulesByModuleSlug = {
   }),
   query: Joi.object().keys({
     // parentId: Joi.string().custom(objectId),
-    field: Joi.valid('companyName', 'subModuleCode'),
+    field: Joi.valid('companyName', 'subModuleTitle'),
     search: Joi.string(),
     sortBy: Joi.string(),
     sortByTime: Joi.valid('latest', 'oldest'),
