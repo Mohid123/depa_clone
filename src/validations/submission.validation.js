@@ -74,7 +74,7 @@ const updateSubmission = {
       formDataIds: Joi.required().when('type', {
         is: 'edit',
         then: Joi.array().items(Joi.object({
-          "id": Joi.string().custom(objectId),
+          "_id": Joi.string().custom(objectId),
           "data": Joi.object(),
         }).required()),
         otherwise: Joi.forbidden()
@@ -92,7 +92,7 @@ const updateSubmission = {
       }),
       workFlowId: Joi.when('type', {
         is: 'edit',
-        then: Joi.custom(objectId),
+        then: Joi.custom(objectId).required(),
         otherwise: Joi.forbidden()
       }),
       emailNotifyTo: Joi.when('type', {
