@@ -59,14 +59,24 @@ const updateSubmission = {
         then: Joi.required().custom(objectId),
         otherwise: Joi.forbidden()
       }),
+      isApproved: Joi.when('type', {
+        is: 'submittal',
+        then: Joi.boolean(),
+        otherwise: Joi.forbidden()
+      }),
       remarks: Joi.when('type', {
         is: 'submittal',
         then: Joi.string(),
         otherwise: Joi.forbidden()
       }),
-      isApproved: Joi.required().when('type', {
+      submissionStatus: Joi.when('type', {
         is: 'submittal',
-        then: Joi.boolean().required(),
+        then: Joi.valid(2, 5),
+        otherwise: Joi.optional()
+      }),
+      status: Joi.when('type', {
+        is: 'submittal',
+        then: Joi.valid(2),
         otherwise: Joi.forbidden()
       }),
 
@@ -103,7 +113,7 @@ const updateSubmission = {
       submissionStatus: Joi.when('type', {
         is: 'edit',
         then: Joi.valid(1, 4),
-        otherwise: Joi.forbidden()
+        otherwise: Joi.optional()
       }),
 
       ////////////Common

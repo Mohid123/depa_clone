@@ -12,7 +12,8 @@ const createApprovalLog = {
     performedById: Joi.required().custom(objectId),
     approvedOn: Joi.date().required(),
     remarks: Joi.string().required(),
-    approvalStatus: Joi.string().valid('inProgress', 'pending', 'approved', 'rejected').required(),
+    approvalStatus: Joi.string().valid('approved', 'rejected'),
+    action: Joi.string().valid('cancelled', 'deleted'),
   }),
 };
 

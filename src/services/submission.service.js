@@ -472,6 +472,10 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'Submission not found');
   }
 
+  if (submission.status == 2) {
+    throw new ApiError(httpStatus.METHOD_NOT_ALLOWED, 'Invalid Action');
+  }
+
   if (updateBody.type == "edit" && submission.submissionStatus == 4) {
     if (updateBody.steps) {
       await workFlowService.updateWorkFlowById(submission.workFlowId._id, updateBody);
@@ -502,6 +506,41 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'Invalid User!');
   }
 
+  if (updateBody.submissionStatus || updateBody.status) {
+    // Fields to pluck
+    const fieldsToPluck = ['submissionStatus', 'status'];
+
+    // Create a new object with the plucked fields
+    const newUpdateBody = {};
+
+    fieldsToPluck.forEach(field => {
+      if (updateBody.hasOwnProperty(field)) {
+        newUpdateBody[field] = updateBody[field];
+      }
+    });
+
+    let action;
+    if (updateBody.status) {
+      action = 'deleted';
+    } else {
+      action = updateBody.submissionStatus == 5 ? 'cancelled' : 'enabled';
+    }
+    await approvalLogService.createApprovalLog({
+      subModuleId: submission.subModuleId,
+      submissionId: submission.id,
+      workFlowId: submission.workFlowId,
+      stepId: updateBody.stepId,
+      approvedOn: new Date().getTime(),
+      remarks: updateBody.remarks,
+      action: updateBody.status ? 'deleted' : 'cancelled',
+      performedById: stepActiveUserId
+    });
+
+    Object.assign(submission, newUpdateBody);
+    await submission.save();
+    return getSubmissionById(submissionId)
+  }
+
   await approvalLogService.createApprovalLog({
     subModuleId: submission.subModuleId,
     submissionId: submission.id,
@@ -510,8 +549,7 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     approvedOn: new Date().getTime(),
     remarks: updateBody.remarks,
     approvalStatus: updateBody.isApproved ? 'approved' : 'rejected',
-    performedById: stepActiveUserId,
-    isApproved: updateBody.isApproved
+    performedById: stepActiveUserId
   });
 
   if (Boolean(updateBody.isApproved)) {
