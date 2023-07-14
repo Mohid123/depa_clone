@@ -474,12 +474,12 @@ const updateSubmissionById = async (submissionId, updateBody) => {
 
   if (updateBody.type == "edit" && submission.submissionStatus == 4) {
     if (updateBody.steps) {
-      workFlowService.updateWorkFlowById(submission.workFlowId.id, updateBody);
+      await workFlowService.updateWorkFlowById(submission.workFlowId.id, updateBody);
     }
 
-    if (updateBody.formData) {
-      updateBody.formData.forEach(formData => {
-        formDataService.updateFormDataById(formData.id, { data: formData.data });
+    if (updateBody.formDataIds) {
+      updateBody.formDataIds.forEach(formData => {
+        await formDataService.updateFormDataById(formData.id, { data: formData.data });
       });
     }
 

@@ -71,7 +71,7 @@ const updateSubmission = {
       }),
 
       //////////Edit Submission
-      formData: Joi.required().when('type', {
+      formDataIds: Joi.required().when('type', {
         is: 'edit',
         then: Joi.array().items(Joi.object({
           "id": Joi.string().custom(objectId),
