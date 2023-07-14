@@ -14,8 +14,7 @@ const createSubmission = {
       "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
       "emailNotifyTo": Joi.array().items(Joi.string().email()).required(),
     }).required()).required(),
-    submissionStatus: Joi.valid(4),
-    createdBy: Joi.required().custom(objectId),
+    submissionStatus: Joi.valid(1, 4),
   }),
 };
 
@@ -44,14 +43,46 @@ const updateSubmission = {
   }),
   body: Joi.object()
     .keys({
-      summaryData: Joi.object(),
+      ///////////Submittal
+      // summaryData: Joi.object(),
       // formIds: Joi.array().items(Joi.string().custom(objectId)),
       // formDataIds: Joi.array().items(Joi.string().custom(objectId)),
-      submissionStatus: Joi.valid(2, 3, 4),
-      stepId: Joi.required().custom(objectId),
-      userId: Joi.required().custom(objectId),
+      // submissionStatus: Joi.valid(2, 3, 4),
+      type: Joi.string().optional(),
+      stepId: Joi.required().when('type', {
+        is: 'submittal',
+        then: Joi.required().custom(objectId),
+        otherwise: Joi.forbidden()
+      }),
+      userId: Joi.required().when('type', {
+        is: 'submittal',
+        then: Joi.required().custom(objectId),
+        otherwise: Joi.forbidden()
+      }),
       remarks: Joi.string(),
-      isApproved: Joi.boolean().required(),
+      isApproved: Joi.required().when('type', {
+        is: 'submittal',
+        then: Joi.boolean().required(),
+        otherwise: Joi.forbidden()
+      }),
+
+      //////////Edit Submission
+      steps: Joi.required().when('type', {
+        is: 'edit',
+        then: Joi.array().items(Joi.object({
+          "id": Joi.string().custom(objectId),
+          "condition": Joi.string().valid("none", "and", "or").required(),
+          "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
+          "emailNotifyToId": Joi.string().custom(objectId),
+          "emailNotifyTo": Joi.array().items(Joi.string().email()).required(),
+        }).required()),
+        otherwise: Joi.forbidden()
+      }),
+      workFlowId: Joi.custom(objectId),
+      emailNotifyTo: Joi.array().items(Joi.string().email()),
+
+      ////////////Common
+      submissionStatus: Joi.valid(1, 4),
       isDeleted: Joi.valid(false),
     })
     .min(1),

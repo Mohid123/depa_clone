@@ -86,7 +86,7 @@ const querySubModules = async (filter, options) => {
  * @returns {Promise<SubModule>}
  */
 const getSubModuleById = async (id) => {
-  return SubModule.findById(id).populate(["adminUsers", "viewOnlyUsers", "formIds", "moduleId", "companyId", {
+  const subModule = await SubModule.findById(id).populate(["adminUsers", "viewOnlyUsers", "formIds", "moduleId", "companyId", {
     path: 'workFlowId',
     populate: {
       path: 'stepIds',
@@ -100,6 +100,10 @@ const getSubModuleById = async (id) => {
       ]
     }
   }]);
+
+  subModule.image = subModule.image;
+
+  return subModule;
 };
 
 /**
@@ -108,7 +112,7 @@ const getSubModuleById = async (id) => {
  * @returns {Promise<SubModule>}
  */
 const getSubModuleBySlug = async (slug) => {
-  return SubModule.findOne({ 'code': slug, 'isDeleted': false }).populate(["formIds", {
+  const subModule = await SubModule.findOne({ 'code': slug, 'isDeleted': false }).populate(["formIds", {
     path: 'workFlowId',
     populate: {
       path: 'stepIds',
@@ -117,6 +121,10 @@ const getSubModuleBySlug = async (slug) => {
       }
     }
   }]);
+
+  subModule.image = subModule.image;
+
+  return subModule;
 };
 
 /**

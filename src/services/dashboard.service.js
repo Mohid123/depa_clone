@@ -41,7 +41,7 @@ const querySubModulesWithModule = async (filter, options) => {
             $addFields: {
               image: {
                 $concat: [
-                  config.imageServer,
+                  config.fileServer,
                   "$image",
                 ],
               },

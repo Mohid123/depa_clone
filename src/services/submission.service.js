@@ -190,7 +190,7 @@ const createSubmission = async (submissionBody) => {
   submission = await getSubmissionById(submission._id);
   emailNotifyToIds.forEach(emailNotifyToId => {
     emailNotifyToService.updateEmailNotifyToById(emailNotifyToId, {
-      // "moduleId": submission.subModuleId.moduleId,
+      "moduleId": submission.subModuleId.moduleId,
       "subModuleId": submission.subModuleId._id,
       "submissionId": submission._id
     })
@@ -470,6 +470,17 @@ const updateSubmissionById = async (submissionId, updateBody) => {
   const submission = await Submission.findById(submissionId);
   if (!submission) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Submission not found');
+  }
+
+  if (updateBody.type == "edit" && submission.submissionStatus == 4) {
+    if (updateBody.steps) {
+      await workFlowService.updateWorkFlowById(submission.workFlowId.id, updateBody);
+    }
+
+    Object.assign(submission, updateBody);
+    await submission.save();
+
+    return getSubmissionById(submissionId);
   }
 
   const workFlowStatus = submission.workflowStatus;
