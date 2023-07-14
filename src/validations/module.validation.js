@@ -66,7 +66,7 @@ const updateModule = {
         "emailNotifyToId": Joi.string().custom(objectId),
         "emailNotifyTo": Joi.array().items(Joi.string().email()).required(),
       }).required()),
-      workFlowId: Joi.custom(objectId),
+      workFlowId: Joi.custom(objectId).required(),
       emailNotifyTo: Joi.array().items(Joi.string().email()),
       status: Joi.valid(1, 2, 3),
       isDeleted: Joi.valid(false),

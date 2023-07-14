@@ -519,6 +519,10 @@ const updateSubmissionById = async (submissionId, updateBody) => {
       }
     });
 
+    if (newUpdateBody.status == 2) {
+      newUpdateBody.submissionStatus = 6;
+    }
+
     let action;
     if (updateBody.status) {
       action = 'deleted';

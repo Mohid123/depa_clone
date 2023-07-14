@@ -23,7 +23,7 @@ const getSubmissions = {
     subModuleId: Joi.string().custom(objectId),
     formIds: Joi.array().items(Joi.string().custom(objectId)),
     formDataIds: Joi.array().items(Joi.string().custom(objectId)),
-    submissionStatus: Joi.number().min(1).max(4),
+    submissionStatus: Joi.number().min(1).max(6),
     sortBy: Joi.string(),
     limit: Joi.number(),
     page: Joi.number(),
