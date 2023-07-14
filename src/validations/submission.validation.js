@@ -59,7 +59,11 @@ const updateSubmission = {
         then: Joi.required().custom(objectId),
         otherwise: Joi.forbidden()
       }),
-      remarks: Joi.string(),
+      remarks: Joi.when('type', {
+        is: 'submittal',
+        then: Joi.string(),
+        otherwise: Joi.forbidden()
+      }),
       isApproved: Joi.required().when('type', {
         is: 'submittal',
         then: Joi.boolean().required(),
@@ -67,6 +71,14 @@ const updateSubmission = {
       }),
 
       //////////Edit Submission
+      formData: Joi.required().when('type', {
+        is: 'edit',
+        then: Joi.array().items(Joi.object({
+          "id": Joi.string().custom(objectId),
+          "data": Joi.object(),
+        }).required()),
+        otherwise: Joi.forbidden()
+      }),
       steps: Joi.required().when('type', {
         is: 'edit',
         then: Joi.array().items(Joi.object({
@@ -78,11 +90,23 @@ const updateSubmission = {
         }).required()),
         otherwise: Joi.forbidden()
       }),
-      workFlowId: Joi.custom(objectId),
-      emailNotifyTo: Joi.array().items(Joi.string().email()),
+      workFlowId: Joi.when('type', {
+        is: 'edit',
+        then: Joi.custom(objectId),
+        otherwise: Joi.forbidden()
+      }),
+      emailNotifyTo: Joi.when('type', {
+        is: 'edit',
+        then: Joi.array().items(Joi.string().email()),
+        otherwise: Joi.forbidden()
+      }),
+      submissionStatus: Joi.when('type', {
+        is: 'edit',
+        then: Joi.valid(1, 4),
+        otherwise: Joi.forbidden()
+      }),
 
       ////////////Common
-      submissionStatus: Joi.valid(1, 4),
       isDeleted: Joi.valid(false),
     })
     .min(1),
