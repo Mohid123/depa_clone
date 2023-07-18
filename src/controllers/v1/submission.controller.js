@@ -5,7 +5,8 @@ const catchAsync = require('../../utils/catchAsync');
 const { submissionService } = require('../../services');
 
 const createSubmission = catchAsync(async (req, res) => {
-  req.body.createdBy = req.user.id;
+  req.body.createdBy = req.user.id; req.user
+  req.body.user = req.user;
   const submission = await submissionService.createSubmission(req.body);
   res.status(httpStatus.CREATED).send(submission);
 });

@@ -7,6 +7,7 @@ const approvalLogService = require('./approvalLog.service');
 const emailService = require('./email.service');
 const userService = require('./user.service');
 const emailNotifyToService = require('./emailNotifyTo.service');
+const { subModuleService } = require('.');
 
 /**
  * Find next workflow step
@@ -94,6 +95,12 @@ const emailDataWithTemplate = async (data, isNotify) => {
  * @returns {Promise<Submission>}
  */
 const createSubmission = async (submissionBody) => {
+  const subModule = await subModuleService.getSubModuleById(submissionBody.subModuleId);
+  if (submissionBody.user.roles.includes('admin') &&
+    !subModule.workFlowId.stepIds[0].approverIds.filter(function (user) { return (user.id == submissionBody.user.id); })[0]) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Invalid User!');
+  }
+
   const { formDataIds } = submissionBody;
 
   const formsData = await formDataService.createManyFormsData(formDataIds);
@@ -187,6 +194,15 @@ const createSubmission = async (submissionBody) => {
     pendingOnUsers: activeUsersId
   }
   let submission = await Submission.create(submissionBody);
+  await approvalLogService.createApprovalLog({
+    subModuleId: submission.subModuleId,
+    submissionId: submission.id,
+    workFlowId: submission.workFlowId,
+    approvedOn: new Date().getTime(),
+    approvalStatus: 'created',
+    performedById: submissionBody.user.id
+  });
+
   submission = await getSubmissionById(submission._id);
   emailNotifyToIds.forEach(emailNotifyToId => {
     emailNotifyToService.updateEmailNotifyToById(emailNotifyToId, {
