@@ -31,28 +31,28 @@ mongoose.connect(config.mongoose.url, config.mongoose.options)
                 fullName: "Administrator",
                 email: "admin@depa.com",
                 password: passA,
-                role: ["admin"]
+                roles: ["admin"]
             },
             {
                 userName: "F",
                 fullName: "Fahad",
                 email: "fahad@quaidtech.com",
                 password: passA,
-                role: ["admin", "any"]
+                roles: ["admin", "any"]
             },
             {
                 userName: "M",
                 fullName: "Mohid",
                 email: "mohid@quaidtech.com",
                 password: passA,
-                role: ["admin", "any"]
+                roles: ["admin", "any"]
             },
             {
                 userName: "MK",
                 fullName: "Mohammad Kamran",
                 email: "kamran@depa.com",
                 password: passB,
-                role: ["admin", "any"]
+                roles: ["admin", "any"]
             },
             {
                 userName: "H",
@@ -426,7 +426,7 @@ mongoose.connect(config.mongoose.url, config.mongoose.options)
                         "input": true
                     },
                     {
-                        "label": "Role",
+                        "label": "Roles",
                         "widget": "choicesjs",
                         "tableView": true,
                         "validate": {
@@ -444,7 +444,7 @@ mongoose.connect(config.mongoose.url, config.mongoose.options)
                                 }
                             ]
                         },
-                        "key": "role",
+                        "key": "roles",
                         "type": "select",
                         "input": true
                     }
