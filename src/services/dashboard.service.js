@@ -19,18 +19,18 @@ const querySubModulesWithModule = async (filter, options) => {
   limit = limit ?? 6;
   page = page ?? 1;
 
-  const modules = await Module.aggregate([
+  const modules = await Category.aggregate([
     {
       $match: { status: 1, isDeleted: false }
     },
     {
       $lookup: {
         from: "submodules",
-        let: { moduleId: "$_id" },
+        let: { categoryId: "$_id" },
         pipeline: [
           {
             $match: {
-              $expr: { $eq: ["$$moduleId", "$moduleId"] },
+              $expr: { $eq: ["$$categoryId", "$categoryId"] },
               $and: [
                 { parentId: null },
                 { isDeleted: false }
@@ -76,7 +76,7 @@ const querySubModulesWithModule = async (filter, options) => {
     {
       $project: {
         _id: 1,
-        title: 1,
+        name: 1,
         submodules: 1
       }
     }

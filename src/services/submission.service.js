@@ -371,6 +371,13 @@ const approveStep = async (submission, workFlowStatusStep, approvingUser) => {
           nextStep.status = "inProgress";
         }
       }
+    } else {
+      step.approvedUsers.push(approvingUser);
+      step.status = "approved";
+      nextStep = await nextWorkFlowStep(workFlowStatus, workFlowStatusStep);
+      if (nextStep) {
+        nextStep.status = "inProgress";
+      }
     }
   }
 
@@ -421,7 +428,8 @@ const rejectStep = async (submission, workFlowStatusStep, rejectingUser) => {
       step.status = "pending";
       previousStep.status = "inProgress";
       const index = previousStep.approvedUsers.pop();
-      if (!previousStep.activeUsers.includes(index)) {
+      const user = await userService.getUserById(rejectingUser);
+      if (!previousStep.activeUsers.includes(index) && !user.roles.includes('any')) {
         previousStep.activeUsers.push(index);
       }
     }
@@ -444,6 +452,13 @@ const rejectStep = async (submission, workFlowStatusStep, rejectingUser) => {
         // Rollback to the same hierarchy or previous step
         const index = step.approvedUsers.pop();
         step.activeUsers.push(index);
+      }
+    } else {
+      previousStep = await previousWorkFlowStep(workFlowStatus, workFlowStatusStep)
+      if (previousStep) {
+        step.status = "pending";
+        previousStep.status = "inProgress";
+        previousStep.approvedUsers.pop();
       }
     }
   }
@@ -501,9 +516,12 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'Invalid Approval Step!');
   }
 
-  const stepActiveUserId = await approvalStep.activeUsers.filter(function (item) { return (item == updateBody.userId); })[0];
-  if (!stepActiveUserId) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Invalid User!');
+  const activeUser = await userService.getUserById(updateBody.userId);
+  if (!activeUser.roles.includes('any')) {
+    const stepActiveUserId = await approvalStep.activeUsers.filter(function (item) { return (item == updateBody.userId); })[0];
+    if (!stepActiveUserId) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Invalid User!');
+    }
   }
 
   if (updateBody.submissionStatus || updateBody.status) {
@@ -537,7 +555,7 @@ const updateSubmissionById = async (submissionId, updateBody) => {
       approvedOn: new Date().getTime(),
       remarks: updateBody.remarks,
       action: updateBody.status ? 'deleted' : 'cancelled',
-      performedById: stepActiveUserId
+      performedById: updateBody.userId
     });
 
     Object.assign(submission, newUpdateBody);
@@ -553,17 +571,17 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     approvedOn: new Date().getTime(),
     remarks: updateBody.remarks,
     approvalStatus: updateBody.isApproved ? 'approved' : 'rejected',
-    performedById: stepActiveUserId
+    performedById: updateBody.userId
   });
 
   if (Boolean(updateBody.isApproved)) {
-    const updatedworkFlowStatus = await approveStep(submission, approvalStep, stepActiveUserId);
+    const updatedworkFlowStatus = await approveStep(submission, approvalStep, updateBody.userId);
 
     // Update submission status when all steps are approved
     const allStepsApproved = updatedworkFlowStatus.every(step => step.status === "approved");
     updateBody.submissionStatus = allStepsApproved ? 3 : 2;
   } else {
-    await rejectStep(submission, approvalStep, stepActiveUserId);
+    await rejectStep(submission, approvalStep, updateBody.userId);
     updateBody.submissionStatus = 2;
   }
 

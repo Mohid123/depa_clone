@@ -45,9 +45,9 @@ module.exports = router;
  *               - name
  *               - email
  *               - password
- *               - role
+ *               - roles
  *             properties:
- *               name:
+ *               fullName:
  *                 type: string
  *               email:
  *                 type: string
@@ -58,14 +58,19 @@ module.exports = router;
  *                 format: password
  *                 minLength: 8
  *                 description: At least one number and one letter
- *               role:
- *                  type: string
- *                  enum: [user, admin]
+ *               roles:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   enum:
+ *                     - admin
+ *                     - any
+ *                     - user
  *             example:
- *               name: fake name
+ *               fullName: fake name
  *               email: fake@example.com
  *               password: password1
- *               role: user
+ *               roles: ['user']
  *     responses:
  *       "201":
  *         description: Created
@@ -93,10 +98,10 @@ module.exports = router;
  *           type: string
  *         description: User full name
  *       - in: query
- *         name: role
+ *         name: roles
  *         schema:
  *           type: string
- *         description: User role
+ *         description: User roles
  *       - in: query
  *         name: withTrash
  *         schema:

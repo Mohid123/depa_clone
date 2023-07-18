@@ -58,7 +58,7 @@ const createSubModule = async (subModuleBody) => {
 
   emailNotifyToIds.forEach(emailNotifyToId => {
     emailNotifyToService.updateEmailNotifyToById(emailNotifyToId, {
-      "moduleId": subModule.moduleId,
+      "categoryId": subModule.categoryId,
       "subModuleId": subModule._id
     })
   });
@@ -86,7 +86,7 @@ const querySubModules = async (filter, options) => {
  * @returns {Promise<SubModule>}
  */
 const getSubModuleById = async (id) => {
-  const subModule = await SubModule.findById(id).populate(["adminUsers", "viewOnlyUsers", "formIds", "moduleId", "companyId", {
+  const subModule = await SubModule.findById(id).populate(["adminUsers", "viewOnlyUsers", "formIds", "categoryId", "companyId", {
     path: 'workFlowId',
     populate: {
       path: 'stepIds',

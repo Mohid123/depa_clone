@@ -9,7 +9,7 @@ const validatedCreateSubModule = {
 
 const createSubModule = {
   body: Joi.object().keys({
-    moduleId: Joi.string().required().custom(objectId),
+    categoryId: Joi.string().required().custom(objectId),
     companyId: Joi.string().required().custom(objectId),
     parentId: Joi.string().custom(objectId),
     adminUsers: Joi.array().items(Joi.string().custom(objectId)),
@@ -35,8 +35,7 @@ const createSubModule = {
 
 const getSubModules = {
   query: Joi.object().keys({
-    moduleId: Joi.string().custom(objectId),
-    moduleSlug: Joi.string(),
+    categoryId: Joi.string().custom(objectId),
     companyId: Joi.string().custom(objectId),
     code: Joi.string(),
     withTrash: Joi.string().allow('', null),
@@ -61,7 +60,7 @@ const updateSubModule = {
   }),
   body: Joi.object()
     .keys({
-      moduleId: Joi.string().custom(objectId),
+      categoryId: Joi.string().custom(objectId),
       companyId: Joi.string().custom(objectId),
       parentId: Joi.string().custom(objectId),
       code: Joi.string(),
