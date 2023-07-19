@@ -5,7 +5,6 @@ const createCompany = {
   body: Joi.object().keys({
     groupCode: Joi.string().required(),
     title: Joi.string().required(),
-    createdBy: Joi.required().custom(objectId),
   }),
 };
 

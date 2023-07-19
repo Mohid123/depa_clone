@@ -24,14 +24,14 @@ const userSchema = mongoose.Schema(
         required: true,
         trim: true,
         minlength: 6,
-        validate(value) {
-          if (!value.match(/\d/) || !value.match(/[a-zA-Z]/)) {
-            throw new Error('Password must contain at least one letter and one number');
-          }
-        },
+        // validate(value) {
+        //   if (!value.match(/\d/) || !value.match(/[a-zA-Z]/)) {
+        //     throw new Error('Password must contain at least one letter and one number');
+        //   }
+        // },
         private: true, // used by the toJSON plugin
       },
-      roles: [{ type: String, enum: ["admin", "any", "user"], default: "user" }],
+      roles: [{ type: String, enum: ["sysAdmin", "admin", "any", "user"], default: ["user"] }],
       autheticatedBy: { type: String, enum: ["none", "activeDirectory", "database"], default: "none" },
       supervisorGID: { type: Number, default: null, default: null },
       image: { type: String, default: null },

@@ -27,7 +27,14 @@ mongoose.connect(config.mongoose.url, config.mongoose.options)
 
         let userData = [
             {
-                userName: "Admin",
+                userName: "SA",
+                fullName: "System Administrator",
+                email: "sysadmin@depa.com",
+                password: passA,
+                roles: ["sysAdmin", "admin", "any"]
+            },
+            {
+                userName: "A",
                 fullName: "Administrator",
                 email: "admin@depa.com",
                 password: passA,
@@ -58,61 +65,71 @@ mongoose.connect(config.mongoose.url, config.mongoose.options)
                 userName: "H",
                 fullName: "HOD",
                 email: "hod@depa.com",
-                password: passH
+                password: passH,
+                roles: ["admin"]
             },
             {
                 userName: "H",
                 fullName: "HR",
                 email: "hr@depa.com",
-                password: passH
+                password: passH,
+                roles: ["admin"]
             },
             {
                 userName: "S",
                 fullName: "Service Desk",
                 email: "srdesk@depa.com",
-                password: passH
+                password: passH,
+                roles: ["admin"]
             },
             {
                 userName: "A",
                 fullName: "Mr. ALi Katkhada",
                 email: "mali@depa.com",
-                password: passA
+                password: passA,
+                roles: ["admin"]
             },
             {
                 userName: "C",
                 fullName: "Adeel Hashmi",
                 email: "adeel@depa.com",
-                password: passC
+                password: passC,
+                roles: ["user"]
             },
             {
                 userName: "D",
                 fullName: "Ishtiaq Ahmed",
                 email: "ishtiaq@depa.com",
-                password: passD
+                password: passD,
+                roles: ["user"]
             },
             {
                 userName: "E",
                 fullName: "Mohammad Jahanzeb",
                 email: "jahanzeb@depa.com",
-                password: passE
+                password: passE,
+                roles: ["user"]
             },
             {
                 userName: "F",
                 fullName: "Moin Ul Haq",
                 email: "user.f@depa.com",
-                password: passF
+                password: passF,
+                roles: ["user"]
             },
             {
                 userName: "G",
                 fullName: "Usaid Qazi",
                 email: "user.g@depa.com",
-                password: passG
+                password: passG,
+                roles: ["user"]
             },
             {
                 userName: "H",
                 fullName: "Hassan Khan",
                 email: "hassan@depa.com",
-                password: passH
+                password: passH,
+                roles: ["user"]
             }
         ];
         // Function call

@@ -12,8 +12,13 @@ const createUser = async (userBody) => {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
 
+  if (userBody.roles.includes('any') && !userBody.roles.includes('admin')) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Any role must come with Admin');
+  }
+
   if (!userBody.password) {
-    userBody.password = "p@$$w0rd";
+    // userBody.password = "p@$$w0rd";
+    userBody.password = "12345678";
   }
 
   return User.create(userBody);
@@ -42,6 +47,7 @@ const queryUsers = async (filter, options) => {
     filter.createdAt = { $gte: new Date() };
   }
 
+  // options.sort = { createdAt: -1 };
   const users = await User.paginate(filter, options);
 
   return users;
