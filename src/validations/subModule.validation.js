@@ -79,7 +79,7 @@ const updateSubModule = {
         "emailNotifyTo": Joi.array().items(Joi.string().email()).required(),
       }).required()),
       workFlowId: Joi.custom(objectId).required(),
-      accessType: Joi.valid("anyCreate", "anyCreateAndModify"),
+      accessType: Joi.valid("disabled", "anyCreate", "anyCreateAndModify"),
       status: Joi.valid(1, 2, 3),
       isDeleted: Joi.valid(false),
     })

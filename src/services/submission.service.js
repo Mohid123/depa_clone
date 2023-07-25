@@ -97,12 +97,14 @@ const emailDataWithTemplate = async (data, isNotify) => {
 const createSubmission = async (submissionBody) => {
   const subModule = await SubModule.findById(submissionBody.subModuleId);
   const parrentWorkflow = await workFlowService.getWorkFlowById(subModule.workFlowId);
-
-  if (!submissionBody.user.roles.includes('sysAdmin') &&
+  if (!submissionBody.user.roles.includes('sysAdmin') && submissionBody.user.roles.includes('admin') &&
     !subModule.adminUsers.includes(submissionBody.user.id) &&
-    !parrentWorkflow.stepIds[0].approverIds.filter(function (user) { return (user.id == submissionBody.user.id); })[0] ||
-    submissionBody.user.roles.includes('user') && subModule.accessType != "disabled") {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Invalid User!');
+    !parrentWorkflow.stepIds[0].approverIds.filter((user) => user.id == submissionBody.user.id)[0]) {
+    throw new ApiError(httpStatus.FORBIDDEN, 'Invalid User!');
+  }
+
+  if (submissionBody.user.roles.includes('user') && subModule.accessType == "disabled") {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid Action!');
   }
 
   const { formDataIds } = submissionBody;
@@ -192,29 +194,38 @@ const createSubmission = async (submissionBody) => {
   let activeUsersId = await User.find({ _id: { $in: activeUserIds } }).select('id fullName');
 
   // Add default progress 0 in summary object
+  let totalLength = workflowStatusArray.length + 1;
+  let approvedCount = 1;
   submissionBody.summaryData = {
-    progress: 0,
+    progress: (approvedCount / totalLength) * 100,
     lastActivityPerformedBy: null,
     pendingOnUsers: activeUsersId
   }
 
-
   let submission = await Submission.create(submissionBody);
   const workflowStatus = submission.workflowStatus;
-  const updatedStep = await approveStep(submission, workflowStatus[0], submissionBody.user.id);
-  activeStep = workflowStatus.find(step => step.status === "inProgress");
-  activeUserIds = activeStep.activeUsers;
-  activeUsersId = await User.find({ _id: { $in: activeUserIds } }).select('id fullName');
-  const totalLength = workflowStatus.length;
-  const approvedCount = workflowStatus.filter(step => step.status === "approved").length;
-  updatedStep.summaryData = {
-    progress: (approvedCount / totalLength) * 100,
-    lastActivityPerformedBy: submissionBody.user.id,
-    pendingOnUsers: activeUsersId
+  if (workflowStatus[0].allUsers.includes(submissionBody.user.id)) {
+    const updatedStep = await approveStep(submission, workflowStatus[0], submissionBody.user.id);
+    totalLength = workflowStatus.length + 1;
+    approvedCount = workflowStatus.filter(step => step.status === "approved").length + 1;
+    updatedStep.summaryData = {
+      progress: (approvedCount / totalLength) * 100,
+      lastActivityPerformedBy: submissionBody.user.id,
+      pendingOnUsers: activeUsersId
+    }
+
+    // Object in progress
+    const wkActiveStep = workflowStatus.find(step => step.status === "inProgress");
+    if (wkActiveStep) {
+      const activeUserIds = wkActiveStep.activeUsers;
+
+      const activeUsersId = await User.find({ _id: { $in: activeUserIds } }).select('id fullName');
+      updatedStep.summaryData.pendingOnUsers = activeUsersId;
+    }
+    Object.assign(submission, updatedStep);
+    await submission.save();
   }
 
-  Object.assign(submission, updatedStep);
-  await submission.save();
 
   await approvalLogService.createApprovalLog({
     subModuleId: submission.subModuleId,
@@ -395,7 +406,7 @@ const approveStep = async (submission, workFlowStatusStep, approvingUser) => {
     // and condition step
     if (step.activeUsers.includes(approvingUser)) {
       // User is part of the current step
-      if (step.activeUsers.some(user => step.activeUsers.includes(user) && user !== approvingUser)) {
+      if (step.activeUsers.length > 1) {
         // At least one pending approval in the step
         step.approvedUsers.push(approvingUser);
         step.activeUsers.splice(step.activeUsers.indexOf(approvingUser), 1);
@@ -614,7 +625,6 @@ const updateSubmissionById = async (submissionId, updateBody) => {
 
   if (Boolean(updateBody.isApproved)) {
     const updatedworkFlowStatus = await approveStep(submission, approvalStep, updateBody.userId);
-
     // Update submission status when all steps are approved
     const allStepsApproved = updatedworkFlowStatus.every(step => step.status === "approved");
     updateBody.submissionStatus = allStepsApproved ? 3 : 2;
@@ -623,8 +633,8 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     updateBody.submissionStatus = 2;
   }
 
-  const totalLength = workFlowStatus.length;
-  const approvedCount = workFlowStatus.filter(step => step.status === "approved").length;
+  const totalLength = workFlowStatus.length + 1;
+  const approvedCount = workFlowStatus.filter(step => step.status === "approved").length + 1;
   const user = await User.findOne({ _id: updateBody.userId });
   submission.summaryData = {
     progress: (approvedCount / totalLength) * 100,
