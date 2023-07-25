@@ -31,7 +31,7 @@ const userSchema = mongoose.Schema(
         // },
         private: true, // used by the toJSON plugin
       },
-      roles: [{ type: String, enum: ["sysAdmin", "admin", "any", "user"], default: ["user"] }],
+      roles: [{ type: String, enum: ["sysAdmin", "admin", "user"], default: ["user"] }],
       autheticatedBy: { type: String, enum: ["none", "activeDirectory", "database"], default: "none" },
       supervisorGID: { type: Number, default: null, default: null },
       image: { type: String, default: null },

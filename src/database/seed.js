@@ -28,10 +28,10 @@ mongoose.connect(config.mongoose.url, config.mongoose.options)
         let userData = [
             {
                 userName: "SA",
-                fullName: "System Administrator",
+                fullName: "System Admin",
                 email: "sysadmin@depa.com",
                 password: passA,
-                roles: ["sysAdmin", "admin", "any"]
+                roles: ["sysAdmin", "admin"]
             },
             {
                 userName: "A",
@@ -45,21 +45,21 @@ mongoose.connect(config.mongoose.url, config.mongoose.options)
                 fullName: "Fahad",
                 email: "fahad@quaidtech.com",
                 password: passA,
-                roles: ["admin", "any"]
+                roles: ["admin"]
             },
             {
                 userName: "M",
                 fullName: "Mohid",
                 email: "mohid@quaidtech.com",
                 password: passA,
-                roles: ["admin", "any"]
+                roles: ["admin"]
             },
             {
                 userName: "MK",
                 fullName: "Mohammad Kamran",
                 email: "kamran@depa.com",
                 password: passB,
-                roles: ["admin", "any"]
+                roles: ["admin"]
             },
             {
                 userName: "H",

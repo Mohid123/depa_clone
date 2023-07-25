@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-const { Submission, WorkflowStep, User, ApprovalLog, FormData, EmailNotifyTo } = require('../models');
+const { Submission, WorkflowStep, User, ApprovalLog, FormData, EmailNotifyTo, SubModule } = require('../models');
 const ApiError = require('../utils/ApiError');
 const workFlowService = require('./workFlow.service');
 const formDataService = require('./formData.service');
@@ -95,9 +95,13 @@ const emailDataWithTemplate = async (data, isNotify) => {
  * @returns {Promise<Submission>}
  */
 const createSubmission = async (submissionBody) => {
-  const subModule = await subModuleService.getSubModuleById(submissionBody.subModuleId);
-  if (submissionBody.user.roles.includes('admin') &&
-    !subModule.workFlowId.stepIds[0].approverIds.filter(function (user) { return (user.id == submissionBody.user.id); })[0]) {
+  const subModule = await SubModule.findById(submissionBody.subModuleId);
+  const parrentWorkflow = await workFlowService.getWorkFlowById(subModule.workFlowId);
+
+  if (!submissionBody.user.roles.includes('sysAdmin') &&
+    !subModule.adminUsers.includes(submissionBody.user.id) &&
+    !parrentWorkflow.stepIds[0].approverIds.filter(function (user) { return (user.id == submissionBody.user.id); })[0] ||
+    submissionBody.user.roles.includes('user') && subModule.accessType != "disabled") {
     throw new ApiError(httpStatus.NOT_FOUND, 'Invalid User!');
   }
 
@@ -183,9 +187,9 @@ const createSubmission = async (submissionBody) => {
   const allNotifyToUsers = unmatchedEmails.concat(activeStepNotifyUsers);
 
   // Find inprogress step active users
-  const activeStep = workflowStatusArray.find(step => step.status === "inProgress");
-  const activeUserIds = activeStep.activeUsers;
-  const activeUsersId = await User.find({ _id: { $in: activeUserIds } }).select('id fullName');
+  let activeStep = workflowStatusArray.find(step => step.status === "inProgress");
+  let activeUserIds = activeStep.activeUsers;
+  let activeUsersId = await User.find({ _id: { $in: activeUserIds } }).select('id fullName');
 
   // Add default progress 0 in summary object
   submissionBody.summaryData = {
@@ -193,7 +197,25 @@ const createSubmission = async (submissionBody) => {
     lastActivityPerformedBy: null,
     pendingOnUsers: activeUsersId
   }
+
+
   let submission = await Submission.create(submissionBody);
+  const workflowStatus = submission.workflowStatus;
+  const updatedStep = await approveStep(submission, workflowStatus[0], submissionBody.user.id);
+  activeStep = workflowStatus.find(step => step.status === "inProgress");
+  activeUserIds = activeStep.activeUsers;
+  activeUsersId = await User.find({ _id: { $in: activeUserIds } }).select('id fullName');
+  const totalLength = workflowStatus.length;
+  const approvedCount = workflowStatus.filter(step => step.status === "approved").length;
+  updatedStep.summaryData = {
+    progress: (approvedCount / totalLength) * 100,
+    lastActivityPerformedBy: submissionBody.user.id,
+    pendingOnUsers: activeUsersId
+  }
+
+  Object.assign(submission, updatedStep);
+  await submission.save();
+
   await approvalLogService.createApprovalLog({
     subModuleId: submission.subModuleId,
     submissionId: submission.id,
@@ -398,12 +420,12 @@ const approveStep = async (submission, workFlowStatusStep, approvingUser) => {
   }
 
   if (nextStep) {
-    emailDataWithTemplate({
-      formDataIds: submission.formDataIds,
-      allUsers: nextStep.activeUsers,
-      submissionId: submission.id,
-      stepId: nextStep.stepId,
-    }, false);
+    // emailDataWithTemplate({
+    //   formDataIds: submission.formDataIds,
+    //   allUsers: nextStep.activeUsers,
+    //   submissionId: submission.id,
+    //   stepId: nextStep.stepId,
+    // }, false);
   }
 
   return workFlowStatus;
@@ -480,12 +502,12 @@ const rejectStep = async (submission, workFlowStatusStep, rejectingUser) => {
   }
 
   if (previousStep) {
-    emailDataWithTemplate({
-      formDataIds: submission.formDataIds,
-      allUsers: previousStep.activeUsers,
-      submissionId: submission.id,
-      stepId: previousStep.stepId,
-    }, false);
+    // emailDataWithTemplate({
+    //   formDataIds: submission.formDataIds,
+    //   allUsers: previousStep.activeUsers,
+    //   submissionId: submission.id,
+    //   stepId: previousStep.stepId,
+    // }, false);
   }
 
   return workFlowStatus;

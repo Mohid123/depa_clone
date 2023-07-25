@@ -12,9 +12,10 @@ const createUser = async (userBody) => {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
 
-  if (userBody.roles.includes('any') && !userBody.roles.includes('admin')) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Any role must come with Admin');
-  }
+  // if (userBody.roles.includes('user') && userBody.roles.includes('admin')) {
+  //   throw new ApiError(httpStatus.BAD_REQUEST, "User role can't be added with admin");
+  // }
+
 
   if (!userBody.password) {
     // userBody.password = "p@$$w0rd";
@@ -85,6 +86,12 @@ const updateUserById = async (userId, updateBody) => {
   if (updateBody.email && (await User.isEmailTaken(updateBody.email, userId))) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
+  // if (userBody.roles.includes('user') && userBody.roles.includes('admin')) {
+  //   throw new ApiError(httpStatus.BAD_REQUEST, "User role can't be added with admin");
+  // }
+  // if (updateBody.roles.includes('any') && !updateBody.roles.includes('admin')) {
+  //   throw new ApiError(httpStatus.BAD_REQUEST, 'Any role must come with Admin');
+  // }
   Object.assign(user, updateBody);
   await user.save();
   return user;

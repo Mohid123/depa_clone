@@ -20,7 +20,7 @@ const createSubModule = {
       "approverIds": Joi.array().items(Joi.string().custom(objectId)).required(),
       "emailNotifyTo": Joi.array().items(Joi.string().email()).required(),
     }).required()).required(),
-
+    accessType: Joi.valid("anyCreate", "anyCreateAndModify"),
     summarySchema: Joi.array().items(Joi.object()),
     viewSchema: Joi.array().items(Joi.object()),
     code: Joi.string().required(),
@@ -29,7 +29,6 @@ const createSubModule = {
     description: Joi.string(),
     image: Joi.string(),
     status: Joi.valid(1, 2, 3),
-    createdBy: Joi.required().custom(objectId),
   }),
 };
 
@@ -80,6 +79,7 @@ const updateSubModule = {
         "emailNotifyTo": Joi.array().items(Joi.string().email()).required(),
       }).required()),
       workFlowId: Joi.custom(objectId).required(),
+      accessType: Joi.valid("anyCreate", "anyCreateAndModify"),
       status: Joi.valid(1, 2, 3),
       isDeleted: Joi.valid(false),
     })

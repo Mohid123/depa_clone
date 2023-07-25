@@ -6,14 +6,14 @@ const createUser = {
     email: Joi.string().required().email(),
     password: Joi.string().custom(password),
     fullName: Joi.string().required(),
-    roles: Joi.array().items(Joi.string().required().valid('admin', 'any', 'user')),
+    roles: Joi.array().items(Joi.string().required().valid('admin', 'user')),
   }),
 };
 
 const getUsers = {
   query: Joi.object().keys({
     fullName: Joi.string(),
-    roles: Joi.array().items(Joi.string().valid('admin', 'any', 'user')),
+    roles: Joi.array().items(Joi.string().valid('admin', 'user')),
     sortBy: Joi.string(),
     limit: Joi.number().integer(),
     page: Joi.number().integer(),
@@ -38,7 +38,7 @@ const updateUser = {
       email: Joi.string().email(),
       password: Joi.string().custom(password),
       fullName: Joi.string(),
-      roles: Joi.array().items(Joi.string().required().valid('admin', 'any', 'user')),
+      roles: Joi.array().items(Joi.string().required().valid('admin', 'user')),
       isDeleted: Joi.valid(false),
     })
     .min(1),

@@ -24,6 +24,12 @@ const subModuleSchema = mongoose.Schema(
       title: { type: String },
       description: { type: String },
       image: { type: String, get: attachDomainWithImageUrl },
+
+      accessType: {
+        type: String,
+        enum: ['disabled', 'anyCreate', 'anyCreateAndModify'],
+        default: 'disabled',
+      }
     }
   )
 );
