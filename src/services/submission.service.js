@@ -356,7 +356,16 @@ const getSubmissionById = async (id) => {
     stepStatus.approvedUsers = approvedUsers;
   }
 
-  const approvalLog = await ApprovalLog.find({ workFlowId: submission.workFlowId._id }).populate("performedById");
+  const approvalLog = await ApprovalLog.find({ workFlowId: submission.workFlowId._id }).populate([
+    {
+      path: "performedById",
+      select: "id fullName"
+
+    },
+    {
+      path: "onBehalfOf",
+      select: "id fullName"
+    }]);
 
   // Convert the submission model instance to a plain JavaScript object
   const submissionObj = submission.toObject();
@@ -612,7 +621,7 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     return getSubmissionById(submissionId)
   }
 
-  await approvalLogService.createApprovalLog({
+  const approvalLogData = {
     subModuleId: submission.subModuleId,
     submissionId: submission.id,
     workFlowId: submission.workFlowId,
@@ -621,7 +630,13 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     remarks: updateBody.remarks,
     approvalStatus: updateBody.isApproved ? 'approved' : 'rejected',
     performedById: updateBody.userId
-  });
+  };
+
+  if (updateBody.onBehalfOf) {
+    approvalLogData.onBehalfOf = updateBody.onBehalfOf;
+  }
+
+  await approvalLogService.createApprovalLog(approvalLogData);
 
   if (Boolean(updateBody.isApproved)) {
     const updatedworkFlowStatus = await approveStep(submission, approvalStep, updateBody.userId);

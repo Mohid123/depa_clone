@@ -13,6 +13,7 @@ const approvalLogSchema = mongoose.Schema(
       workFlowId: { type: mongoose.Schema.Types.ObjectId, ref: 'Workflow', required: true },
       stepId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkflowStep' },
       performedById: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+      onBehalfOf: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
       approvalStatus: { type: String, enum: ['created', 'inProgress', 'approved', 'rejected'], default: 'inProgress' },
       action: { type: String, enum: ['cancelled', 'deleted'] },
       remarks: { type: String },

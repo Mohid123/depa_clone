@@ -59,6 +59,11 @@ const updateSubmission = {
         then: Joi.required().custom(objectId),
         otherwise: Joi.forbidden()
       }),
+      onBehalfOf: Joi.when('type', {
+        is: 'submittal',
+        then: Joi.custom(objectId),
+        otherwise: Joi.forbidden()
+      }),
       isApproved: Joi.when('type', {
         is: 'submittal',
         then: Joi.boolean(),
