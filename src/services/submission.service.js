@@ -7,7 +7,6 @@ const approvalLogService = require('./approvalLog.service');
 const emailService = require('./email.service');
 const userService = require('./user.service');
 const emailNotifyToService = require('./emailNotifyTo.service');
-const { subModuleService } = require('.');
 
 /**
  * Find next workflow step
@@ -104,6 +103,10 @@ const createSubmission = async (submissionBody) => {
   }
 
   if (submissionBody.user.roles.includes('user') && subModule.accessType == "disabled") {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid Action!');
+  }
+
+  if (submissionBody.steps.condition == 'and') {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid Action!');
   }
 

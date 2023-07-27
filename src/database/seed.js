@@ -5,7 +5,7 @@ const logger = require('./../config/logger');
 const bcrypt = require('bcryptjs');
 
 const { User, Company, Category } = require('./../models/index');
-const { formService, moduleService, subModuleService, submissionService } = require('../services');
+const { formService, subModuleService } = require('../services');
 
 async function password(password) {
     const pass = await bcrypt.hash(password, 8);
@@ -554,64 +554,107 @@ mongoose.connect(config.mongoose.url, config.mongoose.options)
         ]
         const categories = await Category.insertMany(categoriesData);
 
-        // const moduleData = {
-        //     categoryId: categories[0].id,
-        //     code: "it-department",
-        //     title: "IT Department",
-        //     description: "The IT department oversees the installation and maintenance of computer network systems within a company. This may only require a single IT employee, or in the case of larger organizations, a team of people working to ensure that the network runs smoothly.",
-        //     url: "/submodule/submodules-list/it-department",
-        //     image: "uploads/images/1686820628632.jpg",
-        //     steps: [
-        //         {
-        //             "condition": "none",
-        //             "approverIds": [users[1]],
-        //             "emailNotifyTo": [],
-        //         },
-        //         {
-        //             "condition": "none",
-        //             "approverIds": [users[2]],
-        //             "emailNotifyTo": [],
-        //         },
-        //         {
-        //             "condition": "none",
-        //             "approverIds": [users[3]],
-        //             "emailNotifyTo": [],
-        //         }
-        //     ],
-        //     createdBy: users[0]
-        // };
+        const moduleData = {
+            categoryId: categories[0].id,
+            companyId: companies[0],
+            adminUsers: [users[2], users[3]],
+            viewOnlyUsers: [],
+            code: "it-department",
+            title: "IT Department",
+            description: "The IT department oversees the installation and maintenance of computer network systems within a company. This may only require a single IT employee, or in the case of larger organizations, a team of people working to ensure that the network runs smoothly.",
+            image: "uploads/images/1686820628632.jpg",
+            url: "/module/it-department",
+            steps: [
+                {
+                    "condition": "none",
+                    "approverIds": [users[1]],
+                    "emailNotifyTo": [],
+                },
+                {
+                    "condition": "none",
+                    "approverIds": [users[2]],
+                    "emailNotifyTo": [],
+                },
+                {
+                    "condition": "none",
+                    "approverIds": [users[3]],
+                    "emailNotifyTo": [],
+                }
+            ],
+            formIds: [formsData[6]],
+            steps: [
+                {
+                    "condition": "none",
+                    "approverIds": [users[1]],
+                    "emailNotifyTo": [],
+                },
+                {
+                    "condition": "none",
+                    "approverIds": [users[2]],
+                    "emailNotifyTo": [],
+                },
+                {
+                    "condition": "none",
+                    "approverIds": [users[3]],
+                    "emailNotifyTo": [],
+                }
+            ],
+            createdBy: users[0]
+        };
 
-        // const module = await moduleService.createModule(moduleData);
+        const module = await subModuleService.createSubModule(moduleData);
 
-        // const subModuleData = {
-        //     moduleId: module.id,
-        //     companyId: companies[0],
-        //     adminUsers: [users[5]],
-        //     viewOnlyUsers: [users[7]],
-        //     formIds: [formsData[6]],
-        //     code: "digital-transformation",
-        //     url: "/submodule/submodule-details/digital-transformation",
-        //     steps: [
-        //         {
-        //             "condition": "none",
-        //             "approverIds": [users[1]],
-        //             "emailNotifyTo": [],
-        //         },
-        //         {
-        //             "condition": "none",
-        //             "approverIds": [users[2]],
-        //             "emailNotifyTo": [],
-        //         },
-        //         {
-        //             "condition": "none",
-        //             "approverIds": [users[3]],
-        //             "emailNotifyTo": [],
-        //         }
-        //     ],
-        //     createdBy: users[0]
-        // };
+        const subModuleData = {
+            parentId: module.id,
+            companyId: companies[0],
+            adminUsers: [users[4]],
+            viewOnlyUsers: [],
+            code: "digital-transformation",
+            title: "Digital transformation",
+            description: "The IT department oversees the installation and maintenance of computer network systems within a company. This may only require a single IT employee, or in the case of larger organizations, a team of people working to ensure that the network runs smoothly.",
+            image: "uploads/images/1686820628632.jpg",
+            url: "/module/it-department/digital-transformation",
+            steps: [
+                {
+                    "condition": "none",
+                    "approverIds": [users[1]],
+                    "emailNotifyTo": [],
+                },
+                {
+                    "condition": "none",
+                    "approverIds": [users[2]],
+                    "emailNotifyTo": [],
+                },
+                {
+                    "condition": "none",
+                    "approverIds": [users[3]],
+                    "emailNotifyTo": [],
+                }
+            ],
+            formIds: [formsData[6]],
+            steps: [
+                {
+                    "condition": "none",
+                    "approverIds": [users[1]],
+                    "emailNotifyTo": [],
+                },
+                {
+                    "condition": "none",
+                    "approverIds": [users[2]],
+                    "emailNotifyTo": [],
+                },
+                {
+                    "condition": "none",
+                    "approverIds": [users[3]],
+                    "emailNotifyTo": [],
+                }
+            ],
+            createdBy: users[0]
+        };
 
-        // const subModule = await subModuleService.createSubModule(subModuleData);
+
+
+        const subModule = await subModuleService.createSubModule(subModuleData);
 
         // Check if all documents were inserted successfully
         if (users.length === userData.length
