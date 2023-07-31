@@ -544,7 +544,6 @@ const rejectStep = async (submission, workFlowStatusStep, rejectingUser) => {
  * @returns {Promise<Submission>}
  */
 const updateSubmissionById = async (submissionId, updateBody) => {
-  return updateBody.userId;
   const submission = await Submission.findById(submissionId);
   if (!submission) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Submission not found');
