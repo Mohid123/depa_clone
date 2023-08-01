@@ -21,6 +21,17 @@ const getUsers = catchAsync(async (req, res) => {
   res.send(result);
 });
 
+const getAdminUsers = catchAsync(async (req, res) => {
+  const filter = pick(req.query, ['fullName']);
+  if (req.query.withTrash !== "" && req.query.withTrash !== "true") {
+    filter.isDeleted = false;
+  }
+
+  const options = pick(req.query, ['latest', 'oldest', 'sortBy', 'limit', 'page']);
+  const result = await userService.queryAdminUsers(filter, options);
+  res.send(result);
+});
+
 const getUser = catchAsync(async (req, res) => {
   const user = await userService.getUserById(req.params.userId);
   if (!user) {
@@ -43,6 +54,7 @@ const deleteUser = catchAsync(async (req, res) => {
 module.exports = {
   createUser,
   getUsers,
+  getAdminUsers,
   getUser,
   updateUser,
   deleteUser,

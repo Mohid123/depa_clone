@@ -55,6 +55,35 @@ const queryUsers = async (filter, options) => {
 };
 
 /**
+ * Query for admin users
+ * @param {Object} filter - Mongo filter
+ * @param {Object} options - Query options
+ * @param {string} [options.sortBy] - Sort option in the format: sortField:(desc|asc)
+ * @param {number} [options.limit] - Maximum number of results per page (default = 10)
+ * @param {number} [options.page] - Current page (default = 1)
+ * @returns {Promise<QueryResult>}
+ */
+const queryAdminUsers = async (filter, options) => {
+  // Adjust the filter to include regex search on fullName if provided
+  if (filter.fullName) {
+    filter.fullName = { $regex: filter.fullName, $options: 'i' };
+  }
+
+  // Add logic for latest and oldest records
+  if (filter.latest) {
+    filter.createdAt = { $lte: new Date() };
+  }
+  if (filter.oldest) {
+    filter.createdAt = { $gte: new Date() };
+  }
+
+  filter.roles = ['admin'];
+  const users = await User.paginate(filter, options);
+
+  return users;
+};
+
+/**
  * Get user by id
  * @param {ObjectId} id
  * @returns {Promise<User>}
@@ -114,6 +143,7 @@ const deleteUserById = async (userId) => {
 module.exports = {
   createUser,
   queryUsers,
+  queryAdminUsers,
   getUserById,
   getUserByEmail,
   updateUserById,

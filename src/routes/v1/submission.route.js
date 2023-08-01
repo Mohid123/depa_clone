@@ -12,6 +12,10 @@ router
     .get(auth(), validate(submissionValidation.getSubmissions), submissionController.getSubmissions);
 
 router
+    .route('/workflow/:submissionId')
+    .patch(validate(submissionValidation.updateWorkFlowSubmission), submissionController.updateWorkFlowSubmission)
+
+router
     .route('/:submissionId')
     .get(auth(), validate(submissionValidation.getSubmission), submissionController.getSubmission)
     .patch(validate(submissionValidation.updateSubmission), submissionController.updateSubmission)

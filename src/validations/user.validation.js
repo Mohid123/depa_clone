@@ -23,6 +23,18 @@ const getUsers = {
   }),
 };
 
+const getAdminUsers = {
+  query: Joi.object().keys({
+    fullName: Joi.string(),
+    sortBy: Joi.string(),
+    limit: Joi.number().integer(),
+    page: Joi.number().integer(),
+    latest: Joi.valid("true"),
+    oldest: Joi.valid("true"),
+    withTrash: Joi.string().allow('', null),
+  }),
+};
+
 const getUser = {
   params: Joi.object().keys({
     userId: Joi.string().custom(objectId),
@@ -53,6 +65,7 @@ const deleteUser = {
 module.exports = {
   createUser,
   getUsers,
+  getAdminUsers,
   getUser,
   updateUser,
   deleteUser,

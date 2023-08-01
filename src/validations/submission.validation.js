@@ -127,6 +127,20 @@ const updateSubmission = {
     .min(1),
 };
 
+const updateWorkFlowSubmission = {
+  params: Joi.object().keys({
+    submissionId: Joi.required().custom(objectId),
+  }),
+  body: Joi.object()
+    .keys({
+      type: Joi.string().optional(),
+
+      ////////////Common
+      isDeleted: Joi.valid(false),
+    })
+    .min(1),
+};
+
 const deleteSubmission = {
   params: Joi.object().keys({
     submissionId: Joi.string().custom(objectId),
@@ -138,5 +152,6 @@ module.exports = {
   getSubmissions,
   getSubmission,
   updateSubmission,
+  updateWorkFlowSubmission,
   deleteSubmission,
 };

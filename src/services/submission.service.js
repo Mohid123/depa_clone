@@ -578,14 +578,6 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'Invalid Approval Step!');
   }
 
-  const activeUser = await userService.getUserById(updateBody.userId);
-  if (!activeUser.roles.includes('any')) {
-    const stepActiveUserId = await approvalStep.activeUsers.filter(function (item) { return (item == updateBody.userId); })[0];
-    if (!stepActiveUserId) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Invalid User!');
-    }
-  }
-
   if (updateBody.submissionStatus || updateBody.status) {
     // Fields to pluck
     const fieldsToPluck = ['submissionStatus', 'status'];
@@ -638,6 +630,8 @@ const updateSubmissionById = async (submissionId, updateBody) => {
 
   if (updateBody.onBehalfOf) {
     approvalLogData.onBehalfOf = updateBody.onBehalfOf;
+    const allUsers = approvalStep.allUsers.find(user => user.assignedTo == updateBody.userId);
+    allUsers.performedBy = updateBody.onBehalfOf;
   }
 
   await approvalLogService.createApprovalLog(approvalLogData);
@@ -654,7 +648,13 @@ const updateSubmissionById = async (submissionId, updateBody) => {
 
   const totalLength = workFlowStatus.length;
   const approvedCount = workFlowStatus.filter(step => step.status === "approved").length;
-  const user = await User.findOne({ _id: updateBody.userId });
+  let user = null;
+  if (updateBody.onBehalfOf) {
+    user = await User.findOne({ _id: updateBody.onBehalfOf });
+  } else {
+    user = await User.findOne({ _id: updateBody.userId });
+  }
+
   submission.summaryData = {
     progress: (approvedCount / totalLength) * 100,
     lastActivityPerformedBy: updateBody.userId,
@@ -695,6 +695,28 @@ const updateSubmissionById = async (submissionId, updateBody) => {
 };
 
 /**
+ * Update Submission by id
+ * @param {ObjectId} submissionId
+ * @param {Object} updateBody
+ * @returns {Promise<Submission>}
+ */
+const updateWorkFlowSubmissionById = async (submissionId, updateBody) => {
+  const submission = await Submission.findById(submissionId);
+  if (!submission) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Submission not found');
+  }
+
+  if (submission.status == 2) {
+    throw new ApiError(httpStatus.METHOD_NOT_ALLOWED, 'Invalid Action');
+  }
+
+  return submission;
+  Object.assign(submission, updateBody);
+  await submission.save();
+  return getSubmissionById(submissionId);
+};
+
+/**
  * Delete Submission by id
  * @param {ObjectId} submissionId
  * @returns {Promise<Submission>}
@@ -713,5 +735,6 @@ module.exports = {
   querySubmissions,
   getSubmissionById,
   updateSubmissionById,
+  updateWorkFlowSubmissionById,
   deleteSubmissionById,
 };

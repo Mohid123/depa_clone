@@ -35,6 +35,12 @@ const updateSubmission = catchAsync(async (req, res) => {
   res.send(submission);
 });
 
+const updateWorkFlowSubmission = catchAsync(async (req, res) => {
+  req.body.updatedBy = req.body.userId;
+  const submission = await submissionService.updateWorkFlowSubmissionById(req.params.submissionId, req.body);
+  res.send(submission);
+});
+
 const deleteSubmission = catchAsync(async (req, res) => {
   await submissionService.deleteSubmissionById(req.params.submissionId);
   res.status(httpStatus.NO_CONTENT).send();
@@ -45,5 +51,6 @@ module.exports = {
   getSubmissions,
   getSubmission,
   updateSubmission,
+  updateWorkFlowSubmission,
   deleteSubmission,
 };
