@@ -133,8 +133,18 @@ const updateWorkFlowSubmission = {
   }),
   body: Joi.object()
     .keys({
-      type: Joi.string().optional(),
-
+      stepStatus: Joi.object({
+        allUsers: Joi.array().items({
+          _id: Joi.custom(objectId),
+          assignedTo: Joi.required().custom(objectId),
+        }).required(),
+        activeUsers: Joi.array().items(Joi.string().custom(objectId)).required(),
+        approvedUsers: Joi.array().items(Joi.string().custom(objectId)).required(),
+        condition: Joi.string().valid("none", "and", "or").required(),
+        status: Joi.valid('inProgress', 'pending'),
+        stepId: Joi.required().custom(objectId),
+        _id: Joi.required().custom(objectId),
+      }).required(),
       ////////////Common
       isDeleted: Joi.valid(false),
     })
