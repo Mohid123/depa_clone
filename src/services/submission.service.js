@@ -710,17 +710,18 @@ const updateWorkFlowSubmissionById = async (submissionId, updateBody) => {
     throw new ApiError(httpStatus.METHOD_NOT_ALLOWED, 'Invalid Action');
   }
 
+  const targetStep = submission.workflowStatus.find(step => step.id == updateBody.stepStatus._id);
+
   // Find the index of the target step
   const targetStepIndex = submission.workflowStatus.findIndex(step => step.id == updateBody.stepStatus._id);
 
   // If the target step is not found, then throw an error
-  if (targetStepIndex === -1) {
+  if (targetStepIndex === -1 || targetStep.approvedUsers.length != 0 && !targetStep.approvedUsers.every((user) => updateBody.stepStatus.allUsers.some((assignedUser) => assignedUser.assignedTo === user))) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Invalid data!');
   }
-
+  updateBody.stepStatus.approvedUsers = targetStep.approvedUsers;
   submission.workflowStatus[targetStepIndex] = updateBody.stepStatus;
 
-  Object.assign(submission, submission);
   await submission.save();
   return {
     message: "Workflow step updated successfully!"

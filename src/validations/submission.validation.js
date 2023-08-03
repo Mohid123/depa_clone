@@ -139,7 +139,7 @@ const updateWorkFlowSubmission = {
           assignedTo: Joi.required().custom(objectId),
         }).required(),
         activeUsers: Joi.array().items(Joi.string().custom(objectId)).required(),
-        approvedUsers: Joi.array().items(Joi.string().custom(objectId)).required(),
+        // approvedUsers: Joi.array().items(Joi.string().custom(objectId)).required(),
         condition: Joi.string().valid("none", "and", "or").required(),
         status: Joi.valid('inProgress', 'pending'),
         stepId: Joi.required().custom(objectId),
