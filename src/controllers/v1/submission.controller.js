@@ -5,7 +5,7 @@ const catchAsync = require('../../utils/catchAsync');
 const { submissionService } = require('../../services');
 
 const createSubmission = catchAsync(async (req, res) => {
-  req.body.createdBy = req.user.id; req.user
+  req.body.createdBy = req.user.id;
   req.body.user = req.user;
   const submission = await submissionService.createSubmission(req.body);
   res.status(httpStatus.CREATED).send(submission);
@@ -30,13 +30,13 @@ const getSubmission = catchAsync(async (req, res) => {
 });
 
 const updateSubmission = catchAsync(async (req, res) => {
-  req.body.updatedBy = req.body.userId;
+  req.body.updatedBy = req.user.id;
   const submission = await submissionService.updateSubmissionById(req.params.submissionId, req.body);
   res.send(submission);
 });
 
 const updateWorkFlowSubmission = catchAsync(async (req, res) => {
-  req.body.updatedBy = req.body.userId;
+  req.body.updatedBy = req.user.id;
   const submission = await submissionService.updateWorkFlowSubmissionById(req.params.submissionId, req.body);
   res.send(submission);
 });

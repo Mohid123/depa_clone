@@ -13,12 +13,12 @@ router
 
 router
     .route('/workflow/:submissionId')
-    .patch(validate(submissionValidation.updateWorkFlowSubmission), submissionController.updateWorkFlowSubmission)
+    .patch(auth(), validate(submissionValidation.updateWorkFlowSubmission), submissionController.updateWorkFlowSubmission)
 
 router
     .route('/:submissionId')
     .get(auth(), validate(submissionValidation.getSubmission), submissionController.getSubmission)
-    .patch(validate(submissionValidation.updateSubmission), submissionController.updateSubmission)
+    .patch(auth(), validate(submissionValidation.updateSubmission), submissionController.updateSubmission)
     .delete(auth(), validate(submissionValidation.deleteSubmission), submissionController.deleteSubmission);
 
 module.exports = router;

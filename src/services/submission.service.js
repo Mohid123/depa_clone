@@ -198,7 +198,10 @@ const createSubmission = async (submissionBody) => {
   let submission = await Submission.create(submissionBody);
   const workflowStatus = submission.workflowStatus;
 
-  await approveStep(submission, workflowStatus[0], submissionBody.user.id);
+  if (submissionBody.submissionStatus != 4) {
+    await approveStep(submission, workflowStatus[0], submissionBody.user.id);
+  }
+
   // Object in progress
   const wkActiveStep = workflowStatus.find(step => step.status === "inProgress");
   if (wkActiveStep) {
@@ -207,7 +210,7 @@ const createSubmission = async (submissionBody) => {
     const activeUsersId = await User.find({ _id: { $in: activeUserIds } }).select('id fullName');
     // Add default progress 0 in summary object
     let totalLength = workflowStatusArray.length;
-    let approvedCount = 1;
+    let approvedCount = submissionBody.submissionStatus != 4 ? 1 : 0;
     Object.assign(submission, {
       summaryData: {
         progress: (approvedCount / totalLength) * 100,
@@ -553,7 +556,7 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     throw new ApiError(httpStatus.METHOD_NOT_ALLOWED, 'Invalid Action');
   }
 
-  if (updateBody.type == "edit" && submission.submissionStatus == 4) {
+  if (updateBody.type == "edit") {
     if (updateBody.steps) {
       await workFlowService.updateWorkFlowById(submission.workFlowId._id, updateBody);
     }
@@ -564,21 +567,15 @@ const updateSubmissionById = async (submissionId, updateBody) => {
       });
     }
 
-    Object.assign(submission, updateBody);
-    await submission.save();
+    if (updateBody.submissionStatus == 4) {
+      Object.assign(submission, updateBody);
+      await submission.save();
 
-    return getSubmissionById(submissionId);
+      return getSubmissionById(submissionId);
+    }
   }
 
-  const workFlowStatus = submission.workflowStatus;
-
-  const approvalStep = await workFlowStatus.filter(function (item) { return (item.stepId == updateBody.stepId); })[0];
-
-  if (!approvalStep || approvalStep.status != "inProgress") {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Invalid Approval Step!');
-  }
-
-  if (updateBody.submissionStatus || updateBody.status) {
+  if (updateBody.type == "submittal" && (updateBody.submissionStatus || updateBody.status)) {
     // Fields to pluck
     const fieldsToPluck = ['submissionStatus', 'status'];
 
@@ -617,6 +614,24 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     return getSubmissionById(submissionId)
   }
 
+  const workFlowStatus = submission.workflowStatus;
+  const isCreateSubmissionAfterDraft = updateBody.type == "edit" && submission.submissionStatus == 4 && updateBody.submissionStatus == 1;
+
+  let approvalStatus;
+  let approvalStep;
+  if (isCreateSubmissionAfterDraft) {
+    approvalStep = workFlowStatus[0];
+    updateBody.userId = approvalStep.allUsers[0].assignedTo;
+    approvalStatus = 'approved';
+  } else {
+    approvalStep = workFlowStatus.filter(function (item) { return (item.stepId == updateBody.stepId); })[0];
+    approvalStatus = updateBody.isApproved ? 'approved' : 'rejected';
+  }
+
+  if (!approvalStep || approvalStep.status != "inProgress") {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Invalid Approval Step!');
+  }
+
   const approvalLogData = {
     subModuleId: submission.subModuleId,
     submissionId: submission.id,
@@ -624,7 +639,7 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     stepId: approvalStep._id,
     approvedOn: new Date().getTime(),
     remarks: updateBody.remarks,
-    approvalStatus: updateBody.isApproved ? 'approved' : 'rejected',
+    approvalStatus: approvalStatus,
     performedById: updateBody.userId
   };
 
@@ -636,7 +651,7 @@ const updateSubmissionById = async (submissionId, updateBody) => {
 
   await approvalLogService.createApprovalLog(approvalLogData);
 
-  if (Boolean(updateBody.isApproved)) {
+  if (Boolean(updateBody.isApproved) || isCreateSubmissionAfterDraft) {
     const updatedworkFlowStatus = await approveStep(submission, approvalStep, updateBody.userId);
     // Update submission status when all steps are approved
     const allStepsApproved = updatedworkFlowStatus.every(step => step.status === "approved");
