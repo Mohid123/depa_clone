@@ -39,7 +39,7 @@ const emailSchema = mongoose.Schema(
       }],
       cc: { type: String, required: true },
       bcc: { type: String, required: true },
-      // redirectionalUrl: { type: String, required: true },
+      redirectionalUrl: { type: String, required: true },
       bodyWithAction: { type: String, required: true },
       bodyWithoutAction: { type: String, required: true },
       data: { type: Object },

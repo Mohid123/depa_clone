@@ -7,6 +7,7 @@ const approvalLogService = require('./approvalLog.service');
 const emailService = require('./email.service');
 const userService = require('./user.service');
 const emailNotifyToService = require('./emailNotifyTo.service');
+const workFlowStepService = require('./workFlowStep.service');
 
 /**
  * Find next workflow step
@@ -725,17 +726,31 @@ const updateWorkFlowSubmissionById = async (submissionId, updateBody) => {
     throw new ApiError(httpStatus.METHOD_NOT_ALLOWED, 'Invalid Action');
   }
 
-  const targetStep = submission.workflowStatus.find(step => step.id == updateBody.stepStatus._id);
-
-  // Find the index of the target step
-  const targetStepIndex = submission.workflowStatus.findIndex(step => step.id == updateBody.stepStatus._id);
-
-  // If the target step is not found, then throw an error
-  if (targetStepIndex === -1 || targetStep.approvedUsers.length != 0 && !targetStep.approvedUsers.every((user) => updateBody.stepStatus.allUsers.some((assignedUser) => assignedUser.assignedTo === user))) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Invalid data!');
+  if (updateBody.action == 'add') {
+    const workFlowStep = await workFlowStepService.createWorkflowStep(updateBody.stepStatus);
+    stepStatusData = {
+      stepId: workFlowStep.id,
+      allUsers: workFlowStep.approverIds.map(user => ({ assignedTo: user })),
+      activeUsers: workFlowStep.approverIds,
+      approvedUserIds: [],
+      condition: workFlowStep.condition,
+    };
+    submission.workflowStatus.push(stepStatusData);
   }
-  updateBody.stepStatus.approvedUsers = targetStep.approvedUsers;
-  submission.workflowStatus[targetStepIndex] = updateBody.stepStatus;
+  else if (updateBody.action == 'edit') {
+    const targetStep = submission.workflowStatus.find(step => step.id == updateBody.stepStatus._id);
+    // Find the index of the target step
+    const targetStepIndex = submission.workflowStatus.findIndex(step => step.id == updateBody.stepStatus._id);
+
+    // If the target step is not found, then throw an error
+    if (targetStepIndex === -1 || targetStep.approvedUsers.length != 0 && !targetStep.approvedUsers.every((user) => updateBody.stepStatus.allUsers.some((assignedUser) => assignedUser.assignedTo === user))) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Invalid data!');
+    }
+    updateBody.stepStatus.approvedUsers = targetStep.approvedUsers;
+    submission.workflowStatus[targetStepIndex] = updateBody.stepStatus;
+  } else {
+    submission.workflowStatus = submission.workflowStatus.filter(step => step.id !== updateBody.stepStatus._id);
+  }
 
   await submission.save();
   return {
