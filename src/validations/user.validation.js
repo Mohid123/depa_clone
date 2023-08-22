@@ -50,7 +50,7 @@ const updateUser = {
       email: Joi.string().email(),
       password: Joi.string().custom(password),
       fullName: Joi.string(),
-      roles: Joi.array().items(Joi.string().required().valid('admin', 'user')),
+      roles: Joi.array().items(Joi.string().valid('admin', 'user')),
       isDeleted: Joi.valid(false),
     })
     .min(1),
