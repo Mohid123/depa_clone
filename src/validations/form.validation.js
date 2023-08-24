@@ -2,11 +2,9 @@ const Joi = require('joi');
 const { objectId } = require('./custom.validation');
 
 const validateKeyForm = {
-  body: Joi.object()
-    .keys({
-      key: Joi.string(),
-    })
-    .min(1),
+  query: Joi.object().keys({
+    key: Joi.string(),
+  }),
 };
 
 const createForm = {
