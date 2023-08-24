@@ -17,8 +17,8 @@ const subModuleSchema = mongoose.Schema(
       workFlowId: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkFlow', required: true },
       formIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Form', required: true }],
 
-      summarySchema: [{ type: Object, required: true }],
-      viewSchema: [{ type: Object, required: true }],
+      summarySchema: [{ type: String, required: true }],
+      viewSchema: [{ type: String, required: true }],
       code: { type: String, required: true },
       url: { type: String, required: true },
       title: { type: String },

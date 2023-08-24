@@ -4,6 +4,11 @@ const ApiError = require('../../utils/ApiError');
 const catchAsync = require('../../utils/catchAsync');
 const { formService } = require('../../services');
 
+const validateKeyForm = catchAsync(async (req, res) => {
+  const form = await formService.validateKeyForm(req.body);
+  res.status(httpStatus.OK).send(form);
+});
+
 const createForm = catchAsync(async (req, res) => {
   req.body.createdBy = req.user.id;
   const form = await formService.createForm(req.body);
@@ -48,6 +53,7 @@ const deleteForm = catchAsync(async (req, res) => {
 });
 
 module.exports = {
+  validateKeyForm,
   createForm,
   getForms,
   getForm,

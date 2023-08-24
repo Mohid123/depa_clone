@@ -7,7 +7,7 @@ const { subModuleService } = require('../../services');
 const validateCreateSubModule = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['code']);
   const isCodeTaken = await subModuleService.validateCreateSubModule(filter);
-  res.status(httpStatus.CREATED).send(isCodeTaken);
+  res.status(httpStatus.OK).send(isCodeTaken);
 });
 
 const createSubModule = catchAsync(async (req, res) => {

@@ -69,8 +69,8 @@ const updateSubModule = {
       image: Joi.string(),
       adminUsers: Joi.array().items(Joi.string().custom(objectId)),
       viewOnlyUsers: Joi.array().items(Joi.string().custom(objectId)),
-      summarySchema: Joi.array().items(Joi.object()),
-      viewSchema: Joi.array().items(Joi.object()),
+      summarySchema: Joi.array().items(Joi.string()),
+      viewSchema: Joi.array().items(Joi.string()),
       steps: Joi.array().items(Joi.object({
         "id": Joi.string().custom(objectId),
         "condition": Joi.string().valid("none", "and", "or").required(),
@@ -78,7 +78,6 @@ const updateSubModule = {
         "emailNotifyToId": Joi.string().custom(objectId),
         "emailNotifyTo": Joi.array().items(Joi.string().email()).required(),
       }).required()),
-      workFlowId: Joi.custom(objectId).required(),
       accessType: Joi.valid("disabled", "anyCreate", "anyCreateAndModify"),
       status: Joi.valid(1, 2, 3),
       isDeleted: Joi.valid(false),

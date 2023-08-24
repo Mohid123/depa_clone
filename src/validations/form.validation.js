@@ -1,6 +1,14 @@
 const Joi = require('joi');
 const { objectId } = require('./custom.validation');
 
+const validateKeyForm = {
+  body: Joi.object()
+    .keys({
+      key: Joi.string(),
+    })
+    .min(1),
+};
+
 const createForm = {
   body: Joi.object().keys({
     subModuleId: Joi.string().custom(objectId),
@@ -64,6 +72,7 @@ const deleteForm = {
 };
 
 module.exports = {
+  validateKeyForm,
   createForm,
   getForms,
   getForm,

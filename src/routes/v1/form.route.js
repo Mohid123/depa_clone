@@ -12,6 +12,10 @@ router
     .get(auth(), validate(formValidation.getForms), formController.getForms);
 
 router
+    .route('/validate-key')
+    .get(auth(), validate(formValidation.validateKeyForm), formController.validateKeyForm);
+
+router
     .route('/slug/:formKey')
     .get(auth(), validate(formValidation.getFormSlug), formController.getFormSlug);
 

@@ -8,6 +8,23 @@ const mongoose = require('mongoose');
  * @param {Object} formBody
  * @returns {Promise<Form>}
  */
+const validateKeyForm = async (formBody) => {
+  if (await Form.isKeyTaken(formBody.key)) {
+    return {
+      isKeyTaken: true
+    }
+  }
+
+  return {
+    isKeyTaken: false
+  };
+};
+
+/**
+ * Create a Form
+ * @param {Object} formBody
+ * @returns {Promise<Form>}
+ */
 const createForm = async (formBody) => {
   if (await Form.isKeyTaken(formBody.key)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Form Key already taken');
@@ -40,11 +57,25 @@ const createForm = async (formBody) => {
  * @returns {Promise<Form>}
  */
 const createManyForms = async (formBody) => {
-  // for (const form of formBody) {
-  //   if (await Form.isKeyTaken(form.key)) {
-  //     throw new ApiError(httpStatus.BAD_REQUEST, 'Form Key already taken');
-  //   }
-  // }
+  const seenKeys = new Set();
+  const hasKeyDuplicates = formBody.some(obj => {
+    if (seenKeys.has(obj.key)) {
+      return true; // Found a duplicate
+    }
+    seenKeys.add(obj.key);
+    return false;
+  });
+
+  if (hasKeyDuplicates) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Form Key already taken');
+  }
+
+
+  for (const form of formBody) {
+    if (await Form.isKeyTaken(form.key)) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Form Key already taken');
+    }
+  }
 
   const forms = await Form.insertMany(formBody);
   return forms;
@@ -118,6 +149,7 @@ const deleteFormById = async (formId) => {
 };
 
 module.exports = {
+  validateKeyForm,
   createForm,
   createManyForms,
   queryForms,

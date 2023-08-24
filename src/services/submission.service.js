@@ -8,6 +8,7 @@ const emailService = require('./email.service');
 const userService = require('./user.service');
 const emailNotifyToService = require('./emailNotifyTo.service');
 const workFlowStepService = require('./workFlowStep.service');
+const formService = require('./form.service');
 
 /**
  * Find next workflow step
@@ -260,6 +261,30 @@ const createSubmission = async (submissionBody) => {
   return submission;
 };
 
+function findValueInNestedData(data, keys) {
+  const [currentKey, ...remainingKeys] = keys;
+
+  if (data[currentKey] !== undefined) {
+    if (remainingKeys.length === 0) {
+      return data[currentKey];
+    } else if (Array.isArray(data[currentKey])) {
+      const matchingValues = [];
+      for (const item of data[currentKey]) {
+        const value = findValueInNestedData(item, remainingKeys);
+        if (value !== null) {
+          matchingValues.push(value);
+        }
+      }
+      return matchingValues.length > 0 ? matchingValues : null;
+    } else if (typeof data[currentKey] === 'object') {
+      return findValueInNestedData(data[currentKey], remainingKeys);
+    }
+  }
+
+  return null;
+}
+
+
 /**
  * Query for Submissions
  * @param {Object} filter - Mongo filter
@@ -307,6 +332,37 @@ const querySubmissions = async (filter, options) => {
 
   query.sort(options.sortBy == "asc" ? 'createdAt' : '-createdAt');
   const results = await query;
+
+  if (results.length != 0) {
+    const subModule = results[0].subModuleId;
+    if (filter.subModuleId && subModule.summarySchema.length != 0) {
+      const summarySchema = subModule.summarySchema;
+      for (const submission of results) {
+        for (const element of summarySchema) {
+          const firstDotIndex = element.indexOf('.');
+          if (firstDotIndex !== -1) {
+            const keys = element.split('.'); // Split into hierarchical keys
+            const formKey = keys[0];
+
+            const form = await formService.getFormBySlug(formKey);
+            if (form) {
+              const formData = submission.formDataIds.find(obj => obj.formId == form._id.toString());
+
+              if (formData) {
+                const targetKeys = keys.slice(1); // Remove the first key (formKey)
+                const matchingValue = findValueInNestedData(formData.data, targetKeys);
+
+                if (matchingValue !== null) {
+                  submission.summaryData[element] = matchingValue;
+                  console.log(`Matching value for key "${element}": ${matchingValue}`);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 
   const totalResults = await Submission.countDocuments(submissionFilter);
   const totalPages = Math.ceil(totalResults / limit);
