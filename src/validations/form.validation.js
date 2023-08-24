@@ -3,7 +3,7 @@ const { objectId } = require('./custom.validation');
 
 const validateKeyForm = {
   query: Joi.object().keys({
-    key: Joi.string(),
+    key: Joi.string().required(),
   }),
 };
 

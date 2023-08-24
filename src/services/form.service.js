@@ -17,7 +17,7 @@ const validateKeyForm = async (formBody) => {
 
   return {
     isKeyTaken: false
-  };
+  }
 };
 
 /**

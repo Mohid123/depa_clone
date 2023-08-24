@@ -5,7 +5,11 @@ const catchAsync = require('../../utils/catchAsync');
 const { formService } = require('../../services');
 
 const validateKeyForm = catchAsync(async (req, res) => {
-  const form = await formService.validateKeyForm(req.body);
+  const filter = pick(req.query, ["key"]);
+  if (req.query.withTrash !== "") {
+    filter.isDeleted = false;
+  }
+  const form = await formService.validateKeyForm(filter);
   res.status(httpStatus.OK).send(form);
 });
 
