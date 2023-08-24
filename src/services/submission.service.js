@@ -217,11 +217,23 @@ const createSubmission = async (submissionBody) => {
       summaryData: {
         progress: (approvedCount / totalLength) * 100,
         lastActivityPerformedBy: submissionBody.user.id,
+        userName: submissionBody.user.fullName,
         pendingOnUsers: activeUsersId
       }
     });
-    await submission.save();
+  } else {
+    Object.assign(submission, {
+      submissionStatus: 3,
+      summaryData: {
+        progress: 100,
+        lastActivityPerformedBy: submissionBody.user.id,
+        userName: submissionBody.user.fullName,
+        pendingOnUsers: []
+      }
+    });
   }
+
+  await submission.save();
 
   const approvalLogData = {
     subModuleId: submission.subModuleId,
