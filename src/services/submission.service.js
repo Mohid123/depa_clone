@@ -216,8 +216,10 @@ const createSubmission = async (submissionBody) => {
     Object.assign(submission, {
       summaryData: {
         progress: (approvedCount / totalLength) * 100,
-        lastActivityPerformedBy: submissionBody.user.id,
-        userName: submissionBody.user.fullName,
+        lastActivityPerformedBy: {
+          _id: submissionBody.user.id,
+          fullName: submissionBody.user.fullName
+        },
         pendingOnUsers: activeUsersId
       }
     });
@@ -226,8 +228,10 @@ const createSubmission = async (submissionBody) => {
       submissionStatus: 3,
       summaryData: {
         progress: 100,
-        lastActivityPerformedBy: submissionBody.user.id,
-        userName: submissionBody.user.fullName,
+        lastActivityPerformedBy: {
+          _id: submissionBody.user.id,
+          fullName: submissionBody.user.fullName
+        },
         pendingOnUsers: []
       }
     });
@@ -269,6 +273,13 @@ const createSubmission = async (submissionBody) => {
   //   submissionId: submission._id,
   //   stepId: activeStepId,
   // }, false);
+
+  if (submission.subModuleId.summarySchema.length != 0) {
+    const updatedData = await getSummaryDataBySubmission(submission);
+    submission = await Submission.findById(submission._id);
+    Object.assign(submission, updatedData);
+    submission.save()
+  }
 
   return submission;
 };
@@ -344,37 +355,6 @@ const querySubmissions = async (filter, options) => {
 
   query.sort(options.sortBy == "asc" ? 'createdAt' : '-createdAt');
   const results = await query;
-
-  if (results.length != 0) {
-    const subModule = results[0].subModuleId;
-    if (filter.subModuleId && subModule.summarySchema.length != 0) {
-      const summarySchema = subModule.summarySchema;
-      for (const submission of results) {
-        for (const element of summarySchema) {
-          const firstDotIndex = element.indexOf('.');
-          if (firstDotIndex !== -1) {
-            const keys = element.split('.'); // Split into hierarchical keys
-            const formKey = keys[0];
-
-            const form = await formService.getFormBySlug(formKey);
-            if (form) {
-              const formData = submission.formDataIds.find(obj => obj.formId == form._id.toString());
-
-              if (formData) {
-                const targetKeys = keys.slice(1); // Remove the first key (formKey)
-                const matchingValue = findValueInNestedData(formData.data, targetKeys);
-
-                if (matchingValue !== null) {
-                  submission.summaryData[element] = matchingValue;
-                  console.log(`Matching value for key "${element}": ${matchingValue}`);
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
 
   const totalResults = await Submission.countDocuments(submissionFilter);
   const totalPages = Math.ceil(totalResults / limit);
@@ -616,7 +596,7 @@ const rejectStep = async (submission, workFlowStatusStep, rejectingUser) => {
  * @returns {Promise<Submission>}
  */
 const updateSubmissionById = async (submissionId, updateBody) => {
-  const submission = await Submission.findById(submissionId);
+  const submission = await Submission.findById(submissionId).populate(['subModuleId', 'formDataIds']);
   if (!submission) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Submission not found');
   }
@@ -668,7 +648,7 @@ const updateSubmissionById = async (submissionId, updateBody) => {
       action = updateBody.submissionStatus == 5 ? 'cancelled' : 'enabled';
     }
     await approvalLogService.createApprovalLog({
-      subModuleId: submission.subModuleId,
+      subModuleId: submission.subModuleId.id,
       submissionId: submission.id,
       workFlowId: submission.workFlowId,
       stepId: updateBody.stepId,
@@ -702,7 +682,7 @@ const updateSubmissionById = async (submissionId, updateBody) => {
   }
 
   const approvalLogData = {
-    subModuleId: submission.subModuleId,
+    subModuleId: submission.subModuleId.id,
     submissionId: submission.id,
     workFlowId: submission.workFlowId,
     stepId: approvalStep._id,
@@ -741,8 +721,10 @@ const updateSubmissionById = async (submissionId, updateBody) => {
 
   submission.summaryData = {
     progress: (approvedCount / totalLength) * 100,
-    lastActivityPerformedBy: updateBody.userId,
-    userName: user.fullName
+    lastActivityPerformedBy: {
+      _id: updateBody.userId,
+      fullName: user.fullName
+    },
   };
 
   // Object in progress
@@ -753,7 +735,6 @@ const updateSubmissionById = async (submissionId, updateBody) => {
     const activeUsersId = await User.find({ _id: { $in: activeUserIds } }).select('id fullName');
     submission.summaryData.pendingOnUsers = activeUsersId;
   }
-
   // let workflowUsers = [...new Set(workFlowStatus.flatMap(step => step.allUsers))];
   // workflowUsers = await User.find({ _id: { $in: workflowUsers } }).select('email');
 
@@ -773,8 +754,14 @@ const updateSubmissionById = async (submissionId, updateBody) => {
   //   allUsers: allNotifyToUsers,
   // }, true);
 
+  if (submission.subModuleId.summarySchema.length != 0) {
+    const updatedSchema = await getSummaryDataBySubmission(submission);
+    Object.assign(submission, updatedSchema);
+  }
+
   Object.assign(submission, updateBody);
   await submission.save();
+
   return getSubmissionById(submissionId);
 };
 
@@ -827,6 +814,90 @@ const updateWorkFlowSubmissionById = async (submissionId, updateBody) => {
 };
 
 /**
+ * Update Submission by id
+ * @param {Object} submission
+ * @returns {Promise<Submission>}
+ */
+const getSummaryDataBySubmission = async (submission) => {
+  const summarySchema = submission.subModuleId.summarySchema;
+  for (const element of summarySchema) {
+    const firstDotIndex = element.indexOf('.');
+    if (firstDotIndex !== -1) {
+      const keys = element.split('.'); // Split into hierarchical keys
+      const formKey = keys[0];
+
+      const form = await formService.getFormBySlug(formKey);
+      if (form) {
+        const formData = submission.formDataIds.find(obj => obj.formId == form._id.toString());
+
+        if (formData) {
+          const targetKeys = keys.slice(1); // Remove the first key (formKey)
+          const matchingValue = findValueInNestedData(formData.data, targetKeys);
+
+          if (matchingValue !== null) {
+            submission.summaryData[element] = matchingValue;
+          }
+        }
+      }
+    }
+  }
+
+  return {
+    summaryData: submission.summaryData
+  };
+};
+
+/**
+ * Update Submission by id
+ * @param {ObjectId} submissionId
+ * @param {Object} updateBody
+ * @returns {Promise<Submission>}
+ */
+const updateAllSubmissionSummerySchemaBySubModuleId = async (subModuleId, updateBody) => {
+  const submissions = await Submission.find({ subModuleId: subModuleId, status: 1 }).populate('formDataIds');
+  if (!submissions) {
+    return [];
+  }
+
+  const summarySchema = updateBody.summarySchema;
+  for (const submission of submissions) {
+    for (const element of summarySchema) {
+      const firstDotIndex = element.indexOf('.');
+      if (firstDotIndex !== -1) {
+        const keys = element.split('.'); // Split into hierarchical keys
+        const formKey = keys[0];
+
+        const form = await formService.getFormBySlug(formKey);
+        if (form) {
+          const formData = submission.formDataIds.find(obj => obj.formId == form._id.toString());
+
+          if (formData) {
+            const targetKeys = keys.slice(1); // Remove the first key (formKey)
+            const matchingValue = findValueInNestedData(formData.data, targetKeys);
+
+            if (matchingValue !== null) {
+              submission.summaryData[element] = matchingValue;
+
+              console.log(`Matching value for key "${element}": ${matchingValue}`);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  const bulkUpdateOperations = submissions.map(submission => ({
+    updateOne: {
+      filter: { _id: submission._id },
+      update: { $set: { summaryData: submission.summaryData } }
+    }
+  }));
+
+  const updatedSubmissons = await Submission.bulkWrite(bulkUpdateOperations);
+  return updatedSubmissons;
+};
+
+/**
  * Delete Submission by id
  * @param {ObjectId} submissionId
  * @returns {Promise<Submission>}
@@ -846,5 +917,6 @@ module.exports = {
   getSubmissionById,
   updateSubmissionById,
   updateWorkFlowSubmissionById,
+  updateAllSubmissionSummerySchemaBySubModuleId,
   deleteSubmissionById,
 };

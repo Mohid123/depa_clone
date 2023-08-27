@@ -4,6 +4,7 @@ const ApiError = require('../utils/ApiError');
 const formService = require('./form.service');
 const workFlowService = require('./workFlow.service');
 const emailNotifyToService = require('./emailNotifyTo.service');
+const submissionService = require('./submission.service');
 
 /**
  * Validate submodule code is taken or not
@@ -141,6 +142,10 @@ const updateSubModuleById = async (subModuleId, updateBody) => {
 
   if (await SubModule.isCodeTaken(updateBody.code, subModule.id)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Sub Module Key already taken');
+  }
+
+  if (subModule.summarySchema.length != updateBody.summarySchema.length) {
+    submissionService.updateAllSubmissionSummerySchemaBySubModuleId(subModuleId, { summarySchema: updateBody.summarySchema });
   }
 
   if (updateBody.steps) {
