@@ -18,7 +18,7 @@ const subModuleSchema = mongoose.Schema(
       formIds: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Form', required: true }],
 
       summarySchema: [{ type: String, required: true }],
-      viewSchema: [{ type: String, required: true }],
+      viewSchema: [{ type: Object, required: true }],
       code: { type: String, required: true },
       url: { type: String, required: true },
       title: { type: String },
