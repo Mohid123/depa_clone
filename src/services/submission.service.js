@@ -96,7 +96,12 @@ const emailDataWithTemplate = async (data, isNotify) => {
  */
 const createSubmission = async (submissionBody) => {
   const subModule = await SubModule.findById(submissionBody.subModuleId);
+  if (!subModule) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'SubModule not found');
+  }
+
   const parrentWorkflow = await workFlowService.getWorkFlowById(subModule.workFlowId);
+
   if (!submissionBody.user.roles.includes('sysAdmin') && submissionBody.user.roles.includes('admin') &&
     !subModule.adminUsers.includes(submissionBody.user.id) &&
     !parrentWorkflow.stepIds[0].approverIds.filter((user) => user.id == submissionBody.user.id)[0]) {
@@ -274,13 +279,12 @@ const createSubmission = async (submissionBody) => {
   //   stepId: activeStepId,
   // }, false);
 
-  if (submission.subModuleId.summarySchema.length != 0) {
+  if (subModule.summarySchema.length != 0) {
     const updatedData = await getSummaryDataBySubmission(submission);
     submission = await Submission.findById(submission._id);
     Object.assign(submission, updatedData);
     submission.save()
   }
-
   return submission;
 };
 
@@ -827,16 +831,21 @@ const getSummaryDataBySubmission = async (submission) => {
       const formKey = keys[0];
 
       const form = await formService.getFormBySlug(formKey);
+
       if (form) {
         const formData = submission.formDataIds.find(obj => obj.formId == form._id.toString());
 
+
         if (formData) {
           const targetKeys = keys.slice(1); // Remove the first key (formKey)
-          const matchingValue = findValueInNestedData(formData.data, targetKeys);
+          const matchingValue = findValueInNestedData(formData.data[formKey], targetKeys);
+
 
           if (matchingValue !== null) {
             submission.summaryData[element] = matchingValue;
+
           }
+
         }
       }
     }
@@ -873,7 +882,7 @@ const updateAllSubmissionSummerySchemaBySubModuleId = async (subModuleId, update
 
           if (formData) {
             const targetKeys = keys.slice(1); // Remove the first key (formKey)
-            const matchingValue = findValueInNestedData(formData.data, targetKeys);
+            const matchingValue = findValueInNestedData(formData.data[formKey], targetKeys);
 
             if (matchingValue !== null) {
               submission.summaryData[element] = matchingValue;
