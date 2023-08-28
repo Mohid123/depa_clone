@@ -144,7 +144,7 @@ const updateSubModuleById = async (subModuleId, updateBody) => {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Sub Module Key already taken');
   }
 
-  if (subModule.summarySchema.length != updateBody.summarySchema.length) {
+  if (updateBody.summarySchema && updateBody.summarySchema.length != 0) {
     submissionService.updateAllSubmissionSummerySchemaBySubModuleId(subModuleId, { summarySchema: updateBody.summarySchema });
   }
 

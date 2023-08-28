@@ -22,7 +22,10 @@ const createSubModule = {
     }).required()).required(),
     accessType: Joi.valid("anyCreate", "anyCreateAndModify"),
     summarySchema: Joi.array().items(Joi.string()),
-    viewSchema: Joi.array().items(Joi.string()),
+    viewSchema: Joi.array().items({
+      displayAs: Joi.string().required(),
+      fieldKey: Joi.string().required(),
+    }),
     code: Joi.string().required(),
     url: Joi.string().required(),
     title: Joi.string(),
@@ -70,7 +73,10 @@ const updateSubModule = {
       adminUsers: Joi.array().items(Joi.string().custom(objectId)),
       viewOnlyUsers: Joi.array().items(Joi.string().custom(objectId)),
       summarySchema: Joi.array().items(Joi.string()),
-      viewSchema: Joi.array().items(Joi.string()),
+      viewSchema: Joi.array().items({
+        displayAs: Joi.string().required(),
+        fieldKey: Joi.string().required(),
+      }),
       steps: Joi.array().items(Joi.object({
         "id": Joi.string().custom(objectId),
         "condition": Joi.string().valid("none", "and", "or").required(),
