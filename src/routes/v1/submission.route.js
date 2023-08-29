@@ -8,8 +8,11 @@ const router = express.Router();
 
 router
     .route('/')
+    .post(auth(), validate(submissionValidation.getSubmissions), submissionController.getSubmissions);
+
+router
+    .route('/create')
     .post(auth(), validate(submissionValidation.createSubmission), submissionController.createSubmission)
-    .get(auth(), validate(submissionValidation.getSubmissions), submissionController.getSubmissions);
 
 router
     .route('/workflow/:submissionId')

@@ -19,6 +19,7 @@ const createSubmission = {
 };
 
 const getSubmissions = {
+  // query: Joi.object().pattern(Joi.string(), Joi.any()),
   query: Joi.object().keys({
     subModuleId: Joi.string().custom(objectId),
     formIds: Joi.array().items(Joi.string().custom(objectId)),
@@ -29,6 +30,10 @@ const getSubmissions = {
     page: Joi.number(),
     withTrash: Joi.string().allow('', null),
   }),
+  body: Joi.object()
+    .keys({
+      summaryData: Joi.object(),
+    }),
 };
 
 const getSubmission = {

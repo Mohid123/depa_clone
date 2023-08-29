@@ -321,21 +321,46 @@ function findValueInNestedData(data, keys) {
  * @param {number} [options.page] - Current page (default = 1)
  * @returns {Promise<QueryResult>}
  */
-const querySubmissions = async (filter, options) => {
+const querySubmissions = async (filter, options, getBody) => {
   const page = options.page ?? 1;
   const limit = options.limit ?? 10;
 
-  const submissionFilter = {};
+  // const submissionFilter = {};
+  // if (filter.subModuleId) {
+  //   submissionFilter.subModuleId = filter.subModuleId;
+  // }
+  // if (filter.submissionStatus) {
+  //   submissionFilter.submissionStatus = filter.submissionStatus;
+  // }
+
+  // submissionFilter.isDeleted = filter.isDeleted;
+
+  const queryObject = {
+    $and: []
+  };
+
   if (filter.subModuleId) {
-    submissionFilter.subModuleId = filter.subModuleId;
+    queryObject.$and.push({ subModuleId: filter.subModuleId });
   }
+
   if (filter.submissionStatus) {
-    submissionFilter.submissionStatus = filter.submissionStatus;
+    queryObject.$and.push({ submissionStatus: filter.submissionStatus });
   }
 
-  submissionFilter.isDeleted = filter.isDeleted;
+  queryObject.$and.push({ isDeleted: filter.isDeleted });
 
-  const query = Submission.find(submissionFilter).populate(["subModuleId", "formIds", "formDataIds",
+  for (const key in getBody.summaryData) {
+    const queryPart = {};
+    queryPart[`summaryData.${key}`] = getBody.summaryData[key];
+    queryObject.$and.push(queryPart);
+  }
+
+  // queryObject.$and.push({ "form-1.textField": "Ex quisquam quia nih" });
+  // return {
+  //   getBody: getBody,
+  //   queryObject: queryObject
+  // };
+  const query = Submission.find(queryObject).populate(["subModuleId", "formIds", "formDataIds",
     {
       path: "createdBy",
       select: "id fullName"
@@ -360,7 +385,7 @@ const querySubmissions = async (filter, options) => {
   query.sort(options.sortBy == "asc" ? 'createdAt' : '-createdAt');
   const results = await query;
 
-  const totalResults = await Submission.countDocuments(submissionFilter);
+  const totalResults = await Submission.countDocuments(queryObject);
   const totalPages = Math.ceil(totalResults / limit);
 
   return {
@@ -838,7 +863,7 @@ const getSummaryDataBySubmission = async (submission) => {
 
         if (formData) {
           const targetKeys = keys.slice(1); // Remove the first key (formKey)
-          const matchingValue = findValueInNestedData(formData.data[formKey], targetKeys);
+          const matchingValue = findValueInNestedData(formData.data, targetKeys);
 
 
           if (matchingValue !== null) {
@@ -882,7 +907,7 @@ const updateAllSubmissionSummerySchemaBySubModuleId = async (subModuleId, update
 
           if (formData) {
             const targetKeys = keys.slice(1); // Remove the first key (formKey)
-            const matchingValue = findValueInNestedData(formData.data[formKey], targetKeys);
+            const matchingValue = findValueInNestedData(formData.data, targetKeys);
 
             if (matchingValue !== null) {
               submission.summaryData[element] = matchingValue;

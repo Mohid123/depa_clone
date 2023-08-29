@@ -12,12 +12,13 @@ const createSubmission = catchAsync(async (req, res) => {
 });
 
 const getSubmissions = catchAsync(async (req, res) => {
+  // const filter = { ...req.query };
   const filter = pick(req.query, ["subModuleId", 'submissionStatus']);
   if (req.query.withTrash !== "") {
     filter.isDeleted = false;
   }
   const options = pick(req.query, [, 'sortBy', 'limit', 'page']);
-  const result = await submissionService.querySubmissions(filter, options);
+  const result = await submissionService.querySubmissions(filter, options, req.body);
   res.send(result);
 });
 
