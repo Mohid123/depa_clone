@@ -322,6 +322,70 @@ function findValueInNestedData(data, keys) {
  * @returns {Promise<QueryResult>}
  */
 const querySubmissions = async (filter, options, getBody) => {
+  // const page = options.page ?? 1;
+  // const limit = options.limit ?? 10;
+
+  // const aggregationPipeline = [];
+
+  // // Add optional filters if present
+  // if (filter.subModuleId) {
+  //   aggregationPipeline.push({ $match: { subModuleId: filter.subModuleId } });
+  // }
+
+  // if (filter.submissionStatus) {
+  //   aggregationPipeline.push({ $match: { submissionStatus: filter.submissionStatus } });
+  // }
+
+  // aggregationPipeline.push({ $match: { isDeleted: filter.isDeleted } });
+
+  // // Build dynamic summaryData filters if present
+  // const summaryDataFilters = [];
+  // for (const key in getBody.summaryData) {
+  //   const filterObj = {};
+  //   filterObj[`summaryData.${key}`] = getBody.summaryData[key];
+  //   summaryDataFilters.push(filterObj);
+  // }
+
+  // // Add filter for lastActivityPerformedBy.fullName if present
+  // if (getBody.summaryData && getBody.summaryData.lastActivityPerformedBy?.fullName) {
+  //   summaryDataFilters.push({
+  //     "summaryData.lastActivityPerformedBy.fullName": getBody.summaryData.lastActivityPerformedBy.fullName
+  //   });
+  // }
+
+  // if (summaryDataFilters.length > 0) {
+  //   aggregationPipeline.push({ $match: { $or: summaryDataFilters } });
+  // }
+
+  // // Pagination stages
+  // aggregationPipeline.push(
+  //   { $skip: (page - 1) * limit },
+  //   { $limit: limit }
+  // );
+
+  // const results = await Submission.aggregate(aggregationPipeline).exec();
+
+  // // Manually populate references if needed
+  // // Iterate through the results and populate reference fields as required
+
+  // const totalResults = await Submission.aggregate([
+  //   ...aggregationPipeline.slice(0, -2), // Excluding $skip and $limit
+  //   { $count: "count" }
+  // ]);
+
+  // const totalPages = Math.ceil(totalResults[0]?.count / limit) || 1;
+
+  // return {
+  //   results,
+  //   page,
+  //   limit,
+  //   totalPages,
+  //   totalResults: totalResults[0]?.count || 0,
+  // };
+
+
+
+
   const page = options.page ?? 1;
   const limit = options.limit ?? 10;
 
@@ -350,12 +414,17 @@ const querySubmissions = async (filter, options, getBody) => {
   queryObject.$and.push({ isDeleted: filter.isDeleted });
 
   for (const key in getBody.summaryData) {
-    const queryPart = {};
-    queryPart[`summaryData.${key}`] = getBody.summaryData[key];
-    queryObject.$and.push(queryPart);
+    if (key == "lastActivityPerformedBy") {
+      queryObject.$and.push({
+        "summaryData.lastActivityPerformedBy.fullName": getBody.summaryData.lastActivityPerformedBy.fullName
+      });
+    } else {
+      const queryPart = {};
+      queryPart[`summaryData.${key}`] = getBody.summaryData[key];
+      queryObject.$and.push(queryPart);
+    }
   }
 
-  // queryObject.$and.push({ "form-1.textField": "Ex quisquam quia nih" });
   // return {
   //   getBody: getBody,
   //   queryObject: queryObject
@@ -867,8 +936,8 @@ const getSummaryDataBySubmission = async (submission) => {
 
 
           if (matchingValue !== null) {
-            submission.summaryData[element] = matchingValue;
-
+            submission.summaryData[formKey] = createNestedObjectFromArray(targetKeys, matchingValue);
+            // submission.summaryData[element] = matchingValue;
           }
 
         }
@@ -880,6 +949,22 @@ const getSummaryDataBySubmission = async (submission) => {
     summaryData: submission.summaryData
   };
 };
+
+function createNestedObjectFromArray(keysArray, value) {
+  let result = {};
+
+  let current = result;
+  keysArray.forEach((key, index) => {
+    if (index === keysArray.length - 1) {
+      current[key] = value;
+    } else {
+      current[key] = {};
+      current = current[key];
+    }
+  });
+
+  return result;
+}
 
 /**
  * Update Submission by id
@@ -910,9 +995,8 @@ const updateAllSubmissionSummerySchemaBySubModuleId = async (subModuleId, update
             const matchingValue = findValueInNestedData(formData.data, targetKeys);
 
             if (matchingValue !== null) {
-              submission.summaryData[element] = matchingValue;
-
-              console.log(`Matching value for key "${element}": ${matchingValue}`);
+              submission.summaryData[formKey] = createNestedObjectFromArray(targetKeys, matchingValue);
+              // console.log(`Matching value for key "${element}": ${matchingValue}`);
             }
           }
         }
